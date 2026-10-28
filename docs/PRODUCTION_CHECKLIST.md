@@ -76,14 +76,14 @@
 - [ ] Rejected and unverified records excluded from approved statistics and public outputs by default.
 - [ ] Notifications and deadlines work under both normal and degraded connections.
 
-### 08. GIS mapping and geography
+- [x] Admin, MEAL and focal roles have responsive role-specific sidebar with collapsing desktop navigation and mobile drawer; server permissions tested.\n\n### 08. GIS mapping and geography
 - [x] Real GeoJSON polygons for all 17 LGAs extracted and name-validated from geoBoundaries NGA ADM2 (CC BY 4.0).
 - [x] Approved-status GIS feed returns the approved report with its stored GPS and reference in MySQL integration test; broader map disclosure review is pending.
-- [x] Interactive LGA boundaries, selection controls, map-layer toggles and authorized marker popup code deployed; route tested.
-- [ ] Full browser test of GIS interactions, marker clustering and large-dataset performance.
-- [ ] Map filters by sector, LGA, date, report type and verification/progress status.
+- [x] Interactive 17-LGA boundaries, selection, report list, basemap themes, marker clustering, density heatmap, distance measurement, fullscreen and exports deployed on staging. Browser QA used synthetic feed data.
+- [ ] Full GIS browser acceptance on real authorized sessions, marker clustering with large datasets, map accuracy and performance still required.
+- [x] GIS explorer implements filters by sector, LGA, date, report type, search and verification/progress status; Laravel access and parameter tests pass.
 - [ ] Consistent disclosure rules and map location privacy for sensitive records.
-- [ ] Mobile/low-bandwidth map rendering and tile-provider usage/licence verified.
+- [ ] Mobile/low-bandwidth map rendering and tile-provider usage/licence acceptance still required. Synthetic browser QA verified desktop/mobile map rendering without horizontal overflow.
 
 ### 09. Dashboards, search and exports
 - [x] Dashboard template reads the current database-derived KPI and grouping variables (render tested).
@@ -138,9 +138,9 @@
 - [ ] No cross-domain authentication or data sharing without explicit approval.
 
 ### 15. Automated testing, UAT and release
-- [x] Current automated suite passes: 16 tests, 123 assertions (SQLite test suite and dedicated MySQL 8 integration suite).
+- [x] Current automated suite passes: 24 tests, 171 assertions, in the default test environment and dedicated MySQL 8 QA database.
 - [ ] Expanded release-wide test coverage including all contracted modules.
-- [x] Isolated MySQL 8 integration test database: migrations, password rotation, report submission, uploaded evidence, MEAL review, administrator approval, GIS feed and dashboard, 16 tests pass.
+- [x] Isolated MySQL 8 integration test database: migrations, password rotation, report submission, uploaded evidence, MEAL review, administrator approval, GIS feed and dashboard, 24 tests pass.
 - [ ] Browser E2E tests for three roles and entire submit→verify→dashboard/map workflow.
 - [ ] Performance tests at expected initial load, including upload and exports.
 - [ ] Android acceptance testing with representative supported devices.
@@ -160,7 +160,7 @@
 | Verification | Evidence | Result |
 |---|---|---|
 | Initial HTTP/HTTPS | Nginx + curl tests | HTTPS 200, HTTP → HTTPS |
-| Database conversion | Laravel `db:show --counts` on staging | MySQL 8; 10 tables, 17 LGAs, 8 sectors, no user records |
+| Database conversion | Laravel `db:show --counts` on staging | MySQL 8; 10 tables, 17 LGAs, 8 sectors, one existing administrator account (credentials unchanged) |
 | Landing, login, CSS, JS, photo | HTTPS responses | All HTTP 200 |
 | Authentication protection | Unauthenticated HTTP requests | Dashboard and map redirect to login |
 | JS parser | `node --check public/js/act-interactions.js` | Passed |
@@ -169,8 +169,17 @@
 | Frontend pipeline | npm + Vite build | Asset build completed |
 | GIS boundaries | geoBoundaries NGA ADM2 | 17 unique Yobe LGAs, 122,897-byte GeoJSON; HTTP 200 |
 | Login async error path | Puppeteer invalid-credentials test | Feedback shown; login remains protected; submit button reset |
-| End-to-end operational workflow | Laravel HTTP feature test using isolated MySQL 8 database | 16 tests, 123 assertions; Focal submit, evidence, MEAL review, admin approval, GIS marker, dashboard and CSV confirmed |
+| End-to-end operational workflow | Laravel HTTP feature test using isolated MySQL 8 database | 24 tests, 171 assertions; Focal submit, evidence, MEAL review, admin approval, GIS marker, dashboard and CSV confirmed |
 | Secure onboarding | Password rotation and account policy tests | First login requires password change; wrong current password rejected |
 | JavaScript offline/AJAX coordination | Handler review + Node syntax check | AJAX form handler skips IndexedDB-managed reporting form; successful sync can open the created report |
 
 **Next verification gates:** provision first live administrator securely, real-browser three-role acceptance on isolated QA data, permission audit for all file/actions, mobile/offline evidence synchronization, PDF/Excel export, Android APK, and RAWYOD acceptance. No synthetic reports are stored in the staging production database.
+
+### Release verification — 28 October 2026
+
+- GitHub `main`: merged GIS/sidebar release `fbb4007` (pull request #1).
+- Laravel tests: 24 passing, 171 assertions (default and isolated MySQL QA).
+- Headless browser with synthetic report feed: 17 authentic LGA polygons, dashboard/navigation shell, filter updates, heat layer, sidebar desktop collapse and mobile drawer; no client-side errors or horizontal overflow at tested widths.
+- Clean clone from `main`: `npm ci`, `npm run build`, generated Font Awesome/Lucide/Leaflet assets verified; Composer manifest validated.
+- Staging: landing page, login, local mapping assets and GeoJSON respond HTTP 200. One real administrator account preserved; zero synthetic production case records.
+- Remaining: real authenticated browser UAT, live-user training, large-data GIS performance, complete offline synchronization, Android APK and final security/RAWYOD acceptance. GitHub Actions CI status requires separate investigation.
