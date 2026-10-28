@@ -1,0 +1,40 @@
+<?php
+use App\Http\Controllers\AuthController;
+use App\Http\Controllers\CaseController;
+use App\Http\Controllers\EvidenceController;
+use App\Http\Controllers\MapController;
+use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\ExportController;
+use App\Http\Controllers\ClarificationController;
+use App\Http\Controllers\ProgressController;
+use App\Http\Controllers\Admin\UserController;
+use App\Http\Controllers\Admin\SectorController;
+use Illuminate\Support\Facades\Route;
+Route::view('/','welcome')->name('home');
+Route::middleware('guest')->group(function(){Route::get('/login',[AuthController::class,'form'])->name('login');Route::post('/login',[AuthController::class,'login']);});
+Route::middleware('auth')->group(function(){
+    Route::post('/logout',[AuthController::class,'logout'])->name('logout');
+    Route::get('/dashboard',[DashboardController::class,'index'])->name('dashboard');
+    Route::get('/cases',[CaseController::class,'index'])->name('cases.index');
+    Route::get('/cases/new',[CaseController::class,'create'])->name('cases.create');
+    Route::post('/cases',[CaseController::class,'store'])->name('cases.store');
+    Route::get('/cases/export.csv',[ExportController::class,'csv'])->name('cases.export');
+    Route::get('/cases/{case}',[CaseController::class,'show'])->name('cases.show')->whereNumber('case');
+    Route::post('/cases/{case}/review',[CaseController::class,'review'])->name('cases.review')->whereNumber('case');
+    Route::post('/cases/{case}/followups',[CaseController::class,'followup'])->name('cases.followups')->whereNumber('case');
+    Route::post('/cases/{case}/clarification',[ClarificationController::class,'respond'])->name('cases.clarification')->whereNumber('case');
+    Route::post('/cases/{case}/progress',[ProgressController::class,'update'])->name('cases.progress')->whereNumber('case');
+    Route::post('/cases/{case}/evidence',[EvidenceController::class,'store'])->name('cases.evidence')->whereNumber('case');
+    Route::get('/evidence/{evidence}/download',[EvidenceController::class,'download'])->name('evidence.download')->whereNumber('evidence');
+    Route::get('/map',[MapController::class,'page'])->name('map.index');
+    Route::get('/map/data',[MapController::class,'data'])->name('map.data');
+    Route::prefix('admin')->name('admin.')->group(function(){
+        Route::get('/users',[UserController::class,'index'])->name('users.index');
+        Route::get('/users/create',[UserController::class,'create'])->name('users.create');
+        Route::post('/users',[UserController::class,'store'])->name('users.store');
+        Route::put('/users/{user}',[UserController::class,'update'])->name('users.update');
+        Route::get('/sectors',[SectorController::class,'index'])->name('sectors.index');
+        Route::post('/sectors',[SectorController::class,'store'])->name('sectors.store');
+        Route::put('/sectors/{sector}',[SectorController::class,'update'])->name('sectors.update');
+    });
+});

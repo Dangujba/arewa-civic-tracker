@@ -1,0 +1,5 @@
+{
+ "name":"Arewa Civic Tracker","short_name":"Arewa Tracker","description":"Authorized civic monitoring and field reporting",
+ "start_url":"/cases","scope":"/","display":"standalone","background_color":"#f6f8fb","theme_color":"#153f3d",
+ "icons":[{"src":"/icons/act-192.png","sizes":"192x192","type":"image/png"},{"src":"/icons/act-512.png","sizes":"512x512","type":"image/png"}]
+}
