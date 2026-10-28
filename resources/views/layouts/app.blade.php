@@ -22,23 +22,23 @@
   <div class="act-sidebar-org"><i class="fa-solid fa-building-columns" aria-hidden="true"></i><span class="act-sidebar-copy"><b>RAWYOD</b><small>VOICES TO VOTES</small></span></div>
   <nav class="act-sidebar-links">
     <small class="act-sidebar-section">Workspace</small>
-    <a href="{{ route('dashboard') }}" class="act-sidebar-link {{ request()->routeIs('dashboard')?'active':'' }}" @if(request()->routeIs('dashboard'))aria-current="page"@endif><i class="fa-solid fa-gauge-high" aria-hidden="true"></i><span class="act-sidebar-copy">Dashboard</span></a>
-    <a href="{{ route('cases.index') }}" class="act-sidebar-link {{ request()->routeIs('cases.index','cases.show')?'active':'' }}" @if(request()->routeIs('cases.index','cases.show'))aria-current="page"@endif><i class="fa-regular fa-file-lines" aria-hidden="true"></i><span class="act-sidebar-copy">Monitoring reports</span></a>
+    <a href="{{ route('dashboard') }}" title="Dashboard" aria-label="Dashboard" class="act-sidebar-link {{ request()->routeIs('dashboard')?'active':'' }}" @if(request()->routeIs('dashboard'))aria-current="page"@endif><i class="fa-solid fa-gauge-high" aria-hidden="true"></i><span class="act-sidebar-copy">Dashboard</span></a>
+    <a href="{{ route('cases.index') }}" title="Monitoring reports" aria-label="Monitoring reports" class="act-sidebar-link {{ request()->routeIs('cases.index','cases.show')?'active':'' }}" @if(request()->routeIs('cases.index','cases.show'))aria-current="page"@endif><i class="fa-regular fa-file-lines" aria-hidden="true"></i><span class="act-sidebar-copy">Monitoring reports</span></a>
     @can('create', App\Models\CivicCase::class)
-    <a href="{{ route('cases.create') }}" class="act-sidebar-link {{ request()->routeIs('cases.create')?'active':'' }}" @if(request()->routeIs('cases.create'))aria-current="page"@endif><i class="fa-solid fa-square-plus" aria-hidden="true"></i><span class="act-sidebar-copy">New field report</span></a>
+    <a href="{{ route('cases.create') }}" title="New field report" aria-label="New field report" class="act-sidebar-link {{ request()->routeIs('cases.create')?'active':'' }}" @if(request()->routeIs('cases.create'))aria-current="page"@endif><i class="fa-solid fa-square-plus" aria-hidden="true"></i><span class="act-sidebar-copy">New field report</span></a>
     @endcan
     @if(auth()->user()->canReview())
-    <a href="{{ route('cases.queue') }}" class="act-sidebar-link {{ request()->routeIs('cases.queue')?'active':'' }}" @if(request()->routeIs('cases.queue'))aria-current="page"@endif><i class="fa-solid fa-clipboard-check" aria-hidden="true"></i><span class="act-sidebar-copy">Verification queue</span></a>
+    <a href="{{ route('cases.queue') }}" title="Verification queue" aria-label="Verification queue" class="act-sidebar-link {{ request()->routeIs('cases.queue')?'active':'' }}" @if(request()->routeIs('cases.queue'))aria-current="page"@endif><i class="fa-solid fa-clipboard-check" aria-hidden="true"></i><span class="act-sidebar-copy">Verification queue</span></a>
     @endif
     <small class="act-sidebar-section">Geographic intelligence</small>
-    <a href="{{ route('map.index') }}" class="act-sidebar-link {{ request()->routeIs('map.index')?'active':'' }}" @if(request()->routeIs('map.index'))aria-current="page"@endif><i class="fa-solid fa-map-location-dot" aria-hidden="true"></i><span class="act-sidebar-copy">GIS intelligence map</span></a>
+    <a href="{{ route('map.index') }}" title="GIS intelligence map" aria-label="GIS intelligence map" class="act-sidebar-link {{ request()->routeIs('map.index')?'active':'' }}" @if(request()->routeIs('map.index'))aria-current="page"@endif><i class="fa-solid fa-map-location-dot" aria-hidden="true"></i><span class="act-sidebar-copy">GIS intelligence map</span></a>
     @if(auth()->user()->isAdmin())
     <small class="act-sidebar-section">Administration</small>
-    <a href="{{ route('admin.users.index') }}" class="act-sidebar-link {{ request()->routeIs('admin.users.*')?'active':'' }}" @if(request()->routeIs('admin.users.*'))aria-current="page"@endif><i class="fa-solid fa-users-gear" aria-hidden="true"></i><span class="act-sidebar-copy">Users & roles</span></a>
-    <a href="{{ route('admin.sectors.index') }}" class="act-sidebar-link {{ request()->routeIs('admin.sectors.*')?'active':'' }}" @if(request()->routeIs('admin.sectors.*'))aria-current="page"@endif><i class="fa-solid fa-layer-group" aria-hidden="true"></i><span class="act-sidebar-copy">Monitoring sectors</span></a>
+    <a href="{{ route('admin.users.index') }}" title="Users and roles" aria-label="Users and roles" class="act-sidebar-link {{ request()->routeIs('admin.users.*')?'active':'' }}" @if(request()->routeIs('admin.users.*'))aria-current="page"@endif><i class="fa-solid fa-users-gear" aria-hidden="true"></i><span class="act-sidebar-copy">Users & roles</span></a>
+    <a href="{{ route('admin.sectors.index') }}" title="Monitoring sectors" aria-label="Monitoring sectors" class="act-sidebar-link {{ request()->routeIs('admin.sectors.*')?'active':'' }}" @if(request()->routeIs('admin.sectors.*'))aria-current="page"@endif><i class="fa-solid fa-layer-group" aria-hidden="true"></i><span class="act-sidebar-copy">Monitoring sectors</span></a>
     @endif
     <small class="act-sidebar-section">Account</small>
-    <a href="{{ route('account.password.form') }}" class="act-sidebar-link {{ request()->routeIs('account.*')?'active':'' }}" @if(request()->routeIs('account.*'))aria-current="page"@endif><i class="fa-solid fa-shield-halved" aria-hidden="true"></i><span class="act-sidebar-copy">Security settings</span></a>
+    <a href="{{ route('account.password.form') }}" title="Security settings" aria-label="Security settings" class="act-sidebar-link {{ request()->routeIs('account.*')?'active':'' }}" @if(request()->routeIs('account.*'))aria-current="page"@endif><i class="fa-solid fa-shield-halved" aria-hidden="true"></i><span class="act-sidebar-copy">Security settings</span></a>
     <a href="{{ route('home') }}" class="act-sidebar-link"><i class="fa-solid fa-arrow-up-right-from-square" aria-hidden="true"></i><span class="act-sidebar-copy">Public website</span></a>
   </nav>
   <div class="act-sidebar-bottom">
