@@ -45,3 +45,13 @@ const chartOutput = join(output, 'charts');
 await mkdir(chartOutput, { recursive: true });
 await copyFile(join(modules, 'chart.js/dist/chart.umd.js'), join(chartOutput, 'chart.umd.js'));
 console.log('Prepared local Chart.js reporting asset.');
+
+const uiOutput = join(output, 'ui');
+await mkdir(uiOutput, { recursive: true });
+for (const [name, path] of Object.entries({
+ 'tom-select.js': join(modules,'tom-select/dist/js/tom-select.complete.min.js'),
+ 'tom-select.css': join(modules,'tom-select/dist/css/tom-select.default.min.css'),
+ 'sweetalert2.js': join(modules,'sweetalert2/dist/sweetalert2.all.min.js'),
+ 'sweetalert2.css': join(modules,'sweetalert2/dist/sweetalert2.min.css')
+})) await copyFile(path, join(uiOutput,name));
+console.log('Prepared local lightweight select and dialog assets.');
