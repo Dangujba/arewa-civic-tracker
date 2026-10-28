@@ -7,7 +7,7 @@
  <p class="muted">Filter field observations, review sector and LGA trends, then export an Excel register or a presentation-ready PDF with verified charts and context.</p></div>
  <div class="dash-actions">
  <a class="btn-outline" href="{{ route('reports.excel',request()->query()) }}"><i class="fa-solid fa-file-excel" aria-hidden="true"></i> Export Excel</a>
- <a class="btn" href="{{ route('reports.pdf',request()->query()) }}"><i class="fa-solid fa-file-pdf" aria-hidden="true"></i aria-label="Export PDF stakeholder report"> Export PDF Report</a>
+ <a class="btn" href="{{ route('reports.pdf',request()->query()) }}"><i class="fa-solid fa-file-pdf" aria-hidden="true"></i> Export PDF Report</a>
  </div>
 </section>
 <form method="GET" action="{{ route('reports.index') }}" class="card reporting-filters">
