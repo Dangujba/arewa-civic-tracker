@@ -55,3 +55,32 @@ for (const [name, path] of Object.entries({
  'sweetalert2.css': join(modules,'sweetalert2/dist/sweetalert2.min.css')
 })) await copyFile(path, join(uiOutput,name));
 console.log('Prepared local lightweight select and dialog assets.');
+
+
+// Rebuild the multiresolution ICO from the committed raster assets.
+const faviconSizes = [16, 32, 48, 64];
+const faviconPngs = await Promise.all(faviconSizes.map(size =>
+  readFile(join(root, 'public/icons', 'favicon-' + size + '.png'))
+));
+const headerSize = 6 + 16 * faviconPngs.length;
+const favicon = Buffer.alloc(headerSize + faviconPngs.reduce((size, png) => size + png.length, 0));
+favicon.writeUInt16LE(0, 0);
+favicon.writeUInt16LE(1, 2);
+favicon.writeUInt16LE(faviconPngs.length, 4);
+let faviconOffset = headerSize;
+for (let index = 0; index < faviconPngs.length; index++) {
+  const size = faviconSizes[index], png = faviconPngs[index];
+  const offset = 6 + index * 16;
+  favicon.writeUInt8(size, offset);
+  favicon.writeUInt8(size, offset + 1);
+  favicon.writeUInt8(0, offset + 2);
+  favicon.writeUInt8(0, offset + 3);
+  favicon.writeUInt16LE(1, offset + 4);
+  favicon.writeUInt16LE(32, offset + 6);
+  favicon.writeUInt32LE(png.length, offset + 8);
+  favicon.writeUInt32LE(faviconOffset, offset + 12);
+  png.copy(favicon, faviconOffset);
+  faviconOffset += png.length;
+}
+await writeFile(join(root, 'public/favicon.ico'), favicon);
+console.log('Generated favicon.ico from approved hand-drawn icon assets.');
