@@ -47,8 +47,9 @@ jobs:
       - name: Check JavaScript syntax
         run: |
           node --check public/js/act-sidebar.js
-          node --check public/js/act-map-explorer.js
+          node --check public/js/act-map.js
           node --check public/js/act-interactions.js
+          node --check public/js/act-select-dialogs.js
 
       - name: Install frontend dependencies
         run: npm ci --no-audit --no-fund
