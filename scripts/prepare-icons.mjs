@@ -40,3 +40,8 @@ for (const [name, src] of Object.entries({
 }
 await cp(join(modules, 'leaflet/dist/images'), join(mapOutput, 'images'), { recursive: true });
 console.log('Prepared local Leaflet, clustering and heatmap assets.');
+
+const chartOutput = join(output, 'charts');
+await mkdir(chartOutput, { recursive: true });
+await copyFile(join(modules, 'chart.js/dist/chart.umd.js'), join(chartOutput, 'chart.umd.js'));
+console.log('Prepared local Chart.js reporting asset.');
