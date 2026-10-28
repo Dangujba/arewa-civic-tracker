@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Http\Controllers;
 
 use App\Models\CivicCase;
@@ -12,6 +11,7 @@ class MapController extends Controller
     public function page(Request $request)
     {
         abort_unless((bool) $request->user()->is_active, 403);
+
         return view('map.index', [
             'lgas' => Lga::orderBy('name')->get(['id', 'name']),
             'sectors' => Sector::where('is_active', true)->orderBy('name')->get(['id', 'name']),
@@ -31,51 +31,52 @@ class MapController extends Controller
             'date_to' => ['nullable', 'date', 'after_or_equal:date_from', 'before_or_equal:today'],
             'q' => ['nullable', 'string', 'max:120'],
         ]);
+
         $query = CivicCase::visibleTo($request->user())
             ->whereNotNull('latitude')->whereNotNull('longitude');
-        foreach (['lga_id', 'sector_id', 'verification_status', 'type', 'progress_status'] as $field) {
-            if (isset($filters[$field])) $query->where($field, $filters[$field]);
+        foreach (['lga_id', 'sector_id', 'verification_status', 'type', 'progress_status'] as $key) {
+            if (isset($filters[$key])) $query->where($key, $filters[$key]);
         }
         if (isset($filters['date_from'])) $query->whereDate('observation_date', '>=', $filters['date_from']);
         if (isset($filters['date_to'])) $query->whereDate('observation_date', '<=', $filters['date_to']);
         if (!empty($filters['q'])) {
-            $term = addcslashes(trim($filters['q']), '%_\\');
-            $query->where(fn($q) => $q
-                ->where('title', 'like', "%{$term}%")
-                ->orWhere('reference', 'like', "%{$term}%")
-                ->orWhere('community', 'like', "%{$term}%"));
+            $search = addcslashes(trim($filters['q']), '%_\\');
+            $query->where(fn($q) => $q->where('title', 'like', "%{$search}%")
+                ->orWhere('reference', 'like', "%{$search}%")
+                ->orWhere('community', 'like', "%{$search}%"));
         }
         $total = (clone $query)->count();
-        $limit = 1000;
-        $rows = $query->with(['lga:id,name', 'sector:id,name'])->latest('id')->limit($limit)->get();
-        $features = $rows->map(static fn($case) => [
-            'type' => 'Feature',
-            'geometry' => [
-                'type' => 'Point',
-                'coordinates' => [(float) $case->longitude, (float) $case->latitude],
-            ],
-            'properties' => [
-                'id' => $case->id,
-                'reference' => $case->reference,
-                'title' => $case->title,
-                'type' => $case->type,
-                'community' => $case->community,
-                'verification_status' => $case->verification_status,
-                'progress_status' => $case->progress_status,
-                'observation_date' => $case->observation_date?->format('Y-m-d'),
-                'lga' => $case->lga?->name,
-                'sector' => $case->sector?->name,
-                'url' => route('cases.show', $case),
-            ],
-        ])->values();
+        $max = 1000;
+        $rows = $query->with(['lga:id,name', 'sector:id,name'])
+            ->orderByDesc('id')->limit($max)->get();
+        $features = $rows->map(static function ($case) {
+            return [
+                'type' => 'Feature',
+                'geometry' => ['type' => 'Point', 'coordinates' => [(float) $case->longitude, (float) $case->latitude]],
+                'properties' => [
+                    'id' => $case->id,
+                    'reference' => $case->reference,
+                    'title' => $case->title,
+                    'type' => $case->type,
+                    'verification_status' => $case->verification_status,
+                    'progress_status' => $case->progress_status,
+                    'lga' => $case->lga?->name,
+                    'sector' => $case->sector?->name,
+                    'community' => $case->community,
+                    'observation_date' => $case->observation_date?->format('Y-m-d'),
+                    'url' => route('cases.show', $case),
+                ],
+            ];
+        })->values();
+
         return response()->json([
             'type' => 'FeatureCollection',
             'features' => $features,
             'meta' => [
-                'total' => $total,
                 'returned' => $features->count(),
-                'limit' => $limit,
-                'truncated' => $total > $limit,
+                'total' => $total,
+                'limit' => $max,
+                'truncated' => $total > $max,
                 'visibility' => 'role-restricted',
             ],
         ])->header('Cache-Control', 'private, no-store');

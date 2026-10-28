@@ -49,12 +49,12 @@ class GisExplorerTest extends TestCase
     {
         $this->actingAs($this->user('admin'))->get('/map')
             ->assertOk()
-            ->assertSee('geo-filters')
-            ->assertSee('geo-report-list')
-            ->assertSee('geo-lga-list')
-            ->assertSee('geo-measure')
-            ->assertSee('geo-geojson')
-            ->assertSee('act-map-explorer.js');
+            ->assertSee('gis-filter-form')
+            ->assertSee('gis-report-results')
+            ->assertSee('gis-lga-results')
+            ->assertSee('gis-measure')
+            ->assertSee('gis-export-geojson')
+            ->assertSee('act-map.js');
     }
 
     public function test_filters_use_approved_parameters_and_stay_role_restricted(): void
@@ -88,7 +88,7 @@ class GisExplorerTest extends TestCase
         $this->actingAs($admin)->getJson('/map/data?date_from=2030-01-01')
             ->assertUnprocessable();
         $this->actingAs($admin)->getJson('/map/data')
-            ->assertOk()->assertHeader('Cache-Control','private, no-store')
+            ->assertOk()->assertHeader('Cache-Control','no-store, private')
             ->assertJsonPath('meta.visibility','role-restricted');
     }
 

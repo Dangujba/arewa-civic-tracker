@@ -24,3 +24,19 @@ for (const name of icons) {
   await copyFile(join(lucideSource, name + '.svg'), join(iconOutput, name + '.svg'));
 }
 console.log('Prepared local Font Awesome and Lucide assets (' + icons.length + ' Lucide icons).');
+
+// Leaflet mapping libraries are bundled locally, not loaded from a third-party CDN.
+const mapOutput = join(output, 'maps');
+await mkdir(mapOutput, { recursive: true });
+for (const [name, src] of Object.entries({
+  'leaflet.js': join(modules, 'leaflet/dist/leaflet.js'),
+  'leaflet.css': join(modules, 'leaflet/dist/leaflet.css'),
+  'markercluster.js': join(modules, 'leaflet.markercluster/dist/leaflet.markercluster.js'),
+  'markercluster.css': join(modules, 'leaflet.markercluster/dist/MarkerCluster.css'),
+  'markercluster-default.css': join(modules, 'leaflet.markercluster/dist/MarkerCluster.Default.css'),
+  'heat.js': join(modules, 'leaflet.heat/dist/leaflet-heat.js'),
+})) {
+  await copyFile(src, join(mapOutput, name));
+}
+await cp(join(modules, 'leaflet/dist/images'), join(mapOutput, 'images'), { recursive: true });
+console.log('Prepared local Leaflet, clustering and heatmap assets.');

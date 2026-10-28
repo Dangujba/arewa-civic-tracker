@@ -25,10 +25,10 @@ class SidebarNavigationTest extends TestCase
     {
         $this->actingAs($this->staff('admin'))->get('/dashboard')
             ->assertOk()
-            ->assertSee('id="act-sidebar"', false)
+            ->assertSee('id="portal-sidebar"', false)
             ->assertSee('Users & roles', false)
             ->assertSee('Verification queue')
-            ->assertSee('GIS intelligence map')
+            ->assertSee('Interactive GIS map')
             ->assertSee('act-sidebar.js');
     }
 
@@ -37,7 +37,7 @@ class SidebarNavigationTest extends TestCase
         $this->actingAs($this->staff('focal'))->get('/dashboard')
             ->assertOk()
             ->assertSee('New field report')
-            ->assertSee('GIS intelligence map')
+            ->assertSee('Interactive GIS map')
             ->assertDontSee('Users & roles', false)
             ->assertDontSee('Verification queue');
     }
@@ -53,6 +53,6 @@ class SidebarNavigationTest extends TestCase
 
     public function test_public_login_does_not_display_private_sidebar(): void
     {
-        $this->get('/login')->assertOk()->assertDontSee('id="act-sidebar"', false);
+        $this->get('/login')->assertOk()->assertDontSee('id="portal-sidebar"', false);
     }
 }
