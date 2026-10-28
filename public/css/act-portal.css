@@ -34,3 +34,5 @@ body{background:#f6f8f5;color:var(--ink)}
 
 .reports-charts{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(290px,.7fr);gap:17px;margin:18px 0}.reports-charts .dash-panel{margin:0}.reports-chart-area{height:270px;position:relative}.reports-chart-status{height:270px;position:relative;display:grid;place-items:center}.reports-chart-status canvas{max-width:100%;max-height:265px}.reports-progress-panel{margin:18px 0}.reports-status-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(125px,1fr));gap:12px}.reports-status-pill{border:1px solid #dce7dd;background:#f7faf7;padding:15px;display:grid;gap:10px}.reports-status-pill span{font-size:11px;color:#617f6b;text-transform:capitalize}.reports-status-pill strong{font-size:22px;color:#1a573b}.reporting-filters .grid{margin-bottom:14px}
 @media(max-width:900px){.reports-charts{grid-template-columns:1fr}.reports-chart-area,.reports-chart-status{height:240px}}
+
+.portal-logo-image{width:38px;height:38px;object-fit:contain;flex-shrink:0}.guest-portal .brand .portal-logo-image{width:34px;height:34px;margin-right:8px}

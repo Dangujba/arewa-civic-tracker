@@ -3,6 +3,10 @@
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="csrf-token" content="{{ csrf_token() }}"><meta name="theme-color" content="#164f3b">
 <link rel="manifest" href="{{ asset('manifest.webmanifest') }}">
+<link rel="icon" type="image/svg+xml" href="{{ asset('icons/arewa-mark.svg') }}?v=2">
+<link rel="icon" type="image/png" sizes="32x32" href="{{ asset('icons/favicon-32.png') }}?v=2">
+<link rel="shortcut icon" href="{{ asset('favicon.ico') }}?v=2">
+<link rel="apple-touch-icon" sizes="180x180" href="{{ asset('icons/apple-touch-icon.png') }}?v=2">
 <link rel="stylesheet" href="{{ asset('vendor/fontawesome/all.min.css') }}">
 <link rel="stylesheet" href="{{ asset('css/act-design.css') }}">
 <link rel="stylesheet" href="{{ asset('css/act-portal.css') }}">
@@ -21,7 +25,7 @@
 <div class="portal-shell" id="portal-shell">
   <aside class="portal-sidebar" id="portal-sidebar" aria-label="Application sidebar">
     <a class="portal-logo" href="{{ route('dashboard') }}">
-      <span class="portal-logo-mark"><i class="fa-solid fa-location-crosshairs" aria-hidden="true"></i></span>
+      <img class="portal-logo-image" src="{{ asset('icons/arewa-mark.svg') }}" alt="" width="38" height="38">
       <span class="portal-logo-text"><strong>arewa.</strong><small>Civic Tracker</small></span>
     </a>
     <div class="sidebar-organization"><span class="portal-org-icon"><i class="fa-solid fa-building-columns" aria-hidden="true"></i></span><span class="sidebar-label"><strong>RAWYOD</strong><small>VOICES TO VOTES</small></span></div>
@@ -77,7 +81,7 @@
 </div>
 @else
 <header class="app-header"><div class="container">
-<a class="brand" href="{{ route('home') }}"><span class="act-portal-wordmark">arewa.<small>Civic Tracker</small></span></a>
+<a class="brand" href="{{ route('home') }}"><img class="portal-logo-image" src="{{ asset('icons/arewa-mark.svg') }}" alt="" width="34" height="34"><span class="act-portal-wordmark">arewa.<small>Civic Tracker</small></span></a>
 <nav class="app-nav"><a href="{{ route('home') }}"><i class="fa-solid fa-arrow-left" aria-hidden="true"></i> Back to website</a></nav>
 </div></header>
 <main class="app-main guest-main"><div class="container">

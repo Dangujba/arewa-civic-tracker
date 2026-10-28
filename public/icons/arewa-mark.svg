@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512" role="img" aria-labelledby="title">
+<title id="title">Arewa Civic Tracker icon</title>
+<defs>
+  <linearGradient id="bg" x1="0" x2="1" y1="1" y2="0">
+    <stop offset="0" stop-color="#083e2b"/>
+    <stop offset="1" stop-color="#188457"/>
+  </linearGradient>
+  <linearGradient id="gold" x1="0" x2="1" y1="1" y2="0">
+    <stop offset="0" stop-color="#e69d21"/>
+    <stop offset="1" stop-color="#fbd66b"/>
+  </linearGradient>
+</defs>
+<rect width="512" height="512" rx="88" fill="url(#bg)"/>
+<path d="M80 116 134 88 183 114 233 88 M317 111 368 80 425 126 M71 268 119 238 168 271 M352 355 411 322 444 350" fill="none" stroke="#55a17b" stroke-opacity=".24" stroke-width="15" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M87 360c49 64 191 91 292 39 27-14 47-34 57-54" fill="none" stroke="url(#gold)" stroke-width="20" stroke-linecap="round"/>
+<circle cx="86" cy="358" r="13" fill="#f7c45a"/>
+<circle cx="434" cy="345" r="13" fill="#f7c45a"/>
+<path d="M255 73c-87 0-152 64-152 148 0 111 106 193 152 231 47-39 153-123 153-231 0-85-66-148-153-148Z" fill="#ffffff"/>
+<path d="M255 111c-65 0-112 46-112 111 0 78 62 137 112 182 50-45 112-104 112-182 0-65-47-111-112-111Z" fill="#0e5e3e"/>
+<circle cx="255" cy="220" r="65" fill="#ffffff"/>
+<circle cx="255" cy="220" r="37" fill="url(#gold)"/>
+</svg>
