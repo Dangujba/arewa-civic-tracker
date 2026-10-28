@@ -8,6 +8,7 @@ const filesInput=document.getElementById('evidence-files'),submit=document.getEl
 const csrf=document.querySelector('meta[name="csrf-token"]')?.content;
 let db=null,syncing=false,draftFiles=[];
 const report=message=>{if(info)info.textContent=message};
+const toast=(message,type='success')=>window.ACTToast?.(message,type);
 function setBusy(on){if(!submit)return;submit.disabled=on;submit.setAttribute('aria-busy',String(on));submit.innerHTML=on?'<i class="fa-solid fa-spinner fa-spin" aria-hidden="true"></i> Saving & synchronizing…':'Submit report'}
 if(!globalThis.indexedDB||!globalThis.crypto?.randomUUID){report('Offline storage unavailable; online upload is still supported.');return}
 if(!idInput.value)idInput.value=crypto.randomUUID();
@@ -40,7 +41,7 @@ async function optimizedAttachments(){
 }
 function loadFields(data){for(const [key,value] of Object.entries(data||{})){const input=form.elements.namedItem(key);if(input&&typeof value==='string')input.value=value}}
 async function recoverDraft(){try{const saved=await tx('drafts','readonly',s=>s.get(userId));if(saved?.payload){loadFields(saved.payload);draftFiles=saved.files||[];report(saved.files?.length?'Recovered draft with '+saved.files.length+' stored evidence file(s). Save or submit to synchronize.':'Recovered your local draft.')}else report('Field reporting ready. Reports and evidence can be queued for synchronization.')}catch(e){report(e.message)}}
-async function saveDraft(){try{const files=await optimizedAttachments();await tx('drafts','readwrite',s=>s.put({userId,payload:fields(),files,savedAt:Date.now()}));report('Draft and selected evidence saved on this device. Not yet sent to RAWYOD.')}catch(e){report('Draft saving failed: '+e.message)}}
+async function saveDraft(){try{const files=await optimizedAttachments();await tx('drafts','readwrite',s=>s.put({userId,payload:fields(),files,savedAt:Date.now()}));report('Draft and evidence saved on this device.');toast('Draft saved successfully')}catch(e){report('Draft saving failed: '+e.message)}}
 async function clearDraft(){draftFiles=[];return tx('drafts','readwrite',s=>s.delete(userId))}
 async function enqueue(data,files){validateFiles(files);const key=userId+':'+data.client_submission_id;const old=await tx('outbox','readonly',s=>s.get(key));if(old){if(JSON.stringify(old.payload)!==JSON.stringify(data))throw Error('A different report is already queued under this reference.');return}await tx('outbox','readwrite',s=>s.put({key,userId,payload:data,files,savedAt:Date.now()}))}
 async function syncPending(redirectId=null){
@@ -68,7 +69,7 @@ async function syncPending(redirectId=null){
    if(idInput.value===item.payload.client_submission_id)await clearDraft();
    idInput.value=crypto.randomUUID();
    if(redirectId===item.payload.client_submission_id&&result.redirect){location.assign(result.redirect);return}
-   report('Submitted '+result.reference+'. Evidence synchronized.');
+   report('Submitted '+result.reference+'. Evidence synchronized.');toast('Report submitted successfully')
   }
  }catch(e){report('Synchronization paused: '+e.message)}
  finally{syncing=false;setBusy(false)}
@@ -77,8 +78,8 @@ filesInput?.addEventListener('change',()=>{draftFiles=[]});
 document.getElementById('save-draft')?.addEventListener('click',saveDraft);
 document.getElementById('sync-outbox')?.addEventListener('click',()=>syncPending());
 document.getElementById('new-report')?.addEventListener('click',async()=>{
- if(!confirm('Start a fresh report? This will clear the current draft. Pending submissions are preserved.'))return;
- form.reset();idInput.value=crypto.randomUUID();await clearDraft();document.getElementById('evidence-preview')?.replaceChildren();report('New blank report ready.');
+ if(!(await (window.ACTConfirm?window.ACTConfirm('Start a new report?','The current draft will be cleared. Any already queued submissions will remain safe.'):Promise.resolve(confirm('Start a new report?')))))return;
+ form.reset();idInput.value=crypto.randomUUID();await clearDraft();document.getElementById('evidence-preview')?.replaceChildren();report('New blank report ready.');toast('New report form ready')
 });
 form.addEventListener('submit',async e=>{
  if(!db)return; e.preventDefault();if(syncing||!form.reportValidity())return;

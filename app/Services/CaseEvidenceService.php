@@ -18,19 +18,20 @@ class CaseEvidenceService
             $checksum=hash_file('sha256', $file->getRealPath());
             // Idempotent when a multipart report is retried after the case was saved.
             if (CaseEvidence::where('case_id',$case->id)->where('sha256',$checksum)->exists()) continue;
-            $path=$file->store('cases/'.$case->uuid,'local');
+            $disk=config('filesystems.evidence_disk','local');
+            $path=$file->store('cases/'.$case->uuid,$disk);
             try {
-                DB::transaction(function () use ($file,$path,$case,$actor,$checksum) {
+                DB::transaction(function () use ($file,$path,$disk,$case,$actor,$checksum) {
                     CaseEvidence::create([
                         'case_id'=>$case->id,'uploaded_by'=>$actor->id,
-                        'disk'=>'local','path'=>$path,'original_name'=>basename($file->getClientOriginalName()),
+                        'disk'=>$disk,'path'=>$path,'original_name'=>basename($file->getClientOriginalName()),
                         'mime_type'=>$file->getMimeType(),'size_bytes'=>$file->getSize(),
                         'sha256'=>$checksum,
                     ]);
                     CaseEvent::create(['case_id'=>$case->id,'actor_id'=>$actor->id,'event_type'=>'evidence_uploaded']);
                 });
             } catch (\Throwable $e) {
-                Storage::disk('local')->delete($path);
+                Storage::disk($disk)->delete($path);
                 throw $e;
             }
         }

@@ -1,15 +1,19 @@
 @extends('layouts.app')
 @section('title','New report | Arewa Civic Tracker')
 @section('content')
-<h1>New field report</h1><p class="muted">Document a public project or governance issue. This form submits online; Use the buttons below to save a report on this device and synchronize it when online. Do not use shared or public devices for sensitive reports.</p>
+<div class="report-form-heading"><h1>New field report</h1><p class="muted">Document a public project or governance issue with location and supporting evidence.</p></div>
 <form method="post" action="{{ route('cases.store') }}" class="card report-form" enctype="multipart/form-data" data-user-id="{{ auth()->id() }}">@csrf<input type="hidden" name="client_submission_id" id="submission_id" value="{{ old('client_submission_id') }}"><div class="grid"><div class="field"><label>Report type</label><select required name="type"><option value="public_project">Public project</option><option value="governance_issue">Governance / service delivery issue</option></select></div><div class="field"><label>Observation date</label><input type="date" name="observation_date" max="{{ now()->toDateString() }}" value="{{ old('observation_date',now()->toDateString()) }}" required></div><div class="field"><label>LGA</label><select name="lga_id" required><option value="">Select LGA</option>@foreach($lgas as $l)<option value="{{ $l->id }}" @selected(old('lga_id')==$l->id)>{{ $l->name }}</option>@endforeach</select></div><div class="field"><label>Community</label><input name="community" required maxlength="150" value="{{ old('community') }}"></div><div class="field"><label>Sector</label><select name="sector_id" required><option value="">Select sector</option>@foreach($sectors as $s)<option value="{{ $s->id }}" @selected(old('sector_id')==$s->id)>{{ $s->name }}</option>@endforeach</select></div><div class="field"><label>Observed progress</label><select name="progress_status" required>@foreach(['observed','not_started','ongoing','stalled','completed','resolved','other'] as $s)<option value="{{ $s }}" @selected(old('progress_status')===$s)>{{ str_replace('_',' ',ucfirst($s)) }}</option>@endforeach</select></div></div>
 <div class="field"><label>Report title</label><input name="title" minlength="5" maxlength="200" required value="{{ old('title') }}"></div><div class="field"><label>Description</label><textarea name="description" minlength="15" required>{{ old('description') }}</textarea></div><div class="field"><label>Observations</label><textarea name="observations">{{ old('observations') }}</textarea></div><div class="field"><label>Stakeholders / duty bearers</label><textarea name="duty_bearers">{{ old('duty_bearers') }}</textarea></div><section class="report-evidence-section">
 <h2><i class="fa-solid fa-camera" aria-hidden="true"></i> Photographs & supporting evidence</h2>
 <p class="muted">Attach up to five photographs or PDF documents. Maximum 5MB per file. Large JPEG/WebP images are compressed for lower data use. Select a photo from your device or use the camera.</p>
-<label for="evidence-files">Evidence attachments (optional)</label>
-<input id="evidence-files" type="file" name="evidence[]" accept="image/jpeg,image/png,image/webp,application/pdf" multiple>
+<label for="evidence-files" class="evidence-dropzone" id="evidence-dropzone" tabindex="0" role="button" aria-label="Choose or drop supporting evidence files">
+<i class="fa-solid fa-cloud-arrow-up" aria-hidden="true"></i>
+<strong>Drag and drop your evidence here</strong>
+<span>or <b>browse files</b> · JPG, PNG, WebP, PDF · up to 5 files, 5 MB each</span>
+</label>
+<input id="evidence-files" class="evidence-file-input" type="file" name="evidence[]" accept="image/jpeg,image/png,image/webp,application/pdf" multiple>
 <div id="evidence-preview" aria-live="polite"></div>
-<p class="muted">Selected files can be queued offline on your own device and synchronized when connected. Avoid shared devices for sensitive evidence.</p>
+<p class="report-upload-hint"><i class="fa-solid fa-circle-check" aria-hidden="true"></i> Uploads immediately with your report when connected. Offline saving is optional.</p>
 </section>
 <section class="report-location-section">
 <h2><i class="fa-solid fa-location-dot" aria-hidden="true"></i> Report location</h2>
@@ -17,6 +21,6 @@
 <button type="button" class="secondary" id="gps-capture"><i class="fa-solid fa-location-crosshairs" aria-hidden="true"></i> Detect my location</button>
 <p id="gps-status" class="muted" role="status">Checking GPS permission…</p>
 <div class="grid"><div class="field"><label for="latitude-field">Latitude (optional)</label><input id="latitude-field" type="number" step="any" min="-90" max="90" name="latitude" value="{{ old('latitude') }}"></div><div class="field"><label for="longitude-field">Longitude (optional)</label><input id="longitude-field" type="number" step="any" min="-180" max="180" name="longitude" value="{{ old('longitude') }}"></div></div></section>
-<div style="display:flex;gap:10px;flex-wrap:wrap"><button type="submit" id="submit-btn">Submit report</button><button type="button" class="secondary" id="save-draft">Save on this device</button><button type="button" class="secondary" id="sync-outbox">Sync pending reports</button><button type="button" class="secondary" id="new-report">Start another report</button></div><p class="muted" id="offline-status" role="status">Checking local draft support...</p></form>
+<div style="display:flex;gap:10px;flex-wrap:wrap"><button type="submit" id="submit-btn">Submit report</button><button type="button" class="secondary" id="save-draft">Save on this device</button><button type="button" class="secondary" id="sync-outbox">Sync pending reports</button><button type="button" class="secondary" id="new-report">Start another report</button></div><p class="muted" id="offline-status" role="status">Ready to submit online. Offline drafts are available if needed.</p></form>
 @push('scripts')<script defer src="{{ asset('js/act-report-location.js') }}"></script><script defer src="{{ asset('js/offline-reports.js') }}"></script>@endpush
 @endsection

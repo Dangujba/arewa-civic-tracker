@@ -6,7 +6,13 @@
 <link rel="stylesheet" href="{{ asset('vendor/fontawesome/all.min.css') }}">
 <link rel="stylesheet" href="{{ asset('css/act-design.css') }}">
 <link rel="stylesheet" href="{{ asset('css/act-portal.css') }}">
+<link rel="stylesheet" href="{{ asset('vendor/ui/tom-select.css') }}">
+<link rel="stylesheet" href="{{ asset('vendor/ui/sweetalert2.css') }}">
+<link rel="stylesheet" href="{{ asset('css/act-form-polish.css') }}">
 <title>@yield('title','Arewa Civic Tracker')</title>@stack('head')
+<script defer src="{{ asset('vendor/ui/tom-select.js') }}"></script>
+<script defer src="{{ asset('vendor/ui/sweetalert2.js') }}"></script>
+<script defer src="{{ asset('js/act-select-dialogs.js') }}"></script>
 <script defer src="{{ asset('js/act-interactions.js') }}"></script>
 <script defer src="{{ asset('js/act-sidebar.js') }}"></script>
 </head>
@@ -45,7 +51,7 @@
     </nav>
     <div class="portal-sidebar-bottom">
       <div class="sidebar-account"><span class="sidebar-avatar">{{ strtoupper(substr(auth()->user()->name,0,1)) }}</span><span class="sidebar-label"><strong>{{ auth()->user()->name }}</strong><small>{{ strtoupper(auth()->user()->role) }}</small></span></div>
-      <form action="{{ route('logout') }}" method="POST" data-no-ajax>@csrf<button type="submit" class="sidebar-signout"><i class="fa-solid fa-right-from-bracket" aria-hidden="true"></i><span class="sidebar-label">Sign out</span></button></form>
+      <form action="{{ route('logout') }}" method="POST" data-no-ajax data-logout-confirm>@csrf<button type="submit" class="sidebar-signout"><i class="fa-solid fa-right-from-bracket" aria-hidden="true"></i><span class="sidebar-label">Sign out</span></button></form>
     </div>
   </aside>
   <button class="portal-sidebar-backdrop" id="sidebar-backdrop" type="button" tabindex="-1" aria-label="Close sidebar" hidden></button>
