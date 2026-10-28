@@ -10,7 +10,7 @@ class UserController extends Controller {
     public function create(Request $r){$this->gate($r);return view('admin.users.create');}
     public function store(Request $r){$this->gate($r);
         $data=$r->validate(['name'=>['required','string','max:150'],'email'=>['required','email','max:255','unique:users,email'],'role'=>['required',Rule::in(['admin','meal','focal'])],'password'=>['required','string','min:12','confirmed']]);
-        User::create([...$data,'is_active'=>true]);
+        User::create([...$data,'is_active'=>true,'must_change_password'=>true]);
         return redirect()->route('admin.users.index')->with('message','User account created.');
     }
     public function update(Request $r,User $user){$this->gate($r);

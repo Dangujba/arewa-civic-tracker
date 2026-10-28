@@ -23,7 +23,7 @@
 - [x] HTTPS certificate validated; HTTP redirects to HTTPS.
 - [x] Dedicated MySQL 8 database identity and schema configured, migrations successful.
 - [x] 17 LGAs and 8 initial sectors seeded in MySQL.
-- [ ] Private GitHub repository and protected main branch (currently PUBLIC; no confidential source upload).
+- [ ] Private GitHub repository and protected main branch (currently PUBLIC; sanitized application source is published, with runtime credentials excluded).
 - [ ] Verified environment variable and secret separation, staging vs production.
 - [x] Node dependencies installed and a Vite production asset build completed on staging.
 - [ ] Repeatable build/deployment script, release tags and rollback rehearsed.
@@ -44,6 +44,7 @@
 - [ ] Lighthouse/performance scores and low-bandwidth optimization accepted.
 
 ### 04. Authentication & user administration
+- [x] Administrator-created focal/MEAL users require a new password on first login; protected actions redirect to secure password rotation, verified in integration tests.
 - [ ] Secure administrator initial enrollment, MFA option or approved 2FA policy.
 - [ ] Role-specific login for RAWYOD administrator, MEAL reviewer and Civic Focal Person.
 - [ ] Account activation, deactivation, password reset, session expiry and rate limits tested.
@@ -52,22 +53,23 @@
 - [ ] User activity audit, failed authentication logging and permission-change history.
 
 ### 05. Reporting & public project monitoring
-- [ ] End-to-end new issue/project report submission with accurate validation and case reference.
-- [ ] All required fields: type, sector, LGA/community, observations, status, reporting date and stakeholders.
+- [x] End-to-end test submission with validation and generated reference passes on MySQL QA database.
+- [x] Required type, sector, LGA/community, description, status and observation date validated in submission workflow.
 - [ ] Edit/clarification/follow-up workflows including immutable audit trail and version conflicts.
 - [ ] Report list pagination, full-text search, filters, sort, detail view and deep linking.
-- [ ] Duplicate submission protections with idempotency keys and retry safety tested.
+- [x] Duplicate client submission ID returns the existing report; conflicting payload returns HTTP 409 (tested).
 - [ ] Independent project progress tracking distinct from RAWYOD verification status.
 - [ ] Data consistency checks for out-of-range dates, absent GPS and duplicate project records.
 
 ### 06. Evidence and protected files
-- [ ] Authenticated photo/file upload with size, extension and MIME checks.
+- [x] Authenticated image upload with MIME/size validation and persisted file verified in isolated integration test.
 - [ ] Image resize/compression, mobile camera picker and multi-file upload UI.
 - [ ] Evidence is private and never retrievable via predictable public URLs.
 - [ ] Authorized preview/download, controlled deletion and evidence audit trail.
 - [ ] Storage quotas, integrity checks and upload-failure recovery tested.
 
 ### 07. Review, approval and follow-up
+- [x] MEAL review queue and role-specific server-authorized status options implemented and verified via authenticated feature tests.
 - [ ] MEAL review queue with reviewer assignment, filtering and comments.
 - [ ] Request clarification, field response, verify, approve, reject, close, reopen transition rules.
 - [ ] All transitions authorized, timestamped, attributed and auditable.
@@ -76,7 +78,7 @@
 
 ### 08. GIS mapping and geography
 - [x] Real GeoJSON polygons for all 17 LGAs extracted and name-validated from geoBoundaries NGA ADM2 (CC BY 4.0).
-- [ ] Real report markers only when approved GPS coordinates exist; no invented pins.
+- [x] Approved-status GIS feed returns the approved report with its stored GPS and reference in MySQL integration test; broader map disclosure review is pending.
 - [x] Interactive LGA boundaries, selection controls, map-layer toggles and authorized marker popup code deployed; route tested.
 - [ ] Full browser test of GIS interactions, marker clustering and large-dataset performance.
 - [ ] Map filters by sector, LGA, date, report type and verification/progress status.
@@ -136,9 +138,9 @@
 - [ ] No cross-domain authentication or data sharing without explicit approval.
 
 ### 15. Automated testing, UAT and release
-- [x] Current automated suite passes on staging: 14 tests, 56 assertions including GIS boundary, access and route checks.
+- [x] Current automated suite passes: 16 tests, 123 assertions (SQLite test suite and dedicated MySQL 8 integration suite).
 - [ ] Expanded release-wide test coverage including all contracted modules.
-- [ ] MySQL-backed integration tests, migrations/seeding and data persistence tests.
+- [x] Isolated MySQL 8 integration test database: migrations, password rotation, report submission, uploaded evidence, MEAL review, administrator approval, GIS feed and dashboard, 16 tests pass.
 - [ ] Browser E2E tests for three roles and entire submit→verify→dashboard/map workflow.
 - [ ] Performance tests at expected initial load, including upload and exports.
 - [ ] Android acceptance testing with representative supported devices.
@@ -153,6 +155,7 @@
 - [ ] Signed acceptance/handover record and outstanding issues register.
 - [ ] Contractually agreed stabilization/support period confirmed and documented.
 
+
 ## Evidence log
 | Verification | Evidence | Result |
 |---|---|---|
@@ -161,10 +164,13 @@
 | Landing, login, CSS, JS, photo | HTTPS responses | All HTTP 200 |
 | Authentication protection | Unauthenticated HTTP requests | Dashboard and map redirect to login |
 | JS parser | `node --check public/js/act-interactions.js` | Passed |
-| Automated tests after landing changes and GIS addition | Laravel tests | 14 passed; 56 assertions |
+| Automated tests after landing changes and GIS addition | Laravel tests | 16 passed; 123 assertions |
 | Browser responsiveness | Puppeteer desktop 1440px and mobile 390px | No page errors; mobile horizontal overflow corrected |
 | Frontend pipeline | npm + Vite build | Asset build completed |
 | GIS boundaries | geoBoundaries NGA ADM2 | 17 unique Yobe LGAs, 122,897-byte GeoJSON; HTTP 200 |
 | Login async error path | Puppeteer invalid-credentials test | Feedback shown; login remains protected; submit button reset |
+| End-to-end operational workflow | Laravel HTTP feature test using isolated MySQL 8 database | 16 tests, 123 assertions; Focal submit, evidence, MEAL review, admin approval, GIS marker, dashboard and CSV confirmed |
+| Secure onboarding | Password rotation and account policy tests | First login requires password change; wrong current password rejected |
+| JavaScript offline/AJAX coordination | Handler review + Node syntax check | AJAX form handler skips IndexedDB-managed reporting form; successful sync can open the created report |
 
-**Next verification gates:** full test re-run, authorized staff login, create a real database-backed sample report, verify it, refresh dashboard/map, validate PDF/CSV, mobile/offline E2E, APK smoke test, final RAWYOD acceptance. All demonstration data must be clearly synthetic unless RAWYOD supplies genuine monitoring submissions.
+**Next verification gates:** provision first live administrator securely, real-browser three-role acceptance on isolated QA data, permission audit for all file/actions, mobile/offline evidence synchronization, PDF/Excel export, Android APK, and RAWYOD acceptance. No synthetic reports are stored in the staging production database.

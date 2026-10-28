@@ -10,9 +10,14 @@ use App\Http\Controllers\ProgressController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\SectorController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\AccountController;
+use App\Http\Middleware\EnsurePasswordIsChanged;
 Route::view('/','welcome')->name('home');
 Route::middleware('guest')->group(function(){Route::get('/login',[AuthController::class,'form'])->name('login');Route::post('/login',[AuthController::class,'login']);});
-Route::middleware('auth')->group(function(){
+Route::middleware(['auth',EnsurePasswordIsChanged::class])->group(function(){
+    Route::get('/account/security',[AccountController::class,'form'])->name('account.password.form');
+    Route::post('/account/security/password',[AccountController::class,'update'])->name('account.password.update');
+    Route::get('/reviews/queue',[CaseController::class,'queue'])->name('cases.queue');
     Route::post('/logout',[AuthController::class,'logout'])->name('logout');
     Route::get('/dashboard',[DashboardController::class,'index'])->name('dashboard');
     Route::get('/cases',[CaseController::class,'index'])->name('cases.index');

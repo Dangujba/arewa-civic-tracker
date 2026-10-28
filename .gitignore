@@ -28,3 +28,5 @@ Thumbs.db
 
 # Generated icon assets (npm run assets:icons)
 /public/vendor
+
+/phpunit.mysql.xml

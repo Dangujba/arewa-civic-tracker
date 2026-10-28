@@ -15,12 +15,14 @@
   <nav class="app-nav" aria-label="Portal navigation">
     <a href="{{ route('dashboard') }}"><i class="fa-solid fa-chart-line" aria-hidden="true"></i> Dashboard</a>
     <a href="{{ route('cases.index') }}"><i class="fa-regular fa-file-lines" aria-hidden="true"></i> Reports</a>
+    @if(auth()->user()->canReview())<a href="{{ route('cases.queue') }}"><i class="fa-solid fa-clipboard-check" aria-hidden="true"></i> Review queue</a>@endif
     <a href="{{ route('map.index') }}"><i class="fa-solid fa-map-location-dot" aria-hidden="true"></i> GIS map</a>
     <a href="{{ route('cases.create') }}"><i class="fa-solid fa-plus" aria-hidden="true"></i> New report</a>
     @if(auth()->user()->isAdmin())
       <a href="{{ route('admin.users.index') }}"><i class="fa-solid fa-users" aria-hidden="true"></i> Users</a>
       <a href="{{ route('admin.sectors.index') }}"><i class="fa-solid fa-list-check" aria-hidden="true"></i> Sectors</a>
     @endif
+    <a href="{{ route('account.password.form') }}"><i class="fa-solid fa-shield-halved" aria-hidden="true"></i> Security</a>
     <form action="{{ route('logout') }}" method="post">@csrf<button class="btn-outline" type="submit"><i class="fa-solid fa-right-from-bracket" aria-hidden="true"></i> Sign out</button></form>
   </nav>
   @else

@@ -23,7 +23,7 @@
     if (!local.objectStoreNames.contains('outbox')) local.createObjectStore('outbox', { keyPath: 'key' });
   };
   request.onerror = () => report('Cannot access local drafts. Check private browsing / device storage settings.');
-  request.onsuccess = () => { db = request.result; recoverDraft(); syncPending(); };
+  request.onsuccess = () => { db = request.result; form.dataset.offlineManaged='1'; recoverDraft(); syncPending(); };
   function tx(store,mode,operation) {
     return new Promise((resolve,reject) => {
       if (!db) return reject(Error('Local database unavailable'));
@@ -64,7 +64,7 @@
     if (existing && JSON.stringify(existing.payload) !== JSON.stringify(data)) throw Error('This submission is already queued with different data. Sync or discard the existing report first.');
     if (!existing) await tx('outbox','readwrite',s=>s.put({key,userId,payload:data,savedAt:Date.now()}));
   }
-  async function syncPending() {
+  async function syncPending(redirectId=null) {
     if (!db) return;
     if (!navigator.onLine) return report('Offline: pending reports remain safely stored on this device until you reconnect.');
     try {
@@ -80,10 +80,11 @@
         if (r.status === 409) return report('Submission conflict. Keep the draft and contact an administrator.');
         if (!r.ok) {const body=await r.json().catch(()=>({}));return report(`Sync paused: ${body.message || 'server rejected a report'} (${r.status}). The report is still on this device.`);}
         await tx('outbox','readwrite',s=>s.delete(item.key));
-        await clearDraft();
+        if(idInput.value===item.payload.client_submission_id)await clearDraft();
         const body=await r.json();
         report(`Submitted ${body.reference}. Pending reports are synchronized.`);
         idInput.value=crypto.randomUUID();
+        if(redirectId===item.payload.client_submission_id && body.redirect){window.location.assign(body.redirect);return;}
       }
     } catch(e) {report(`Could not synchronize: ${e.message}`);}
   }
@@ -99,7 +100,7 @@
     e.preventDefault();
     if (!form.reportValidity()) return;
     const data=payload();
-    try {await enqueue(data);await clearDraft();report('Report queued on this device. Attempting secure synchronization...');await syncPending();}
+    try {await enqueue(data);await clearDraft();report('Report queued on this device. Attempting secure synchronization...');await syncPending(data.client_submission_id);}
     catch(err) {report(`Could not queue report: ${err.message}`);}
   });
   window.addEventListener('online',syncPending);

@@ -9,7 +9,7 @@
   </div>
   <div class="dash-actions">
     <a href="{{ route('map.index') }}" class="btn-outline">Explore GIS map <i class="fa-solid fa-arrow-up-right-from-square" aria-hidden="true"></i></a>
-    <a href="{{ route('cases.create') }}" class="btn">+ New field report</a>
+    @if(auth()->user()->canReview())<a href="{{ route('cases.queue') }}" class="btn"><i class="fa-solid fa-clipboard-check" aria-hidden="true"></i> Verification queue</a>@else<a href="{{ route('cases.create') }}" class="btn"><i class="fa-solid fa-plus" aria-hidden="true"></i> New field report</a>@endif
   </div>
 </section>
 <div class="dash-metrics" aria-label="Report statistics">

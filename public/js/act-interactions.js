@@ -18,7 +18,7 @@ if(gallery){
   document.addEventListener('visibilitychange',()=>document.hidden?clearInterval(timer):restart());restart();
 }
 document.addEventListener('submit',async e=>{
-  const form=e.target;if(!(form instanceof HTMLFormElement)||form.hasAttribute('data-no-ajax'))return;
+  const form=e.target;if(!(form instanceof HTMLFormElement)||form.hasAttribute('data-no-ajax')||form.dataset.offlineManaged==='1')return;
   const method=(form.getAttribute('method')||'GET').toUpperCase();if(method==='GET')return;
   e.preventDefault();
   const button=e.submitter||form.querySelector('button[type=submit],input[type=submit]');if(button?.dataset.busy==='1')return;
@@ -28,6 +28,8 @@ document.addEventListener('submit',async e=>{
   try{
     const res=await fetch(form.action,{method:'POST',body:new FormData(form),headers:{'Accept':'application/json','X-Requested-With':'XMLHttpRequest'},credentials:'same-origin',redirect:'follow'});
     if(res.status===422){const data=await res.json();for(const [field,messages] of Object.entries(data.errors||{})){const input=form.querySelector('[name="'+CSS.escape(field)+'"]');if(input){input.setAttribute('aria-invalid','true');const error=document.createElement('small');error.dataset.errorFor=field;error.style.color='#ac3430';error.textContent=messages.join(' ');input.insertAdjacentElement('afterend',error)}}toast(data.message||'Please check the highlighted fields.',true);if(notice)notice.textContent='Please correct the highlighted fields.';return}
+    if(res.status===423){const data=await res.json().catch(()=>({}));toast(data.message||'Update your account security before proceeding.',true);if(data.redirect)window.location.assign(data.redirect);return}
+    if(res.status===419){toast('Your session expired. Refresh and sign in again.',true);return}
     if(res.status===429){toast('Too many attempts. Please retry shortly.',true);return}
     if(!res.ok){toast('The request could not be completed ('+res.status+'). Please retry.',true);return}
     if(res.redirected){window.location.assign(res.url);return}

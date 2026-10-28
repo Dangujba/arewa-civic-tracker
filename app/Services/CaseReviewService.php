@@ -13,6 +13,11 @@ class CaseReviewService {
         'verified'=>['approved','clarification_requested','rejected'],
         'approved'=>[], 'rejected'=>[],
     ];
+    public function allowedTransitions(User $actor,CivicCase $case):array {
+        if (!$actor->canReview())return [];
+        $allowed=self::TRANSITIONS[$case->verification_status]??[];
+        return $actor->isAdmin() ? $allowed : array_values(array_diff($allowed,['approved']));
+    }
     public function transition(User $actor,CivicCase $case,string $to,?string $comment):CivicCase {
         return DB::transaction(function() use($actor,$case,$to,$comment){
             $locked=CivicCase::whereKey($case->id)->lockForUpdate()->firstOrFail();

@@ -11,7 +11,7 @@ class AuthController extends Controller {
         $key=strtolower($data['email']).'|'.$r->ip();
         if(RateLimiter::tooManyAttempts($key,5)){throw ValidationException::withMessages(['email'=>'Too many attempts. Please try again later.']);}
         if(!Auth::attempt([...$data,'is_active'=>true])){RateLimiter::hit($key,60);throw ValidationException::withMessages(['email'=>'Invalid credentials.']);}
-        RateLimiter::clear($key);$r->session()->regenerate();return redirect()->intended('/cases');
+        RateLimiter::clear($key);$r->session()->regenerate();return redirect()->intended($r->user()->must_change_password ? route('account.password.form') : route('dashboard'));
     }
     public function logout(Request $r){Auth::logout();$r->session()->invalidate();$r->session()->regenerateToken();return redirect('/login');}
 }
