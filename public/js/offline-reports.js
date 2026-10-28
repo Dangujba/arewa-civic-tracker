@@ -1,109 +1,92 @@
-// Increment 1 offline field reporting: local draft + idempotent outbox.
-// This is NOT a claim of full offline image/evidence support or encrypted storage.
-(() => {
-  'use strict';
-  const form = document.querySelector('form[data-user-id]');
-  if (!form) return;
-  const userId = form.dataset.userId;
-  const info = document.getElementById('offline-status');
-  const idInput = document.getElementById('submission_id');
-  const dbName = 'arewa-civic-tracker-v1';
-  const dbVersion = 1;
-  let db;
-  const report = message => { info.textContent = message; };
-  if (!globalThis.crypto?.randomUUID || !globalThis.indexedDB) {
-    report('Offline saving is unavailable in this browser. Use an updated browser with HTTPS.');
-    return;
+// Field draft and outbox, including evidence blobs, scoped to the signed-in account.
+// IndexedDB is not encrypted. Use only personal devices for sensitive evidence.
+(()=>{
+'use strict';
+const form=document.querySelector('form[data-user-id]');if(!form)return;
+const userId=form.dataset.userId,info=document.getElementById('offline-status'),idInput=document.getElementById('submission_id');
+const filesInput=document.getElementById('evidence-files'),submit=document.getElementById('submit-btn');
+const csrf=document.querySelector('meta[name="csrf-token"]')?.content;
+let db=null,syncing=false,draftFiles=[];
+const report=message=>{if(info)info.textContent=message};
+function setBusy(on){if(!submit)return;submit.disabled=on;submit.setAttribute('aria-busy',String(on));submit.innerHTML=on?'<i class="fa-solid fa-spinner fa-spin" aria-hidden="true"></i> Saving & synchronizing…':'Submit report'}
+if(!globalThis.indexedDB||!globalThis.crypto?.randomUUID){report('Offline storage unavailable; online upload is still supported.');return}
+if(!idInput.value)idInput.value=crypto.randomUUID();
+const request=indexedDB.open('arewa-civic-tracker-v1',1);
+request.onupgradeneeded=()=>{const d=request.result;if(!d.objectStoreNames.contains('drafts'))d.createObjectStore('drafts',{keyPath:'userId'});if(!d.objectStoreNames.contains('outbox'))d.createObjectStore('outbox',{keyPath:'key'})};
+request.onerror=()=>report('Local offline storage could not be opened. Check browser storage settings.');
+request.onsuccess=()=>{db=request.result;form.dataset.offlineManaged='1';recoverDraft();syncPending()};
+function tx(store,mode,fn){return new Promise((resolve,reject)=>{if(!db)return reject(Error('Offline storage unavailable'));const t=db.transaction(store,mode),r=fn(t.objectStore(store));t.oncomplete=()=>resolve(r.result);t.onerror=()=>reject(t.error||Error('Device storage unavailable'));t.onabort=()=>reject(t.error||Error('Device storage aborted'))})}
+function fields(){const f=new FormData(form),out={};for(const [key,value] of f.entries())if(key!=='_token'&&key!=='evidence[]'&&typeof value==='string')out[key]=value;if(!out.client_submission_id){out.client_submission_id=crypto.randomUUID();idInput.value=out.client_submission_id}return out}
+function attachments(){const live=filesInput?[...filesInput.files].filter(f=>f.size>0):[];return live.length?live:draftFiles}
+function validateFiles(files){if(files.length>5)throw Error('Choose up to five evidence files.');for(const f of files){if(f.size>5*1024*1024)throw Error(f.name+' is larger than 5MB.');if(!['image/jpeg','image/png','image/webp','application/pdf'].includes(f.type))throw Error('Unsupported evidence format: '+f.name)}}
+async function optimizeImage(file){
+ if(!['image/jpeg','image/webp'].includes(file.type)||file.size<750000||!globalThis.createImageBitmap)return file;
+ let bitmap;
+ try{
+  bitmap=await createImageBitmap(file);
+  const max=1600,scale=Math.min(1,max/Math.max(bitmap.width,bitmap.height));
+  const canvas=document.createElement('canvas');canvas.width=Math.max(1,Math.round(bitmap.width*scale));canvas.height=Math.max(1,Math.round(bitmap.height*scale));
+  canvas.getContext('2d').drawImage(bitmap,0,0,canvas.width,canvas.height);
+  const blob=await new Promise(resolve=>canvas.toBlob(resolve,file.type,.79));
+  if(!blob||blob.size>=file.size)return file;
+  return new File([blob],file.name,{type:blob.type,lastModified:file.lastModified});
+ }catch{return file}
+ finally{bitmap?.close?.()}
+}
+async function optimizedAttachments(){
+ const original=attachments();validateFiles(original);
+ const optimized=await Promise.all(original.map(optimizeImage));validateFiles(optimized);
+ return optimized;
+}
+function loadFields(data){for(const [key,value] of Object.entries(data||{})){const input=form.elements.namedItem(key);if(input&&typeof value==='string')input.value=value}}
+async function recoverDraft(){try{const saved=await tx('drafts','readonly',s=>s.get(userId));if(saved?.payload){loadFields(saved.payload);draftFiles=saved.files||[];report(saved.files?.length?'Recovered draft with '+saved.files.length+' stored evidence file(s). Save or submit to synchronize.':'Recovered your local draft.')}else report('Field reporting ready. Reports and evidence can be queued for synchronization.')}catch(e){report(e.message)}}
+async function saveDraft(){try{const files=await optimizedAttachments();await tx('drafts','readwrite',s=>s.put({userId,payload:fields(),files,savedAt:Date.now()}));report('Draft and selected evidence saved on this device. Not yet sent to RAWYOD.')}catch(e){report('Draft saving failed: '+e.message)}}
+async function clearDraft(){draftFiles=[];return tx('drafts','readwrite',s=>s.delete(userId))}
+async function enqueue(data,files){validateFiles(files);const key=userId+':'+data.client_submission_id;const old=await tx('outbox','readonly',s=>s.get(key));if(old){if(JSON.stringify(old.payload)!==JSON.stringify(data))throw Error('A different report is already queued under this reference.');return}await tx('outbox','readwrite',s=>s.put({key,userId,payload:data,files,savedAt:Date.now()}))}
+async function syncPending(redirectId=null){
+ if(!db||syncing)return;
+ if(!navigator.onLine){report('Offline: queued reports and evidence remain on this device until connection returns.');return}
+ syncing=true;setBusy(true);
+ try{
+  const items=(await tx('outbox','readonly',s=>s.getAll())).filter(x=>x.userId===userId);
+  if(!items.length)return;
+  report('Synchronizing '+items.length+' pending report(s)…');
+  for(const item of items){
+   let body,headers={'Accept':'application/json','X-CSRF-TOKEN':csrf,'X-Requested-With':'XMLHttpRequest'};
+   if(item.files?.length){
+    body=new FormData();for(const [name,value]of Object.entries(item.payload))body.append(name,value);
+    for(const file of item.files)body.append('evidence[]',file,file.name||'field-evidence');
+   }else{body=JSON.stringify(item.payload);headers['Content-Type']='application/json'}
+   let response;
+   try{response=await fetch(form.action,{method:'POST',credentials:'same-origin',headers,body})}
+   catch{return report('Network unavailable. The queued report and its evidence remain on this device.')}
+   if(response.status===401||response.status===419||response.redirected)return report('Session expired. Sign in again, then retry synchronization.');
+   if(response.status===409)return report('Submission conflict. The local report is retained for review.');
+   if(!response.ok){const err=await response.json().catch(()=>({}));return report('Sync paused ('+response.status+'): '+(err.message||'server rejected report')+'. Local data retained.')}
+   const result=await response.json();
+   await tx('outbox','readwrite',s=>s.delete(item.key));
+   if(idInput.value===item.payload.client_submission_id)await clearDraft();
+   idInput.value=crypto.randomUUID();
+   if(redirectId===item.payload.client_submission_id&&result.redirect){location.assign(result.redirect);return}
+   report('Submitted '+result.reference+'. Evidence synchronized.');
   }
-  if (!idInput.value) idInput.value = crypto.randomUUID();
-  const request = indexedDB.open(dbName, dbVersion);
-  request.onupgradeneeded = () => {
-    const local = request.result;
-    if (!local.objectStoreNames.contains('drafts')) local.createObjectStore('drafts', { keyPath: 'userId' });
-    if (!local.objectStoreNames.contains('outbox')) local.createObjectStore('outbox', { keyPath: 'key' });
-  };
-  request.onerror = () => report('Cannot access local drafts. Check private browsing / device storage settings.');
-  request.onsuccess = () => { db = request.result; form.dataset.offlineManaged='1'; recoverDraft(); syncPending(); };
-  function tx(store,mode,operation) {
-    return new Promise((resolve,reject) => {
-      if (!db) return reject(Error('Local database unavailable'));
-      const transaction = db.transaction(store,mode);
-      const output = operation(transaction.objectStore(store));
-      transaction.oncomplete = () => resolve(output.result);
-      transaction.onerror = () => reject(transaction.error || Error('Device storage failed'));
-      transaction.onabort = () => reject(transaction.error || Error('Device storage aborted'));
-    });
-  }
-  function payload() {
-    const obj=Object.fromEntries(new FormData(form).entries());
-    delete obj._token;
-    if (!obj.client_submission_id) { obj.client_submission_id=crypto.randomUUID(); idInput.value=obj.client_submission_id; }
-    return obj;
-  }
-  function load(obj) {
-    for (const [key,value] of Object.entries(obj || {})) {
-      const input = form.elements.namedItem(key);
-      if (input && typeof value === 'string') input.value=value;
-    }
-  }
-  async function recoverDraft() {
-    try {
-      const old=await tx('drafts','readonly',s=>s.get(userId));
-      if (old?.payload) { load(old.payload); report('Unsynced draft recovered from this device.'); }
-      else report('Online field reporting ready. You can also save a draft locally.');
-    } catch(e) { report(e.message); }
-  }
-  async function saveDraft() {
-    try { await tx('drafts','readwrite',s=>s.put({userId,payload:payload(),savedAt:new Date().toISOString()})); report('Draft saved on this device. It has not been submitted to RAWYOD.'); }
-    catch(e) { report(e.message); }
-  }
-  async function clearDraft() { await tx('drafts','readwrite',s=>s.delete(userId)); }
-  async function enqueue(data) {
-    const key=`${userId}:${data.client_submission_id}`;
-    const existing=await tx('outbox','readonly',s=>s.get(key));
-    if (existing && JSON.stringify(existing.payload) !== JSON.stringify(data)) throw Error('This submission is already queued with different data. Sync or discard the existing report first.');
-    if (!existing) await tx('outbox','readwrite',s=>s.put({key,userId,payload:data,savedAt:Date.now()}));
-  }
-  async function syncPending(redirectId=null) {
-    if (!db) return;
-    if (!navigator.onLine) return report('Offline: pending reports remain safely stored on this device until you reconnect.');
-    try {
-      const items=await tx('outbox','readonly',s=>s.getAll());
-      const mine=items.filter(x=>x.userId===userId);
-      if (!mine.length) return;
-      report(`Synchronizing ${mine.length} pending report(s)...`);
-      for (const item of mine) {
-        let r;
-        try {r=await fetch(form.action,{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/json','Accept':'application/json','X-CSRF-TOKEN':document.querySelector('meta[name="csrf-token"]').content},body:JSON.stringify(item.payload)});}
-        catch(e) {report('Network unavailable. Submission retained on device.');return;}
-        if (r.status === 401 || r.status===419 || r.redirected) return report('Session expired. Sign in again, then synchronize pending reports.');
-        if (r.status === 409) return report('Submission conflict. Keep the draft and contact an administrator.');
-        if (!r.ok) {const body=await r.json().catch(()=>({}));return report(`Sync paused: ${body.message || 'server rejected a report'} (${r.status}). The report is still on this device.`);}
-        await tx('outbox','readwrite',s=>s.delete(item.key));
-        if(idInput.value===item.payload.client_submission_id)await clearDraft();
-        const body=await r.json();
-        report(`Submitted ${body.reference}. Pending reports are synchronized.`);
-        idInput.value=crypto.randomUUID();
-        if(redirectId===item.payload.client_submission_id && body.redirect){window.location.assign(body.redirect);return;}
-      }
-    } catch(e) {report(`Could not synchronize: ${e.message}`);}
-  }
-  document.getElementById('new-report').addEventListener('click',async () => {
-    if (!confirm('Start a new report? The current form fields will be cleared. Already queued reports will remain saved.')) return;
-    form.reset(); idInput.value=crypto.randomUUID();
-    await clearDraft(); report('New blank report ready. Previously queued reports remain on this device.');
-  });
-  document.getElementById('save-draft').addEventListener('click',saveDraft);
-  document.getElementById('sync-outbox').addEventListener('click',syncPending);
-  form.addEventListener('submit',async e=> {
-    if (!db) return;
-    e.preventDefault();
-    if (!form.reportValidity()) return;
-    const data=payload();
-    try {await enqueue(data);await clearDraft();report('Report queued on this device. Attempting secure synchronization...');await syncPending(data.client_submission_id);}
-    catch(err) {report(`Could not queue report: ${err.message}`);}
-  });
-  window.addEventListener('online',syncPending);
-  window.addEventListener('pagehide',()=>{ /* Explicit Save prevents surprising persistence of partially typed sensitive records. */ });
-  if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js').catch(()=>{});
+ }catch(e){report('Synchronization paused: '+e.message)}
+ finally{syncing=false;setBusy(false)}
+}
+filesInput?.addEventListener('change',()=>{draftFiles=[]});
+document.getElementById('save-draft')?.addEventListener('click',saveDraft);
+document.getElementById('sync-outbox')?.addEventListener('click',()=>syncPending());
+document.getElementById('new-report')?.addEventListener('click',async()=>{
+ if(!confirm('Start a fresh report? This will clear the current draft. Pending submissions are preserved.'))return;
+ form.reset();idInput.value=crypto.randomUUID();await clearDraft();document.getElementById('evidence-preview')?.replaceChildren();report('New blank report ready.');
+});
+form.addEventListener('submit',async e=>{
+ if(!db)return; e.preventDefault();if(syncing||!form.reportValidity())return;
+ setBusy(true);const data=fields();
+ try{const files=await optimizedAttachments();await enqueue(data,files);await clearDraft();report('Report and evidence queued. Attempting secure synchronization…')}
+ catch(e){report('Cannot queue report: '+e.message);setBusy(false);return}
+ setBusy(false);await syncPending(data.client_submission_id);
+});
+window.addEventListener('online',()=>syncPending());
+if('serviceWorker'in navigator)navigator.serviceWorker.register('/sw.js').catch(()=>{});
 })();

@@ -29,6 +29,9 @@
       @if(auth()->user()->canReview())
       <a href="{{ route('cases.queue') }}" class="portal-nav-link {{ request()->routeIs('cases.queue')?'active':'' }}" @if(request()->routeIs('cases.queue')) aria-current="page" @endif><i class="fa-solid fa-clipboard-check" aria-hidden="true"></i><span class="sidebar-label">Verification queue</span></a>
       @endif
+      @if(auth()->user()->canReview())
+      <a href="{{ route('reports.index') }}" class="portal-nav-link {{ request()->routeIs('reports.*')?'active':'' }}" @if(request()->routeIs('reports.*'))aria-current="page"@endif><i class="fa-solid fa-chart-column" aria-hidden="true"></i><span class="sidebar-label">Reports & Analytics</span></a>
+      @endif
       <span class="portal-nav-section">Geographic intelligence</span>
       <a href="{{ route('map.index') }}" class="portal-nav-link {{ request()->routeIs('map.index')?'active':'' }}" @if(request()->routeIs('map.index')) aria-current="page" @endif><i class="fa-solid fa-map-location-dot" aria-hidden="true"></i><span class="sidebar-label">Interactive GIS map</span></a>
       @if(auth()->user()->isAdmin())

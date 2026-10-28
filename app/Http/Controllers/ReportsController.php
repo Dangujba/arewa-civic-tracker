@@ -1,0 +1,123 @@
+<?php
+namespace App\Http\Controllers;
+
+use App\Models\CivicCase;
+use App\Models\Lga;
+use App\Models\Sector;
+use Dompdf\Dompdf;
+use Dompdf\Options;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
+use PhpOffice\PhpSpreadsheet\Cell\DataType;
+
+class ReportsController extends Controller
+{
+    private function filtered(Request $request)
+    {
+        abort_unless($request->user()->canReview(), 403);
+        $f=$request->validate([
+            'lga_id'=>['nullable','integer','exists:lgas,id'],
+            'sector_id'=>['nullable','integer','exists:sectors,id'],
+            'verification_status'=>['nullable','in:submitted,under_review,clarification_requested,verified,approved,rejected'],
+            'type'=>['nullable','in:public_project,governance_issue'],
+            'date_from'=>['nullable','date','before_or_equal:today'],
+            'date_to'=>['nullable','date','after_or_equal:date_from','before_or_equal:today'],
+            'q'=>['nullable','string','max:150'],
+        ]);
+        $query=CivicCase::visibleTo($request->user());
+        foreach(['lga_id','sector_id','verification_status','type'] as $key)if(isset($f[$key]))$query->where($key,$f[$key]);
+        if(isset($f['date_from']))$query->whereDate('observation_date','>=',$f['date_from']);
+        if(isset($f['date_to']))$query->whereDate('observation_date','<=',$f['date_to']);
+        if(!empty($f['q'])){
+            $search=addcslashes(trim($f['q']),'%_\\');
+            $query->where(fn($q)=>$q->where('title','like',"%{$search}%")->orWhere('reference','like',"%{$search}%")->orWhere('community','like',"%{$search}%"));
+        }
+        return $query;
+    }
+
+    public function index(Request $request)
+    {
+        $base=$this->filtered($request);
+        $totals=(clone $base)->selectRaw("COUNT(*) AS total, SUM(CASE WHEN type='public_project' THEN 1 ELSE 0 END) AS projects, SUM(CASE WHEN verification_status='approved' THEN 1 ELSE 0 END) AS approved, SUM(CASE WHEN verification_status IN ('submitted','under_review','clarification_requested') THEN 1 ELSE 0 END) AS pending")->first();
+        $byLga=(clone $base)->select('lga_id',DB::raw('COUNT(*) AS total'))->with('lga:id,name')->groupBy('lga_id')->orderByDesc('total')->limit(17)->get();
+        $bySector=(clone $base)->select('sector_id',DB::raw('COUNT(*) AS total'))->with('sector:id,name')->groupBy('sector_id')->orderByDesc('total')->limit(20)->get();
+        $byStatus=(clone $base)->select('verification_status',DB::raw('COUNT(*) AS total'))->groupBy('verification_status')->orderByDesc('total')->get();
+        $byProgress=(clone $base)->select('progress_status',DB::raw('COUNT(*) AS total'))->groupBy('progress_status')->orderByDesc('total')->get();
+        $monthLabels=[];
+        $monthlyCounts=[];
+        for($month=11;$month>=0;$month--){
+            $date=now()->subMonthsNoOverflow($month)->startOfMonth();
+            $monthLabels[]=$date->format('M Y');
+            $monthlyCounts[$date->format('Y-m')]=0;
+        }
+        // Database-neutral iteration supports both the staging MySQL server and the test suite.
+        foreach((clone $base)->whereDate('observation_date','>=',now()->subMonthsNoOverflow(11)->startOfMonth())->select('observation_date')->cursor() as $entry){
+            $key=$entry->observation_date?->format('Y-m');
+            if(isset($monthlyCounts[$key]))$monthlyCounts[$key]++;
+        }
+        $recent=(clone $base)->with(['lga:id,name','sector:id,name'])->latest()->paginate(20)->withQueryString();
+        return view('reports.index',[
+            'totals'=>$totals,'byLga'=>$byLga,'bySector'=>$bySector,'byStatus'=>$byStatus,'byProgress'=>$byProgress,'monthLabels'=>$monthLabels,'monthlyCounts'=>array_values($monthlyCounts),'recent'=>$recent,
+            'lgas'=>Lga::orderBy('name')->get(['id','name']),'sectors'=>Sector::orderBy('name')->get(['id','name'])
+        ]);
+    }
+
+    public function excel(Request $request)
+    {
+        $query=$this->filtered($request)->with(['lga:id,name','sector:id,name'])->orderBy('id');
+        abort_if((clone $query)->count()>10000,422,'Please narrow your filters to 10,000 records or fewer before exporting to Excel.');
+        $sheetFile=tempnam(sys_get_temp_dir(),'act-xlsx-');
+        if($sheetFile===false)abort(500,'Unable to prepare export.');
+        $workbook=new Spreadsheet();
+        try {
+            $sheet=$workbook->getActiveSheet()->setTitle('Field Reports');
+            $headings=['Reference','Type','Title','LGA','Community','Sector','Observed Date','Verification','Progress','Description','Latitude','Longitude'];
+            foreach($headings as $col=>$value)$sheet->setCellValueExplicit([$col+1,1],$value,DataType::TYPE_STRING);
+            $row=2;
+            foreach($query->cursor() as $case) {
+                $values=[
+                    $case->reference,$case->type,$case->title,$case->lga?->name,$case->community,$case->sector?->name,
+                    $case->observation_date?->format('Y-m-d'),$case->verification_status,$case->progress_status,
+                    $case->description,$case->latitude,$case->longitude
+                ];
+                foreach($values as $col=>$value)$sheet->setCellValueExplicit([$col+1,$row],(string)($value??''),DataType::TYPE_STRING);
+                if(++$row>10001)break;
+            }
+            $sheet->getStyle('A1:L1')->getFont()->setBold(true)->getColor()->setRGB('FFFFFF');
+            $sheet->getStyle('A1:L1')->getFill()->setFillType('solid')->getStartColor()->setRGB('15563C');
+            $sheet->freezePane('A2');
+            $sheet->setAutoFilter('A1:L'.max(1,$row-1));
+            foreach(range('A','L') as $c)$sheet->getColumnDimension($c)->setWidth(in_array($c,['C','J'])?45:19);
+            (new Xlsx($workbook))->save($sheetFile);
+        }catch(\Throwable $e){@unlink($sheetFile);throw $e;}
+        finally{$workbook->disconnectWorksheets();}
+        return response()->download($sheetFile,'arewa-monitoring-'.now()->format('Ymd').'.xlsx',[
+            'Content-Type'=>'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            'Cache-Control'=>'private, no-store',
+        ])->deleteFileAfterSend(true);
+    }
+
+    public function pdf(Request $request)
+    {
+        $query=$this->filtered($request);
+        $total=(clone $query)->count();
+        $rows=(clone $query)->with(['lga:id,name','sector:id,name'])->orderByDesc('observation_date')->limit(150)->get();
+        $summary=(clone $query)->select('verification_status',DB::raw('COUNT(*) AS total'))->groupBy('verification_status')->pluck('total','verification_status');
+        $options=new Options();
+        $options->set('isRemoteEnabled',false);
+        $options->set('isPhpEnabled',false);
+        $options->set('defaultFont','DejaVu Sans');
+        $pdf=new Dompdf($options);
+        $pdf->loadHtml(view('reports.summary-pdf',compact('rows','total','summary'))->render());
+        $pdf->setPaper('a4','landscape');
+        $pdf->render();
+        return response($pdf->output(),200,[
+            'Content-Type'=>'application/pdf',
+            'Content-Disposition'=>'attachment; filename="arewa-monitoring-'.now()->format('Ymd').'.pdf"',
+            'Cache-Control'=>'private, no-store',
+            'X-Content-Type-Options'=>'nosniff',
+        ]);
+    }
+}

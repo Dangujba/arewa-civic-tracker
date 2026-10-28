@@ -8,6 +8,7 @@ use App\Models\CaseEvent;
 use App\Models\CaseFollowup;
 use App\Services\CaseSubmissionService;
 use App\Services\CaseReviewService;
+use App\Services\CaseEvidenceService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 class CaseController extends Controller {
@@ -32,7 +33,12 @@ class CaseController extends Controller {
     }
     public function create(Request $r){$r->user()->can('create',CivicCase::class)||abort(403);return view('cases.create',['lgas'=>Lga::orderBy('name')->get(),'sectors'=>Sector::where('is_active',true)->orderBy('name')->get()]);}
     public function store(StoreCaseRequest $r,CaseSubmissionService $service){
-        $case=$service->submit($r->user(),$r->validated());
+        $data=$r->validated();
+        unset($data['evidence']);
+        $case=$service->submit($r->user(),$data);
+        if($r->hasFile('evidence')) {
+            app(CaseEvidenceService::class)->attach($case,$r->user(),$r->file('evidence'));
+        }
         if($r->expectsJson()){return response()->json(['id'=>$case->id,'reference'=>$case->reference,'verification_status'=>$case->verification_status,'message'=>'Report submitted successfully.','redirect'=>route('cases.show',$case)],201);}
         return redirect()->route('cases.show',$case)->with('message','Report submitted: '.$case->reference);
     }

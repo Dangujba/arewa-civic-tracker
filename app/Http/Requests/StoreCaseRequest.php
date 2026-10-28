@@ -19,5 +19,7 @@ class StoreCaseRequest extends FormRequest {
         'progress_status'=>['required',Rule::in(['observed','not_started','ongoing','stalled','completed','resolved','other'])],
         'latitude'=>['nullable','required_with:longitude','numeric','between:-90,90'],
         'longitude'=>['nullable','required_with:latitude','numeric','between:-180,180'],
+        'evidence'=>['sometimes','array','max:5'],
+        'evidence.*'=>['file','mimes:jpg,jpeg,png,webp,pdf','max:5120'],
     ];}
 }
