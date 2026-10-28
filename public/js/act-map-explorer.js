@@ -63,8 +63,13 @@ function renderCases(){
   drawHeat();countVisible()
 }
 function drawHeat(){
-  heatLayer.clearLayers();if(!$('geo-heat').checked)return;
-  for(const f of features){const [lng,lat]=f.geometry.coordinates;L.circle([lat,lng],{radius:map.getZoom()<=8?9000:2000,stroke:false,color:'#3d9362',fillColor:'#3d9362',fillOpacity:.13,interactive:false}).addTo(heatLayer)}
+  heatLayer.clearLayers();if(!$('geo-heat').checked||!features.length)return;
+  const points=features.map(f=>[f.geometry.coordinates[1],f.geometry.coordinates[0],0.75]);
+  if(typeof L.heatLayer==='function'){
+    L.heatLayer(points,{radius:27,blur:19,maxZoom:16,minOpacity:0.22,gradient:{0.3:'#76c09a',0.6:'#f0b958',1:'#b54a42'}}).addTo(heatLayer);
+  }else{
+    for(const [lat,lng] of points){L.circle([lat,lng],{radius:map.getZoom()<=8?9000:2000,stroke:false,fillColor:'#3d9362',fillOpacity:.13,interactive:false}).addTo(heatLayer)}
+  }
 }
 function fitFeature(id){
   const f=features.find(f=>Number(f.properties.id)===Number(id));if(!f)return;
