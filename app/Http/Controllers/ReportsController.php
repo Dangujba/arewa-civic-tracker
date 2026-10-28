@@ -101,23 +101,93 @@ class ReportsController extends Controller
 
     public function pdf(Request $request)
     {
-        $query=$this->filtered($request);
-        $total=(clone $query)->count();
-        $rows=(clone $query)->with(['lga:id,name','sector:id,name'])->orderByDesc('observation_date')->limit(150)->get();
-        $summary=(clone $query)->select('verification_status',DB::raw('COUNT(*) AS total'))->groupBy('verification_status')->pluck('total','verification_status');
-        $options=new Options();
-        $options->set('isRemoteEnabled',false);
-        $options->set('isPhpEnabled',false);
-        $options->set('defaultFont','DejaVu Sans');
-        $pdf=new Dompdf($options);
-        $pdf->loadHtml(view('reports.summary-pdf',compact('rows','total','summary'))->render());
+        $base = $this->filtered($request);
+        $total = (clone $base)->count();
+        $rows = (clone $base)->with(['lga:id,name','sector:id,name'])
+            ->orderByDesc('observation_date')->limit(150)->get();
+        $statuses = (clone $base)->select('verification_status',DB::raw('COUNT(*) AS total'))
+            ->groupBy('verification_status')->pluck('total','verification_status')->toArray();
+        $progress = (clone $base)->select('progress_status',DB::raw('COUNT(*) AS total'))
+            ->groupBy('progress_status')->pluck('total','progress_status')->toArray();
+        $lgas = (clone $base)->select('lga_id',DB::raw('COUNT(*) AS total'))
+            ->with('lga:id,name')->groupBy('lga_id')->orderByDesc('total')
+            ->limit(17)->get();
+        $sectors = (clone $base)->select('sector_id',DB::raw('COUNT(*) AS total'))
+            ->with('sector:id,name')->groupBy('sector_id')->orderByDesc('total')
+            ->limit(20)->get();
+        $lgaCounts = [];
+        foreach ($lgas as $entry) $lgaCounts[$entry->lga?->name ?? 'Unassigned'] = (int) $entry->total;
+        $sectorCounts = [];
+        foreach ($sectors as $entry) $sectorCounts[$entry->sector?->name ?? 'Unassigned'] = (int) $entry->total;
+
+        $monthLabels = [];
+        $monthCounts = [];
+        for ($i = 11; $i >= 0; $i--) {
+            $month = now()->subMonthsNoOverflow($i)->startOfMonth();
+            $monthLabels[] = $month->format('M Y');
+            $monthCounts[$month->format('Y-m')] = 0;
+        }
+        foreach ((clone $base)->whereDate('observation_date','>=',now()->subMonthsNoOverflow(11)->startOfMonth())
+            ->select('observation_date')->cursor() as $entry) {
+            $key = $entry->observation_date?->format('Y-m');
+            if (isset($monthCounts[$key])) $monthCounts[$key]++;
+        }
+
+        $approved = (int) ($statuses['approved'] ?? 0);
+        $pending = array_sum(array_map('intval', [
+            $statuses['submitted'] ?? 0,
+            $statuses['under_review'] ?? 0,
+            $statuses['clarification_requested'] ?? 0,
+        ]));
+        $projects = (clone $base)->where('type','public_project')->count();
+        $issues = $total - $projects;
+        $scope = [
+            'from' => $request->input('date_from'),
+            'to' => $request->input('date_to'),
+            'lga' => $request->filled('lga_id') ? Lga::find($request->integer('lga_id'))?->name : null,
+            'sector' => $request->filled('sector_id') ? Sector::find($request->integer('sector_id'))?->name : null,
+            'status' => $request->input('verification_status'),
+            'type' => $request->input('type'),
+            'search' => $request->input('q'),
+        ];
+        $chart = app(\App\Services\StakeholderChartService::class);
+        $images = $total > 0 ? [
+            'trend' => $chart->trend($monthLabels,array_values($monthCounts)),
+            'verification' => $chart->bars(
+                collect($statuses)->mapWithKeys(fn($count,$status) => [ucwords(str_replace('_',' ',$status)) => (int) $count])
+                    ->sortDesc()->all(),
+                '#17563E',6
+            ),
+            'lga' => $chart->bars($lgaCounts,'#17563E'),
+            'sector' => $chart->bars($sectorCounts,'#C69C4C'),
+            'progress' => $chart->bars(
+                collect($progress)->mapWithKeys(fn($count,$status) => [ucwords(str_replace('_',' ',$status)) => (int) $count])
+                    ->sortDesc()->all(),'#537967',7
+            ),
+        ] : [];
+
+        $brandPath = public_path('icons/act-192.png');
+        $brand = is_file($brandPath) ? 'data:image/png;base64,'.base64_encode(file_get_contents($brandPath)) : null;
+        $html = view('reports.stakeholder-pdf', [
+            'total'=>$total,'approved'=>$approved,'pending'=>$pending,'projects'=>$projects,'issues'=>$issues,
+            'rows'=>$rows,'statuses'=>$statuses,'progress'=>$progress,'lgaCounts'=>$lgaCounts,
+            'sectorCounts'=>$sectorCounts,'monthLabels'=>$monthLabels,'monthCounts'=>array_values($monthCounts),
+            'scope'=>$scope,'images'=>$images,'brand'=>$brand,'generated'=>now(),
+        ])->render();
+        $options = new Options();
+        $options->set('isRemoteEnabled', false);
+        $options->set('isPhpEnabled', false);
+        $options->set('defaultFont', 'DejaVu Sans');
+        $pdf = new Dompdf($options);
+        $pdf->loadHtml($html);
         $pdf->setPaper('a4','landscape');
         $pdf->render();
         return response($pdf->output(),200,[
             'Content-Type'=>'application/pdf',
-            'Content-Disposition'=>'attachment; filename="arewa-monitoring-'.now()->format('Ymd').'.pdf"',
+            'Content-Disposition'=>'attachment; filename="arewa-stakeholder-report-'.now()->format('Ymd').'.pdf"',
             'Cache-Control'=>'private, no-store',
             'X-Content-Type-Options'=>'nosniff',
         ]);
     }
+
 }
