@@ -1,0 +1,57 @@
+name: Application quality checks
+
+on:
+  pull_request:
+  push:
+    branches:
+      - feature/admin-sidebar-gis-workspace
+
+permissions:
+  contents: read
+
+jobs:
+  php-and-frontend:
+    name: Laravel tests and frontend build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Install PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: mbstring, dom, xml, pdo_sqlite, sqlite3, fileinfo, gd, zip
+          coverage: none
+          tools: composer:v2
+
+      - name: Install PHP dependencies
+        run: composer install --no-interaction --prefer-dist --no-progress --no-scripts
+
+      - name: Configure CI application
+        run: |
+          cp .env.example .env
+          php artisan package:discover --ansi
+          php artisan key:generate
+
+      - name: Run Laravel feature tests
+        run: php artisan test --no-ansi
+
+      - name: Install Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - name: Check JavaScript syntax
+        run: |
+          node --check public/js/act-sidebar.js
+          node --check public/js/act-map-explorer.js
+          node --check public/js/act-interactions.js
+
+      - name: Install frontend dependencies
+        run: npm ci --no-audit --no-fund
+
+      - name: Build assets and icons
+        run: npm run build
