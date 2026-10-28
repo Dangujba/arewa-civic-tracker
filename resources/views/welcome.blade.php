@@ -5,10 +5,10 @@
 <meta name="description" content="Arewa Civic Tracker supports RAWYOD's evidence-led monitoring of civic issues and public projects across the 17 LGAs of Yobe State.">
 <meta name="theme-color" content="#164f3b"><meta name="csrf-token" content="{{ csrf_token() }}">
 <link rel="manifest" href="{{ asset('manifest.webmanifest') }}">
-<link rel="icon" type="image/webp" href="{{ asset('icons/arewa-handdrawn-map.webp') }}?v=4">
-<link rel="icon" type="image/png" sizes="32x32" href="{{ asset('icons/favicon-32.png') }}?v=4">
-<link rel="shortcut icon" href="{{ asset('favicon.ico') }}?v=4">
-<link rel="apple-touch-icon" sizes="180x180" href="{{ asset('icons/apple-touch-icon.png') }}?v=4">
+<link rel="icon" type="image/svg+xml" href="{{ asset('icons/arewa-mark.svg') }}?v=2">
+<link rel="icon" type="image/png" sizes="32x32" href="{{ asset('icons/favicon-32.png') }}?v=2">
+<link rel="shortcut icon" href="{{ asset('favicon.ico') }}?v=2">
+<link rel="apple-touch-icon" sizes="180x180" href="{{ asset('icons/apple-touch-icon.png') }}?v=2">
 <title>Arewa Civic Tracker | Evidence for Better Communities</title>
 <link rel="stylesheet" href="{{ asset('vendor/fontawesome/all.min.css') }}">
 <link rel="stylesheet" href="{{ asset('css/act-structure.css') }}">
@@ -17,7 +17,7 @@
 <a class="skip" href="#main-content">Skip to content</a>
 <div class="topline"><div class="shell"><span><i class="fa-solid fa-location-dot" aria-hidden="true"></i> Yobe State, Nigeria</span><span>RAWYOD · VOICES TO VOTES</span></div></div>
 <header class="site-header"><div class="shell header-inner">
-<a class="wordmark" href="{{ route('home') }}" aria-label="Arewa Civic Tracker, home"><img src="{{ asset('icons/arewa-handdrawn-map.webp') }}" class="site-brand-icon" width="37" height="37" alt=""><strong>arewa.</strong><small>Civic Tracker</small></a>
+<a class="wordmark" href="{{ route('home') }}" aria-label="Arewa Civic Tracker, home"><img src="{{ asset('icons/arewa-mark.svg') }}" class="site-brand-icon" width="37" height="37" alt=""><strong>arewa.</strong><small>Civic Tracker</small></a>
 <nav class="main-nav" id="site-navigation" aria-label="Primary navigation">
  <a href="#about">About</a><a href="#capabilities">Features</a><a href="#how-it-works">How it works</a><a href="#yobe">Yobe in focus</a>
 </nav>

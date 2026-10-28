@@ -13,6 +13,7 @@
 <link rel="stylesheet" href="{{ asset('vendor/ui/tom-select.css') }}">
 <link rel="stylesheet" href="{{ asset('vendor/ui/sweetalert2.css') }}">
 <link rel="stylesheet" href="{{ asset('css/act-form-polish.css') }}">
+<link rel="stylesheet" href="{{ asset('css/act-feedback.css') }}?v=2">
 <title>@yield('title','Arewa Civic Tracker')</title>@stack('head')
 <script defer src="{{ asset('vendor/ui/tom-select.js') }}"></script>
 <script defer src="{{ asset('vendor/ui/sweetalert2.js') }}"></script>

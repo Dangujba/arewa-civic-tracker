@@ -1,10 +1,15 @@
 (()=>{
 'use strict';
 const dialog=window.Swal;
-const tone={success:'#16563b',error:'#a73532',warning:'#9e6e2b',info:'#236b85'};
+window.ACTSpinnerMarkup="<span class=\"act-dot-spinner\" aria-hidden=\"true\"><span style=\"--i:0\"></span><span style=\"--i:1\"></span><span style=\"--i:2\"></span><span style=\"--i:3\"></span><span style=\"--i:4\"></span><span style=\"--i:5\"></span><span style=\"--i:6\"></span><span style=\"--i:7\"></span></span>";
 const showToast=(message,kind='success')=>{
- if(dialog){dialog.fire({toast:true,position:'top-end',icon:kind==='error'?'error':kind==='warning'?'warning':kind==='info'?'info':'success',title:String(message),showConfirmButton:false,timer:3600,timerProgressBar:true,showClass:{popup:'swal2-show'},hideClass:{popup:'swal2-hide'}});return}
- const holder=document.getElementById('toast-stack')||document.body;const e=document.createElement('div');e.className='toast'+(kind==='error'?' error':'');e.textContent=message;holder.append(e);setTimeout(()=>e.remove(),3600);
+ const type=['success','error','info','warning'].includes(kind)?kind:'info';
+ if(window.Swal){
+  const compact=window.Swal.mixin({toast:true,position:'top-end',showConfirmButton:false,timer:2800,timerProgressBar:true,width:310,padding:'0.5rem 0.75rem',iconColor:type==='success'?'#216943':undefined,customClass:{popup:'act-compact-toast'},didOpen:popup=>{popup.addEventListener('mouseenter',window.Swal.stopTimer);popup.addEventListener('mouseleave',window.Swal.resumeTimer)}});
+  compact.fire({icon:type,title:String(message)});return;
+ }
+ const holder=document.getElementById('toast-stack')||document.body;
+ const e=document.createElement('div');e.className='toast act-fallback-toast'+(type==='error'?' error':'');e.textContent=String(message);holder.append(e);setTimeout(()=>e.remove(),2800);
 };
 window.ACTToast=showToast;
 window.ACTConfirm=async (title,message)=>{
@@ -42,7 +47,7 @@ const ready=()=>{
    confirmButtonColor:'#17563e',cancelButtonColor:'#68796d',reverseButtons:true,focusCancel:true,
    customClass:{popup:'act-confirm-dialog'},showLoaderOnConfirm:false
   });
-  if(choice.isConfirmed){logoutForm.dataset.confirmed='1';const btn=logoutForm.querySelector('button[type=submit]');if(btn){btn.disabled=true;btn.innerHTML='<i class="fa-solid fa-spinner fa-spin" aria-hidden="true"></i><span class="sidebar-label">Signing out…</span>'}HTMLFormElement.prototype.submit.call(logoutForm)}
+  if(choice.isConfirmed){logoutForm.dataset.confirmed='1';const btn=logoutForm.querySelector('button[type=submit]');if(btn){btn.disabled=true;btn.innerHTML=''+(window.ACTSpinnerMarkup||'')+'<span class="sidebar-label">Signing out…</span>'}HTMLFormElement.prototype.submit.call(logoutForm)}
  });
  document.querySelectorAll('.notice[role="status"]').forEach(item=>{const msg=item.textContent.trim();if(msg){showToast(msg,'success');item.hidden=true}});
 };

@@ -9,7 +9,7 @@ const show=(v,bad=false)=>{if(status){status.textContent=v;status.style.color=ba
 function capture(){
  if(!navigator.geolocation){show('GPS is not supported here. You may enter coordinates manually.',true);return}
  if(!window.isSecureContext){show('GPS requires HTTPS. You may enter coordinates manually.',true);return}
- button.disabled=true;button.innerHTML='<i class="fa-solid fa-spinner fa-spin" aria-hidden="true"></i> Detecting…';
+ button.disabled=true;button.innerHTML=(window.ACTSpinnerMarkup||'')+' Detecting…';
  show('Requesting location permission…');
  navigator.geolocation.getCurrentPosition(pos=>{
   if(!lat.dataset.edited&&!lng.dataset.edited){

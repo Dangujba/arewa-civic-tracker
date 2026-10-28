@@ -9,7 +9,7 @@ const csrf=document.querySelector('meta[name="csrf-token"]')?.content;
 let db=null,syncing=false,draftFiles=[];
 const report=message=>{if(info)info.textContent=message};
 const toast=(message,type='success')=>window.ACTToast?.(message,type);
-function setBusy(on){if(!submit)return;submit.disabled=on;submit.setAttribute('aria-busy',String(on));submit.innerHTML=on?'<i class="fa-solid fa-spinner fa-spin" aria-hidden="true"></i> Saving & synchronizing…':'Submit report'}
+function setBusy(on){if(!submit)return;submit.disabled=on;submit.setAttribute('aria-busy',String(on));submit.innerHTML=on?(window.ACTSpinnerMarkup||'')+' Saving & synchronizing…':'Submit report'}
 if(!globalThis.indexedDB||!globalThis.crypto?.randomUUID){report('Offline storage unavailable; online upload is still supported.');return}
 if(!idInput.value)idInput.value=crypto.randomUUID();
 const request=indexedDB.open('arewa-civic-tracker-v1',1);

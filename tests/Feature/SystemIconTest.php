@@ -13,10 +13,10 @@ class SystemIconTest extends TestCase
             $this->assertGreaterThan(1000,filesize($file));
         }
         $manifest=json_decode(file_get_contents(public_path('manifest.webmanifest')),true,512,JSON_THROW_ON_ERROR);
-        $this->assertCount(2,$manifest['icons']);
-        $this->assertStringContainsString('act-192.png',$manifest['icons'][0]['src']);
-        $this->assertStringContainsString('act-512.png',$manifest['icons'][1]['src']);
-        $this->get('/')->assertOk()->assertSee('icons/arewa-handdrawn-map.webp')->assertSee('apple-touch-icon');
-        $this->get('/login')->assertOk()->assertSee('icons/arewa-handdrawn-map.webp');
+        $this->assertCount(3,$manifest['icons']);
+        $this->assertStringContainsString('act-192.png',$manifest['icons'][1]['src']);
+        $this->assertStringContainsString('act-512.png',$manifest['icons'][2]['src']);
+        $this->get('/')->assertOk()->assertSee('icons/arewa-mark.svg')->assertSee('apple-touch-icon');
+        $this->get('/login')->assertOk()->assertSee('icons/arewa-mark.svg');
     }
 }
