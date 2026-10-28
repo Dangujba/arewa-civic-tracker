@@ -1,0 +1,45 @@
+name: Arewa platform checks
+on:
+  push:
+    branches: [main, feature/admin-sidebar-gis-workspace]
+  pull_request:
+    branches: [main]
+jobs:
+  laravel:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: mbstring, pdo_sqlite, sqlite3, dom, fileinfo, gd
+          coverage: none
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - name: Install PHP dependencies
+        run: composer install --no-interaction --prefer-dist --no-progress
+      - name: Configure test environment
+        run: |
+          cp .env.example .env
+          php artisan key:generate
+          touch database/database.sqlite
+      - name: Run Laravel tests
+        env:
+          APP_ENV: testing
+          DB_CONNECTION: sqlite
+          DB_DATABASE: ':memory:'
+          SESSION_DRIVER: array
+          CACHE_STORE: array
+          QUEUE_CONNECTION: sync
+        run: php artisan test --no-ansi
+      - name: Build frontend and bundled icon assets
+        run: |
+          npm ci
+          npm run build
+      - name: Check JavaScript syntax
+        run: |
+          node --check public/js/act-sidebar.js
+          node --check public/js/act-map-explorer.js
+          node --check public/js/act-interactions.js
