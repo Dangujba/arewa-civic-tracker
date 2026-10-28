@@ -5,7 +5,7 @@ window.ACTSpinnerMarkup="<span class=\"act-dot-spinner\" aria-hidden=\"true\"><s
 const showToast=(message,kind='success')=>{
  const type=['success','error','info','warning'].includes(kind)?kind:'info';
  if(window.Swal){
-  const compact=window.Swal.mixin({toast:true,position:'top-end',showConfirmButton:false,timer:2800,timerProgressBar:true,width:310,padding:'0.5rem 0.75rem',iconColor:type==='success'?'#216943':undefined,customClass:{popup:'act-compact-toast'},didOpen:popup=>{popup.addEventListener('mouseenter',window.Swal.stopTimer);popup.addEventListener('mouseleave',window.Swal.resumeTimer)}});
+  const compact=window.Swal.mixin({toast:true,position:'top-end',showConfirmButton:false,timer:2800,timerProgressBar:true,width:310,padding:'0.5rem 0.75rem',iconColor:type==='success'?'#216943':undefined,customClass:{popup:'act-compact-toast'},didOpen:popup=>{popup.addEventListener('mouseenter',window.Swal.stopTimer);popup.addEventListener('mouseleave',window.Swal.resumeTimer);const target=popup.querySelector('.swal2-icon');if(target){const glyph=document.createElement('i');glyph.className='fa-solid '+({success:'fa-check',error:'fa-xmark',info:'fa-info',warning:'fa-exclamation'}[type]||'fa-info');glyph.setAttribute('aria-hidden','true');target.replaceChildren(glyph)}}});
   compact.fire({icon:type,title:String(message)});return;
  }
  const holder=document.getElementById('toast-stack')||document.body;
