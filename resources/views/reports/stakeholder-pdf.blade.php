@@ -89,8 +89,8 @@ while {{ number_format($pending) }} remain submitted, under review or awaiting c
 These are record statuses, not independent assessments of project delivery.</p>
 <table class="insight-table"><tr>
 <td><strong>{{ count($lgaCounts) }} LGAs</strong>Represented among the filtered observations</td>
-<td><strong>{{ array_key_first($lgaCounts) ?: 'No LGA reported' }}</strong>Highest recorded LGA count@if($lgaCounts): {{ number_format((int) reset($lgaCounts)) }}@endif</td>
-<td><strong>{{ array_key_first($sectorCounts) ?: 'No sector reported' }}</strong>Highest recorded sector count@if($sectorCounts): {{ number_format((int) reset($sectorCounts)) }}@endif</td>
+<td><strong>{{ array_key_first($lgaCounts) ?: 'No LGA reported' }}</strong>Highest recorded LGA count@if($lgaCounts) {{ number_format((int) reset($lgaCounts)) }}@endif</td>
+<td><strong>{{ array_key_first($sectorCounts) ?: 'No sector reported' }}</strong>Highest recorded sector count@if($sectorCounts) {{ number_format((int) reset($sectorCounts)) }}@endif</td>
 </tr></table>
 @else
 <div class="no-data">No field observations match the selected filters. The figures below are intentionally empty. No locations, activities or outcomes have been inferred.</div>
