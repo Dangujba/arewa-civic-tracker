@@ -30,7 +30,7 @@
   <div class="hero-support"><img class="sicon" src="{{ asset('vendor/lucide/shield-check.svg') }}" alt="" aria-hidden="true"><p>Secure role-based workspaces for field focal persons, reviewers and administrators.</p></div>
  </div>
  <div class="hero-visual" data-carousel aria-roledescription="carousel" aria-label="Photographs of Yobe State public infrastructure">
-  <div class="visual-top"><strong><i class="fa-regular fa-images" aria-hidden="true"></i> Yobe in pictures</strong><span>Actual places, illustrated for context</span></div>
+  <div class="visual-top"><strong><i class="fa-regular fa-images" aria-hidden="true"></i> Yobe in pictures</strong></div>
   <div class="carousel">
    <article class="carousel-slide active" aria-hidden="false"><img src="{{ asset('media/yobe-bridge.jpg') }}" alt="Garin Maje bridge in Potiskum, Yobe State" width="720" height="540" fetchpriority="high"><div class="slide-caption"><small>Infrastructure · Potiskum</small><strong>Connecting communities</strong><span>Garin Maje bridge, Yobe State</span></div></article>
    <article class="carousel-slide" aria-hidden="true"><img src="{{ asset('media/yobe-library.jpg') }}" alt="Yobe State Library Board Complex in Damaturu" width="1012" height="770" loading="lazy"><div class="slide-caption"><small>Public facilities · Damaturu</small><strong>Spaces for learning</strong><span>Yobe State Library Complex</span></div></article>
