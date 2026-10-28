@@ -1,0 +1,13 @@
+:root{--forest:#164f3b;--deep:#103a2c;--gold:#bb9052;--line:#d9e2da;--ink:#1d2922;--muted:#58685e}
+body{background:#f6f8f5;color:var(--ink)}
+.act-portal-wordmark{display:flex;flex-direction:column;line-height:.95;font-size:22px;font-weight:900;color:var(--forest);letter-spacing:-.05em}
+.act-portal-wordmark small{color:#506e5b;font-size:9px;letter-spacing:.17em;text-transform:uppercase;margin-top:6px;font-weight:820}
+.app-header{border-bottom:1px solid var(--line);background:#fff}.app-header .container{min-height:73px}.app-nav a{color:#395444}.app-nav a i{color:var(--forest);margin-right:5px;font-size:12px}
+.app-main .card,.app-main .notice,.dash-panel,.dash-metric,.auth-wrap,.auth-card,.auth-art{border-radius:0!important;box-shadow:none!important}
+.app-main input,.app-main textarea,.app-main select,.auth-card input,.app-main .tag,.dash-status{border-radius:0!important}
+.app-main button,.btn,.btn-outline,.app-nav button,.auth-card button{border-radius:0!important;box-shadow:none!important}
+.app-main .card,.dash-panel,.dash-metric{border-color:var(--line)}
+.app-main h1,.auth-card h1{font-family:Inter,"Segoe UI",sans-serif;letter-spacing:-.035em;font-weight:820}
+.auth-art{background:#154b38!important}.auth-card .btn{background:var(--forest)!important}
+.site-footer{background:#123a2a}
+@media(max-width:830px){.app-header .container{align-items:flex-start;gap:15px;padding-block:12px;flex-wrap:wrap}.app-nav{margin:0;gap:13px}.app-nav a{font-size:11px}}

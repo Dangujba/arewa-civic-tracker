@@ -1,101 +1,107 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="description" content="Arewa Civic Tracker: structured civic monitoring, public project reporting, evidence review and governance accountability across Yobe State.">
-<meta name="theme-color" content="#173f33"><meta name="csrf-token" content="{{ csrf_token() }}">
-<title>Arewa Civic Tracker | Civic Monitoring & Public Project Accountability</title>
-<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="stylesheet" href="{{ asset('css/act-design.css') }}">
-<script src="{{ asset('js/act-interactions.js') }}" defer></script>
-</head>
-<body>
-<div class="topline"><div class="container"><span>VOICES TO VOTES • Digital civic monitoring and community accountability</span><span>RAWYOD • Yobe State, Nigeria</span></div></div>
-<header class="site-header"><div class="container">
-  <a href="{{ url('/') }}" class="brand" aria-label="Arewa Civic Tracker home"><span class="brand-mark">A</span><span>Arewa Civic Tracker<small>Powered by community intelligence</small></span></a>
-  <button class="mobile-toggle" type="button" aria-expanded="false" aria-controls="site-navigation" data-mobile-nav>☰ <span class="sr-only">Toggle navigation</span></button>
-  <nav class="site-nav" id="site-navigation" aria-label="Main navigation">
-    <a href="#about">About the tracker</a><a href="#features">Platform features</a><a href="#how-it-works">How it works</a><a href="#infrastructure">Yobe in focus</a>
-  </nav>
-  <div class="header-actions"><a href="{{ route('login') }}" class="btn">Staff portal <span aria-hidden="true">↗</span></a></div>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="Arewa Civic Tracker supports RAWYOD's evidence-led monitoring of civic issues and public projects across the 17 LGAs of Yobe State.">
+<meta name="theme-color" content="#164f3b"><meta name="csrf-token" content="{{ csrf_token() }}">
+<link rel="manifest" href="{{ asset('manifest.webmanifest') }}">
+<title>Arewa Civic Tracker | Evidence for Better Communities</title>
+<link rel="stylesheet" href="{{ asset('vendor/fontawesome/all.min.css') }}">
+<link rel="stylesheet" href="{{ asset('css/act-structure.css') }}">
+<script defer src="{{ asset('js/act-interactions.js') }}"></script>
+</head><body>
+<a class="skip" href="#main-content">Skip to content</a>
+<div class="topline"><div class="shell"><span><i class="fa-solid fa-location-dot" aria-hidden="true"></i> Yobe State, Nigeria</span><span>RAWYOD · VOICES TO VOTES</span></div></div>
+<header class="site-header"><div class="shell header-inner">
+<a class="wordmark" href="{{ route('home') }}" aria-label="Arewa Civic Tracker, home"><strong>arewa.</strong><small>Civic Tracker</small></a>
+<nav class="main-nav" id="site-navigation" aria-label="Primary navigation">
+ <a href="#about">About</a><a href="#capabilities">Features</a><a href="#how-it-works">How it works</a><a href="#yobe">Yobe in focus</a>
+</nav>
+<button class="menu-button" type="button" aria-controls="site-navigation" aria-expanded="false" data-mobile-nav aria-label="Toggle menu"><i class="fa-solid fa-bars" aria-hidden="true"></i></button>
+<div class="header-actions"><a class="btn" href="{{ route('login') }}"><i class="fa-solid fa-right-to-bracket" aria-hidden="true"></i> Staff portal</a></div>
 </div></header>
-<main>
-<section class="hero" id="about"><div class="container hero-grid">
-  <div>
-    <span class="eyebrow">Transparency begins with evidence</span>
-    <h1>Stronger communities.<br><em>Accountable governance.</em></h1>
-    <p>A secure digital platform helping trained civic focal persons document public projects, report service-delivery issues and turn verified community observations into actionable insights across Yobe State.</p>
-    <div class="hero-buttons">
-      <a href="{{ route('login') }}" class="btn btn-lg">Access reporting portal <span aria-hidden="true">↗</span></a>
-      <a href="#how-it-works" class="btn-outline btn-lg">Discover how it works <span aria-hidden="true">↓</span></a>
-    </div>
+<main id="main-content">
+<section class="hero"><div class="shell hero-grid">
+ <div class="hero-copy">
+  <span class="eyebrow">Civic monitoring • Project accountability</span>
+  <h1>Evidence for <span>better communities.</span></h1>
+  <p>Every community observation matters. Arewa Civic Tracker brings together public project monitoring, geographic intelligence and verified civic reports in one secure platform designed for RAWYOD's VOICES TO VOTES initiative.</p>
+  <div class="hero-actions"><a class="btn" href="#about">Explore the platform <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a><a class="btn outline" href="{{ route('login') }}">Access reporting portal <i class="fa-solid fa-arrow-up-right-from-square" aria-hidden="true"></i></a></div>
+  <div class="hero-support"><img class="sicon" src="{{ asset('vendor/lucide/shield-check.svg') }}" alt="" aria-hidden="true"><p>Secure role-based workspaces for field focal persons, reviewers and administrators.</p></div>
+ </div>
+ <div class="hero-visual" data-carousel aria-roledescription="carousel" aria-label="Photographs of Yobe State public infrastructure">
+  <div class="visual-top"><strong><i class="fa-regular fa-images" aria-hidden="true"></i> Yobe in pictures</strong><span>Actual places, illustrated for context</span></div>
+  <div class="carousel">
+   <article class="carousel-slide active" aria-hidden="false"><img src="{{ asset('media/yobe-bridge.jpg') }}" alt="Garin Maje bridge in Potiskum, Yobe State" width="720" height="540" fetchpriority="high"><div class="slide-caption"><small>Infrastructure · Potiskum</small><strong>Connecting communities</strong><span>Garin Maje bridge, Yobe State</span></div></article>
+   <article class="carousel-slide" aria-hidden="true"><img src="{{ asset('media/yobe-library.jpg') }}" alt="Yobe State Library Board Complex in Damaturu" width="1012" height="770" loading="lazy"><div class="slide-caption"><small>Public facilities · Damaturu</small><strong>Spaces for learning</strong><span>Yobe State Library Complex</span></div></article>
+   <article class="carousel-slide" aria-hidden="true"><img src="{{ asset('media/yobe-education.jpg') }}" alt="Entrance of Yobe State University" width="1080" height="810" loading="lazy"><div class="slide-caption"><small>Education · Damaturu</small><strong>Investing in opportunity</strong><span>Yobe State University</span></div></article>
   </div>
-  <div class="hero-visual">
-    <div class="photo-flag">REAL PLACES • YOBE STATE</div>
-    <div class="slide-window" data-carousel aria-roledescription="carousel" aria-label="Yobe State public infrastructure photographs">
-      <article class="carousel-slide active" aria-hidden="false">
-        <img src="{{ asset('media/yobe-bridge.jpg') }}" alt="A bridge at Garin Maje in Potiskum, Yobe State" width="720" height="540" fetchpriority="high">
-        <div class="slide-info"><span>Infrastructure • Potiskum</span><strong>Connecting communities through public infrastructure</strong><small>Photograph: Garin Maje bridge. Mamman AA / Wikimedia Commons, CC BY-SA 4.0.</small></div>
-      </article>
-      <article class="carousel-slide" aria-hidden="true">
-        <img src="{{ asset('media/yobe-library.jpg') }}" alt="Yobe State Library Board Complex in Damaturu" width="1012" height="770" loading="lazy">
-        <div class="slide-info"><span>Education & community infrastructure</span><strong>Spaces that support knowledge, learning and opportunity</strong><small>Photograph: Yobe State Library Board Complex. Useendk / Wikimedia Commons, CC BY-SA 4.0.</small></div>
-      </article>
-      <article class="carousel-slide" aria-hidden="true">
-        <img src="{{ asset('media/yobe-education.jpg') }}" alt="Entrance gate at Yobe State University, Damaturu" width="1080" height="810" loading="lazy">
-        <div class="slide-info"><span>Education • Damaturu</span><strong>Documenting the places shaping the future</strong><small>Photograph: Yobe State University entrance. Musaddam Idriss / Wikimedia Commons, CC BY-SA.</small></div>
-      </article>
-      <div class="carousel-controls"><div class="carousel-dots" role="tablist" aria-label="Choose photograph">
-        <button class="carousel-dot active" type="button" aria-label="Photo 1: Garin Maje bridge" aria-selected="true" data-slide="0"></button>
-        <button class="carousel-dot" type="button" aria-label="Photo 2: Yobe State Library" aria-selected="false" data-slide="1"></button>
-        <button class="carousel-dot" type="button" aria-label="Photo 3: Yobe State University" aria-selected="false" data-slide="2"></button>
-      </div><div class="carousel-arrows"><button class="carousel-arrow" type="button" data-slide-prev aria-label="Previous photograph">‹</button><button class="carousel-arrow" type="button" data-slide-next aria-label="Next photograph">›</button></div></div>
-    </div>
+  <div class="carousel-bottom">
+   <div class="carousel-dots" role="tablist" aria-label="Select infrastructure photo"><button class="carousel-dot active" type="button" data-slide="0" aria-label="Garin Maje bridge" aria-selected="true"></button><button class="carousel-dot" type="button" data-slide="1" aria-label="Yobe State Library" aria-selected="false"></button><button class="carousel-dot" type="button" data-slide="2" aria-label="Yobe State University" aria-selected="false"></button></div>
+   <div class="carousel-buttons"><button type="button" data-slide-prev aria-label="Previous photo"><i class="fa-solid fa-chevron-left" aria-hidden="true"></i></button><button type="button" data-slide-next aria-label="Next photo"><i class="fa-solid fa-chevron-right" aria-hidden="true"></i></button></div>
   </div>
+ </div>
 </div></section>
-<section class="stat-strip" aria-label="Initial platform coverage"><div class="container stat-grid">
-  <div class="stat"><b>17</b><span>Yobe local government areas</span></div>
-  <div class="stat"><b>34</b><span>Planned civic intelligence focal persons</span></div>
-  <div class="stat"><b>3</b><span>Role-based user workspaces</span></div>
+<section class="scope" aria-label="Platform scope"><div class="shell scope-grid">
+ <div class="scope-stat"><span class="symbol"><img class="sicon" src="{{ asset('vendor/lucide/map-pinned.svg') }}" alt="" aria-hidden="true"></span><div><b>17</b><small>Local government areas</small></div></div>
+ <div class="scope-stat"><span class="symbol"><img class="sicon" src="{{ asset('vendor/lucide/users-round.svg') }}" alt="" aria-hidden="true"></span><div><b>34</b><small>Planned focal persons</small></div></div>
+ <div class="scope-stat"><span class="symbol"><img class="sicon" src="{{ asset('vendor/lucide/clipboard-check.svg') }}" alt="" aria-hidden="true"></span><div><b>08</b><small>Initial monitoring sectors</small></div></div>
+ <div class="scope-stat"><span class="symbol"><img class="sicon" src="{{ asset('vendor/lucide/shield-check.svg') }}" alt="" aria-hidden="true"></span><div><b>03</b><small>Operational user roles</small></div></div>
 </div></section>
-<section class="section" id="features"><div class="container">
-  <span class="eyebrow">One platform. Meaningful action.</span><h2>From observations to<br>verified civic intelligence.</h2>
-  <p class="section-sub">A complete reporting, monitoring and accountability workspace designed around the realities of community fieldwork, independent verification and informed decision-making.</p>
-  <div class="feature-grid">
-    <article class="feature"><span class="feature-icon" aria-hidden="true">▤</span><h3>Structured field reporting</h3><p>Capture public projects and civic issues with location, sector, observations, photographs and follow-up actions in one guided workflow.</p></article>
-    <article class="feature"><span class="feature-icon" aria-hidden="true">◎</span><h3>Interactive GIS mapping</h3><p>Explore verified geographic reports by LGA, community, sector, observation date and project status.</p></article>
-    <article class="feature"><span class="feature-icon" aria-hidden="true">✓</span><h3>Evidence-led verification</h3><p>Review submissions, request clarification, approve or reject reports and preserve a traceable decision history.</p></article>
-    <article class="feature"><span class="feature-icon" aria-hidden="true">↻</span><h3>Offline-capable fieldwork</h3><p>Save drafts on mobile devices, queue submissions when connectivity is poor, and synchronize after reconnection.</p></article>
-    <article class="feature"><span class="feature-icon" aria-hidden="true">▥</span><h3>Insights and dashboards</h3><p>Compare reporting trends across 17 LGAs with configurable filters, sector indicators and exportable summaries.</p></article>
-    <article class="feature"><span class="feature-icon" aria-hidden="true">♧</span><h3>Protected organizational data</h3><p>Role-based access, secure evidence storage and auditability help keep operational information with authorized RAWYOD users.</p></article>
-  </div>
+<section class="section" id="about"><div class="shell focus-grid">
+ <div class="focus-content">
+  <span class="eyebrow">Purpose-built for accountability</span>
+  <h2 class="section-title">From observations to informed action.</h2>
+  <p>Arewa Civic Tracker creates a consistent process for documenting community observations and public projects, reviewing supporting evidence, and producing reliable monitoring insights.</p>
+  <p>Field and monitoring teams can work from a common system, while authorized reviewers control which observations are accepted and how follow-up activity is recorded.</p>
+  <a class="link" href="#how-it-works">See the reporting process <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
+ </div>
+ <div class="focus-cards" id="capabilities">
+  <article class="focus-card"><div class="focus-icon"><img class="sicon sicon-lg" src="{{ asset('vendor/lucide/notebook-pen.svg') }}" alt="" aria-hidden="true"></div><h3>Structured reporting</h3><p>Consistent forms for community observations and project progress.</p></article>
+  <article class="focus-card"><div class="focus-icon"><img class="sicon sicon-lg" src="{{ asset('vendor/lucide/map-pin.svg') }}" alt="" aria-hidden="true"></div><h3>Geographic intelligence</h3><p>Place reports on the map using real submitted coordinates.</p></article>
+  <article class="focus-card"><div class="focus-icon"><img class="sicon sicon-lg" src="{{ asset('vendor/lucide/file-check-2.svg') }}" alt="" aria-hidden="true"></div><h3>Evidence verification</h3><p>Review, clarify, approve and track each submitted report.</p></article>
+  <article class="focus-card"><div class="focus-icon"><img class="sicon sicon-lg" src="{{ asset('vendor/lucide/chart-no-axes-combined.svg') }}" alt="" aria-hidden="true"></div><h3>Monitoring insights</h3><p>See trends, sector summaries and follow-up priorities.</p></article>
+ </div>
 </div></section>
-<section class="section dark-section" id="how-it-works"><div class="container">
-  <span class="eyebrow">The monitoring journey</span><h2>Every report follows<br>a clear path to accountability.</h2>
-  <p class="section-sub">A transparent workflow connects community observations with responsible verification, oversight and documented follow-up.</p>
-  <div class="steps">
-    <article class="step"><b>01</b><h3>Observe & document</h3><p>Authorized focal persons record project information or service-delivery issues, including supporting evidence.</p></article>
-    <article class="step"><b>02</b><h3>Submit securely</h3><p>Reports are saved, submitted and tracked with a unique reference, even after periods of poor connectivity.</p></article>
-    <article class="step"><b>03</b><h3>Verify the evidence</h3><p>RAWYOD reviewers validate submitted information and request clarification whenever necessary.</p></article>
-    <article class="step"><b>04</b><h3>Track & act</h3><p>Approved information supports dashboards, geographic monitoring, structured follow-ups and reporting.</p></article>
-  </div>
+<section class="feature-band" id="coverage"><div class="shell feature-band-grid">
+ <div><span class="eyebrow">Real geographic context</span><h2 class="section-title">One state. Seventeen local government areas.</h2><p>The platform uses open administrative boundary data to support location-aware civic monitoring throughout Yobe. Reports are mapped only when their authorized records include verified-access coordinates.</p><a class="btn white" href="{{ route('map.index') }}">Explore the GIS workspace <i class="fa-solid fa-arrow-up-right-from-square" aria-hidden="true"></i></a></div>
+ <div class="feature-map" aria-label="Geographic monitoring features">
+  <div class="map-tile"><img class="sicon sicon-lg sicon-white" src="{{ asset('vendor/lucide/map-pinned.svg') }}" alt="" aria-hidden="true"><b>17 LGAs</b><small>Administrative boundary layer</small></div>
+  <div class="map-tile"><img class="sicon sicon-lg sicon-white" src="{{ asset('vendor/lucide/route.svg') }}" alt="" aria-hidden="true"><b>GPS</b><small>Location-based observations</small></div>
+  <div class="map-tile"><img class="sicon sicon-lg sicon-white" src="{{ asset('vendor/lucide/chart-column.svg') }}" alt="" aria-hidden="true"><b>Trends</b><small>Area and sector breakdowns</small></div>
+  <div class="map-tile"><img class="sicon sicon-lg sicon-white" src="{{ asset('vendor/lucide/shield-check.svg') }}" alt="" aria-hidden="true"><b>Access</b><small>Authorized record visibility</small></div>
+ </div>
 </div></section>
-<section class="section" id="infrastructure"><div class="container">
-  <span class="eyebrow">Places and infrastructure in Yobe</span><h2>Understand the communities<br>behind the data.</h2>
-  <p class="section-sub">These authentic photos are included for geographic and infrastructure context only. They are not Arewa Civic Tracker submissions, investigation results or RAWYOD-verified project assessments.</p>
-  <div class="project-grid">
-    <article class="project"><img src="{{ asset('media/yobe-bridge.jpg') }}" alt="Garin Maje bridge near Potiskum" loading="lazy"><div class="body"><span class="label">Transport infrastructure</span><h3>Garin Maje bridge</h3><p>Real location in the Potiskum area, illustrating the infrastructure categories civic focal persons may document.</p><span class="credit"><a href="https://commons.wikimedia.org/wiki/File:Garin_maje_New_bridge.jpg" target="_blank" rel="noopener">Mamman AA · Wikimedia Commons · CC BY-SA 4.0</a></span></div></article>
-    <article class="project"><img src="{{ asset('media/yobe-library.jpg') }}" alt="Yobe State Library Board building" loading="lazy"><div class="body"><span class="label">Educational infrastructure</span><h3>Yobe State Library Complex</h3><p>A photographed public institution in Damaturu, featured as an example of infrastructure and service access.</p><span class="credit"><a href="https://commons.wikimedia.org/wiki/File:Yobe_state_library_Board_Complex.jpg" target="_blank" rel="noopener">Useendk · Wikimedia Commons · CC BY-SA 4.0</a></span></div></article>
-    <article class="project"><img src="{{ asset('media/yobe-education.jpg') }}" alt="Yobe State University entrance" loading="lazy"><div class="body"><span class="label">Higher education</span><h3>Yobe State University</h3><p>Damaturu campus entrance, highlighting how geographic reporting can place institutions within their communities.</p><span class="credit"><a href="https://commons.wikimedia.org/wiki/File:Yobe_State_University.jpg" target="_blank" rel="noopener">Musaddam Idriss · Wikimedia Commons · CC BY-SA</a></span></div></article>
-  </div>
+<section class="section steps" id="how-it-works"><div class="shell">
+ <div class="section-header"><div><span class="eyebrow">Simple, accountable workflow</span><h2 class="section-title">How reporting works</h2></div><p class="section-lead">From the first observation to a documented outcome, every stage has an identifiable owner and a traceable record.</p></div>
+ <div class="steps-grid">
+  <article class="step"><div class="step-top"><span>STEP 01</span><img class="sicon" src="{{ asset('vendor/lucide/camera.svg') }}" alt="" aria-hidden="true"></div><h3>Document</h3><p>A focal person records the issue or project, its location, description and supporting evidence.</p></article>
+  <article class="step"><div class="step-top"><span>STEP 02</span><img class="sicon" src="{{ asset('vendor/lucide/clipboard-check.svg') }}" alt="" aria-hidden="true"></div><h3>Submit</h3><p>The system creates a reference and maintains a record of the initial submission.</p></article>
+  <article class="step"><div class="step-top"><span>STEP 03</span><img class="sicon" src="{{ asset('vendor/lucide/file-search.svg') }}" alt="" aria-hidden="true"></div><h3>Verify</h3><p>Authorized reviewers examine the evidence and record decisions or clarification requests.</p></article>
+  <article class="step"><div class="step-top"><span>STEP 04</span><img class="sicon" src="{{ asset('vendor/lucide/chart-column.svg') }}" alt="" aria-hidden="true"></div><h3>Follow up</h3><p>Monitoring teams track progress through dashboards and documented updates.</p></article>
+ </div>
 </div></section>
-<section class="section"><div class="container"><div class="cta-panel">
-  <div><span class="eyebrow">For authorized field and monitoring personnel</span><h2>Ready to document what matters?</h2><p>Access your reporting workspace to submit observations, review evidence, follow projects or explore the monitoring map.</p></div>
-  <div><a href="{{ route('login') }}" class="btn btn-lg">Open secure portal <span aria-hidden="true">↗</span></a></div>
-</div></div></section>
+<section class="section" id="yobe"><div class="shell">
+ <div class="section-header"><div><span class="eyebrow">Local context</span><h2 class="section-title">Yobe in focus</h2></div><p class="section-lead">These authentic photographs are geographical illustrations. They are not RAWYOD-submitted cases or verified assessments of the pictured projects.</p></div>
+ <div class="photos-grid">
+  <article class="photo-card"><img loading="lazy" src="{{ asset('media/yobe-bridge.jpg') }}" alt="Garin Maje bridge in Potiskum" width="720" height="540"><div class="photo-card-body"><span class="eyebrow">Infrastructure</span><h3>Garin Maje bridge</h3><p>Infrastructure and connectivity are important dimensions of public-service monitoring.</p><small>Photo: <a href="https://commons.wikimedia.org/wiki/File:Garin_maje_New_bridge.jpg" target="_blank" rel="noopener noreferrer">Mamman AA / Wikimedia Commons</a>, CC BY-SA 4.0.</small></div></article>
+  <article class="photo-card"><img loading="lazy" src="{{ asset('media/yobe-library.jpg') }}" alt="Yobe State Library Board Complex" width="1012" height="770"><div class="photo-card-body"><span class="eyebrow">Education</span><h3>Yobe State Library Complex</h3><p>Public learning spaces illustrate institutions and services across the state.</p><small>Photo: <a href="https://commons.wikimedia.org/wiki/File:Yobe_state_library_Board_Complex.jpg" target="_blank" rel="noopener noreferrer">Useendk / Wikimedia Commons</a>, CC BY-SA 4.0.</small></div></article>
+  <article class="photo-card"><img loading="lazy" src="{{ asset('media/yobe-education.jpg') }}" alt="Yobe State University campus entrance" width="1080" height="810"><div class="photo-card-body"><span class="eyebrow">Higher education</span><h3>Yobe State University</h3><p>Regional institutions are part of the geographical landscape captured by civic monitoring.</p><small>Photo: <a href="https://commons.wikimedia.org/wiki/File:Yobe_State_University.jpg" target="_blank" rel="noopener noreferrer">Musaddam Idriss / Wikimedia Commons</a>, CC BY-SA.</small></div></article>
+ </div>
+</div></section>
+<section class="section roles" id="workspaces"><div class="shell">
+ <div class="section-header"><div><span class="eyebrow">Purpose-built workspaces</span><h2 class="section-title">Built around the people using it</h2></div><p class="section-lead">Dedicated access for approved field focal persons, MEAL reviewers and administrators. Individual permissions determine which reports and actions are available.</p></div>
+ <div class="roles-grid">
+  <article class="role"><div class="role-icon"><img class="sicon sicon-lg" src="{{ asset('vendor/lucide/users-round.svg') }}" alt="" aria-hidden="true"></div><h3>Field focal persons</h3><p>Capture observations, manage submissions and respond to requests for clarification.</p><a class="link" href="{{ route('cases.create') }}">Field workspace <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a></article>
+  <article class="role"><div class="role-icon"><img class="sicon sicon-lg" src="{{ asset('vendor/lucide/file-search.svg') }}" alt="" aria-hidden="true"></div><h3>Review and MEAL teams</h3><p>Assess report quality, evidence and progress through a documented review process.</p><a class="link" href="{{ route('cases.index') }}">Review reports <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a></article>
+  <article class="role"><div class="role-icon"><img class="sicon sicon-lg" src="{{ asset('vendor/lucide/chart-no-axes-combined.svg') }}" alt="" aria-hidden="true"></div><h3>Administrators</h3><p>Manage users, monitor organizational activity and explore reports through data-driven summaries.</p><a class="link" href="{{ route('dashboard') }}">Monitoring dashboard <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a></article>
+ </div>
+</div></section>
+<section class="cta"><div class="shell cta-inner"><div><span class="eyebrow">Arewa Civic Tracker</span><h2>Turn field observations into clearer decisions.</h2><p>Sign in to your authorized workspace to document issues, review evidence and monitor activities across Yobe State.</p></div><a class="btn white" href="{{ route('login') }}">Open staff portal <i class="fa-solid fa-arrow-up-right-from-square" aria-hidden="true"></i></a></div></section>
 </main>
-<footer class="site-footer"><div class="container">
-  <div class="footer-grid"><div><a href="{{ url('/') }}" class="brand"><span class="brand-mark">A</span><span>Arewa Civic Tracker<small>Civic monitoring for stronger communities</small></span></a><p>An initiative of Roadmap for Women and Youth Development (RAWYOD), under the VOICES TO VOTES project, supported by the Nigeria Youth Futures Fund.</p></div><div class="footer-links"><a href="#features">Features</a><a href="#how-it-works">How it works</a><a href="{{ route('login') }}">Staff portal</a></div></div>
-  <div class="footer-bottom"><span>© {{ date('Y') }} Arewa Civic Tracker. All rights reserved.</span><span>Real infrastructure photos are credited to their Wikimedia Commons creators.</span></div>
+<footer class="footer"><div class="shell">
+ <div class="footer-top"><div><a class="wordmark" href="{{ route('home') }}"><strong>arewa.</strong><small>Civic Tracker</small></a><p class="footer-about">A civic monitoring initiative for Roadmap for Women and Youth Development (RAWYOD), under VOICES TO VOTES. Implemented by InnoBytes Lab LTD.</p></div><nav class="footer-links" aria-label="Footer"><a href="#about">About</a><a href="#capabilities">Features</a><a href="#how-it-works">Reporting process</a><a href="#yobe">Yobe in focus</a><a href="{{ route('login') }}">Staff portal</a></nav></div>
+ <div class="footer-bottom"><span>© {{ date('Y') }} Arewa Civic Tracker. All rights reserved.</span><span>Infrastructure photography: Wikimedia Commons creators · Boundary data: geoBoundaries.</span></div>
 </div></footer>
-<div class="toast-stack" aria-live="polite" id="toast-stack"></div>
+<div class="toast-stack" id="toast-stack" aria-live="polite"></div>
 </body></html>

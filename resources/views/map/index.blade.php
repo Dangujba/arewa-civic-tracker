@@ -61,7 +61,7 @@
         const pin=L.marker([lat,lon],{icon:markerIcon});const box=document.createElement('div');
         const title=document.createElement('div');title.className='map-popup-title';title.textContent=feature.properties.title||'Field report';
         const meta=document.createElement('p');meta.className='map-popup-meta';meta.textContent=[feature.properties.reference,feature.properties.lga,feature.properties.verification_status].filter(Boolean).join(' • ');
-        const link=document.createElement('a');link.className='map-popup-link';link.textContent='Open report ↗';link.href=feature.properties.url||'#';box.append(title,meta,link);pin.bindPopup(box).addTo(markers);points.push([lat,lon]);
+        const link=document.createElement('a');link.className='map-popup-link';link.textContent='Open report';link.href=feature.properties.url||'#';box.append(title,meta,link);pin.bindPopup(box).addTo(markers);points.push([lat,lon]);
       }
       msg.textContent=points.length+' authorized report location'+(points.length===1?'':'s')+' available. Reports without GPS remain in the reports list.';
       if(points.length&&fields.lga.value==='')map.fitBounds(points,{maxZoom:11,padding:[40,40]});

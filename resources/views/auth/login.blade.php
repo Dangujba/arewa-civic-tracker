@@ -8,7 +8,7 @@
       <label for="email">Email address</label><input id="email" type="email" name="email" required autocomplete="username" value="{{ old('email') }}" placeholder="you@organization.org">
       <label for="password">Password</label><input id="password" type="password" name="password" required autocomplete="current-password" placeholder="Enter your password">
       <p data-form-status hidden role="status" style="font-size:12px;color:#577564"></p>
-      <button type="submit" class="btn">Secure sign in <span aria-hidden="true">→</span></button>
+      <button type="submit" class="btn">Secure sign in <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></button>
     </form>
     <p style="font-size:12px;color:#738377;margin-top:23px">Having trouble signing in? Contact your authorized RAWYOD administrator.</p>
   </div>
