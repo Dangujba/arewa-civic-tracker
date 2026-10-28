@@ -1,77 +1,73 @@
 @extends('layouts.app')
 @section('title','GIS Intelligence Map | Arewa Civic Tracker')
+@section('section_heading','GIS Intelligence')
 @push('head')
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyo4CCd8L7f0myA=" crossorigin="">
-<style>
-.geo-heading{display:flex;justify-content:space-between;align-items:flex-end;gap:20px;margin-bottom:25px}.geo-heading h1{margin:4px 0 12px}.geo-heading .muted{max-width:600px;font-size:13px;line-height:1.7}.geo-surface{background:#fff;border:1px solid #dfe8e0;border-radius:16px;overflow:hidden}.geo-tools{padding:24px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:15px;border-bottom:1px solid #e2ece2}.geo-tools label{display:block;font-size:12px;font-weight:800;margin-bottom:8px;color:#38584b}.geo-tools select{width:100%;border:1px solid #cbd9ce;border-radius:10px;padding:11px 13px;background:white;color:#193b2d;outline:none}.geo-tools select:focus{border-color:#2a7750}.geo-map-wrap{position:relative}#map{height:620px;min-height:380px;background:#e5eee6}.geo-status{display:flex;align-items:center;justify-content:space-between;gap:15px;padding:15px 23px;font-size:12px;color:#496255;border-top:1px solid #e2ece2}.geo-legend{display:flex;align-items:center;gap:15px;flex-wrap:wrap}.legend-icon{display:inline-block;width:11px;height:11px;border-radius:3px;background:#1d6a49;margin-right:5px}.legend-icon.marker{border-radius:100%;background:#d0a14f}.map-action{border:0;color:#205d43;background:#e8f3e8;border-radius:8px;padding:10px 12px;font-size:11px;font-weight:800;cursor:pointer}.leaflet-container{font-family:Inter,"Segoe UI",sans-serif}.map-popup-title{font-weight:850;font-size:14px;color:#1d3e2e}.map-popup-meta{margin:6px 0;font-size:12px;color:#4a6657}.map-popup-link{font-size:12px;font-weight:800;color:#20704b}.geo-foot{font-size:11px;color:#748a79;margin-top:13px;line-height:1.6}.geo-foot a{text-decoration:underline}.geo-pill{font-weight:800;color:#1c6646;background:#e9f4e8;border-radius:30px;padding:8px 12px;font-size:12px}
-@media(max-width:700px){.geo-heading{display:block}.geo-heading .btn{margin-top:12px}.geo-tools{grid-template-columns:1fr;padding:17px}.geo-status{display:block;line-height:2}.geo-legend{margin-top:6px}#map{height:480px}}
-</style>
+<link rel="stylesheet" href="{{ asset('css/act-map.css') }}">
 @endpush
 @section('content')
 <section class="geo-heading">
-  <div><span class="eyebrow">GEOGRAPHIC INTELLIGENCE</span><h1>Yobe State Monitoring Map</h1><p class="muted">Explore local government boundaries and reporting locations. Individual markers appear only for records with authorized GPS coordinates; no locations are invented.</p></div>
-  <a class="btn" href="{{ route('cases.create') }}">+ Submit field report</a>
+  <div><span class="eyebrow">GEOSPATIAL INTELLIGENCE</span><h1>Yobe Monitoring Intelligence Map</h1><p class="muted">Explore administrative boundaries and location-based civic observations, with records restricted to your assigned role.</p></div>
+  <div class="geo-heading-actions"><a href="{{ route('cases.index') }}" class="geo-btn geo-light"><i class="fa-solid fa-list" aria-hidden="true"></i> Reports</a>@can('create',App\Models\CivicCase::class)<a href="{{ route('cases.create') }}" class="geo-btn"><i class="fa-solid fa-plus" aria-hidden="true"></i> New report</a>@endcan</div>
 </section>
-<div class="geo-surface">
- <div class="geo-tools">
-  <div><label for="lga">Local government area</label><select id="lga"><option value="">All 17 LGAs</option>@foreach($lgas as $l)<option value="{{ $l->id }}">{{ $l->name }}</option>@endforeach</select></div>
-  <div><label for="sector">Monitoring sector</label><select id="sector"><option value="">All sectors</option>@foreach($sectors as $s)<option value="{{ $s->id }}">{{ $s->name }}</option>@endforeach</select></div>
-  <div><label for="status">Review status</label><select id="status"><option value="">All verification states</option>@foreach(['submitted','under_review','clarification_requested','verified','approved','rejected'] as $s)<option value="{{ $s }}">{{ ucwords(str_replace('_',' ',$s)) }}</option>@endforeach</select></div>
- </div>
- <div class="geo-map-wrap"><div id="map" role="region" aria-label="Map of 17 Yobe LGAs and permitted project monitoring locations"></div></div>
- <div class="geo-status"><span id="map-summary" role="status" aria-live="polite"><span class="spin" aria-hidden="true"></span> Loading authorized map layers…</span><span class="geo-legend"><span><i class="legend-icon"></i> LGA boundaries</span><span><i class="legend-icon marker"></i> Field report</span></span></div>
+<div class="geo-summary" aria-label="Map monitoring summary">
+  <div><span>Geographic coverage</span><strong>17 <small>LGAs</small></strong><i class="fa-solid fa-map" aria-hidden="true"></i></div>
+  <div><span>Matched locations</span><strong id="geo-matched">0</strong><i class="fa-solid fa-location-dot" aria-hidden="true"></i></div>
+  <div><span>Approved records</span><strong id="geo-approved">0</strong><i class="fa-solid fa-circle-check" aria-hidden="true"></i></div>
+  <div><span>Records within map</span><strong id="geo-visible">0</strong><i class="fa-solid fa-layer-group" aria-hidden="true"></i></div>
 </div>
-<p class="geo-foot">Administrative boundaries: <a href="https://www.geoboundaries.org/" target="_blank" rel="noopener noreferrer">geoBoundaries / William & Mary</a>, Nigeria ADM2, CC BY 4.0. Tiles: © OpenStreetMap contributors. Geographic boundaries are reference data; their inclusion is not a RAWYOD project verification.</p>
+<section class="geo-filter-panel" aria-label="GIS filters">
+  <div class="geo-filter-heading"><strong><i class="fa-solid fa-sliders" aria-hidden="true"></i> Explore and filter</strong><button id="geo-clear" type="button" class="geo-link"><i class="fa-solid fa-rotate-left" aria-hidden="true"></i> Reset filters</button></div>
+  <form id="geo-filters">
+    <label><span>Search case or community</span><input id="geo-search" name="q" maxlength="120" placeholder="Reference, report, community"></label>
+    <label><span>Local government</span><select id="geo-lga" name="lga_id"><option value="">All 17 LGAs</option>@foreach($lgas as $lga)<option value="{{ $lga->id }}">{{ $lga->name }}</option>@endforeach</select></label>
+    <label><span>Sector</span><select id="geo-sector" name="sector_id"><option value="">All sectors</option>@foreach($sectors as $sector)<option value="{{ $sector->id }}">{{ $sector->name }}</option>@endforeach</select></label>
+    <label><span>Verification</span><select id="geo-status" name="verification_status"><option value="">All status levels</option>@foreach(['submitted','under_review','clarification_requested','verified','approved','rejected'] as $s)<option value="{{ $s }}">{{ ucwords(str_replace('_',' ',$s)) }}</option>@endforeach</select></label>
+    <label><span>Report type</span><select id="geo-type" name="type"><option value="">All types</option><option value="public_project">Public project</option><option value="governance_issue">Governance issue</option></select></label>
+    <label><span>Project progress</span><select id="geo-progress" name="progress_status"><option value="">All progress states</option>@foreach(['observed','not_started','ongoing','stalled','completed','resolved','other'] as $s)<option value="{{ $s }}">{{ ucwords(str_replace('_',' ',$s)) }}</option>@endforeach</select></label>
+    <label><span>Date from</span><input id="geo-from" name="date_from" type="date" max="{{ now()->toDateString() }}"></label>
+    <label><span>Date to</span><input id="geo-to" name="date_to" type="date" max="{{ now()->toDateString() }}"></label>
+    <button class="geo-btn" type="submit" id="geo-apply"><i class="fa-solid fa-filter" aria-hidden="true"></i> Apply filters</button>
+  </form>
+</section>
+<section class="geo-workspace" aria-label="Interactive map explorer">
+  <aside class="geo-explorer">
+    <header><small>MAP EXPLORER</small><strong>Spatial intelligence</strong></header>
+    <nav class="geo-tabs" role="tablist" aria-label="Explorer tabs">
+      <button type="button" role="tab" aria-selected="true" class="active" data-geo-tab="reports"><i class="fa-regular fa-file-lines" aria-hidden="true"></i> Reports</button>
+      <button type="button" role="tab" aria-selected="false" data-geo-tab="lgas"><i class="fa-solid fa-map" aria-hidden="true"></i> LGAs</button>
+      <button type="button" role="tab" aria-selected="false" data-geo-tab="layers"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Layers</button>
+    </nav>
+    <div class="geo-tab-panel" data-geo-panel="reports"><h3>Filtered records <small id="geo-count">0</small></h3><div id="geo-report-list" role="list" class="geo-scroll"><p class="geo-empty">Loading authorized monitoring records…</p></div></div>
+    <div class="geo-tab-panel" data-geo-panel="lgas" hidden><h3>Local government areas <small>17</small></h3><div id="geo-lga-list" role="list" class="geo-scroll"><p class="geo-empty">Loading boundaries…</p></div></div>
+    <div class="geo-tab-panel" data-geo-panel="layers" hidden><h3>Map visualization</h3>
+      <label class="geo-check"><input type="checkbox" id="geo-show-boundaries" checked><span>Administrative boundaries<small>Real 17 LGA polygons</small></span></label>
+      <label class="geo-check"><input type="checkbox" id="geo-show-labels" checked><span>LGA names<small>Visible when zoomed in</small></span></label>
+      <label class="geo-check"><input type="checkbox" id="geo-group-pins" checked><span>Cluster nearby reports<small>Group overlapping observations</small></span></label>
+      <label class="geo-check"><input type="checkbox" id="geo-heat"><span>Location density<small>Relative concentration of authorized reports</small></span></label>
+      <label class="geo-basemap"><span>Base map</span><select id="geo-base"><option value="street">OpenStreetMap streets</option><option value="light">CARTO light</option><option value="dark">CARTO dark</option></select></label>
+      <p class="geo-tip">Map data can include sensitive location information. Export only when authorized.</p>
+    </div>
+    <footer><i class="fa-solid fa-lock" aria-hidden="true"></i> Role-restricted reports</footer>
+  </aside>
+  <div class="geo-map-holder" id="geo-map-holder">
+    <div id="map" data-feed="{{ route('map.data') }}" data-boundaries="{{ asset('geo/yobe-lgas.geojson') }}" role="application" aria-label="Yobe civic monitoring interactive map"></div>
+    <div class="geo-toolbar" role="toolbar" aria-label="Map tools">
+      <button type="button" id="geo-home" title="Fit all LGAs" aria-label="Fit all local governments"><i class="fa-solid fa-expand" aria-hidden="true"></i></button>
+      <button type="button" id="geo-locate" title="Locate me" aria-label="Locate my device"><i class="fa-solid fa-location-crosshairs" aria-hidden="true"></i></button>
+      <button type="button" id="geo-measure" title="Distance measure" aria-pressed="false" aria-label="Measure distance"><i class="fa-solid fa-ruler" aria-hidden="true"></i></button>
+      <button type="button" id="geo-fullscreen" title="Fullscreen" aria-label="Fullscreen map"><i class="fa-solid fa-up-right-and-down-left-from-center" aria-hidden="true"></i></button>
+      <button type="button" id="geo-share" title="Copy filtered link" aria-label="Copy filtered map link"><i class="fa-solid fa-link" aria-hidden="true"></i></button>
+      <button type="button" id="geo-csv" title="Export authorized CSV" aria-label="Export authorized CSV"><i class="fa-solid fa-file-csv" aria-hidden="true"></i></button>
+      <button type="button" id="geo-geojson" title="Export authorized GeoJSON" aria-label="Export authorized GeoJSON"><i class="fa-solid fa-file-code" aria-hidden="true"></i></button>
+    </div>
+    <div class="geo-legend"><b>VERIFICATION</b><span><i style="--status:#c19a51"></i>Submitted</span><span><i style="--status:#3387a8"></i>In review</span><span><i style="--status:#207954"></i>Approved</span><span><i style="--status:#ba5956"></i>Needs attention</span></div>
+    <div class="geo-message"><span id="geo-message" role="status" aria-live="polite">Preparing map…</span><span id="geo-coords">Yobe State</span></div>
+  </div>
+</section>
+<p class="geo-attribution">Boundaries: <a href="https://www.geoboundaries.org/" target="_blank" rel="noopener noreferrer">geoBoundaries / William & Mary</a>, CC BY 4.0. Tiles: OpenStreetMap contributors and CARTO. No synthetic report locations are shown. Device location is permission-based and is not stored by these map tools.</p>
 @push('scripts')
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
-<script>
-(()=>{
-  const root=document.getElementById('map'),msg=document.getElementById('map-summary');
-  if(!window.L){msg.textContent='Map library could not be loaded. Check your connection.';return}
-  const map=L.map(root,{zoomControl:true,scrollWheelZoom:false}).setView([12,11.45],7);
-  const basemap=L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© OpenStreetMap contributors',maxZoom:18}).addTo(map);
-  const polygons=L.layerGroup().addTo(map),markers=L.layerGroup().addTo(map);let shapeLayer=null,allBound=null,abortController=null;
-  const fields={lga:document.getElementById('lga'),sector:document.getElementById('sector'),status:document.getElementById('status')};
-  const selectByName=(name)=>[...fields.lga.options].find(o=>o.textContent.trim().toLowerCase()===String(name).trim().toLowerCase());
-  const polygonStyle=f=>({color:'#276347',weight:1.5,opacity:.95,fillColor:'#4d906b',fillOpacity:.12});
-  const createLayers=geo=>{
-    shapeLayer=L.geoJSON(geo,{style:polygonStyle,onEachFeature:(f,layer)=>{
-      const name=f.properties.name;
-      const content=document.createElement('div');content.className='map-popup-title';content.textContent=name+' LGA';
-      const btn=document.createElement('button');btn.type='button';btn.className='map-action';btn.textContent='Filter this LGA';btn.addEventListener('click',()=>{const option=selectByName(name);if(option){fields.lga.value=option.value;render();map.fitBounds(layer.getBounds(),{padding:[20,20]})}});const wrap=document.createElement('div');wrap.append(content,document.createElement('br'),btn);layer.bindPopup(wrap);
-      layer.on('mouseover',()=>layer.setStyle({fillOpacity:.27,weight:2.4}));layer.on('mouseout',()=>shapeLayer.resetStyle(layer));
-      layer.on('click',()=>{layer.openPopup()});
-    }}).addTo(polygons);
-    allBound=shapeLayer.getBounds();if(allBound.isValid())map.fitBounds(allBound,{padding:[13,13],maxZoom:9});
-  };
-  const markerIcon=L.divIcon({className:'',html:'<span style="display:block;width:15px;height:15px;background:#d4ab60;border:3px solid #fff;border-radius:50%;box-shadow:0 0 0 2px #174c37,0 1px 5px #3455"></span>',iconSize:[17,17],iconAnchor:[8,8]});
-  const render=async()=>{
-    if(abortController)abortController.abort();abortController=new AbortController();
-    const u=new URL(@json(route('map.data')));
-    for(const [field,param] of [['lga','lga_id'],['sector','sector_id'],['status','verification_status']])if(fields[field].value)u.searchParams.set(param,fields[field].value);
-    msg.innerHTML='<span class="spin" aria-hidden="true"></span> Updating authorized report locations…';
-    markers.clearLayers();
-    try{
-      const r=await fetch(u,{credentials:'same-origin',headers:{Accept:'application/json'},signal:abortController.signal});
-      if(!r.ok)throw new Error('Unable to retrieve monitoring records ('+r.status+').');
-      const collection=await r.json();const points=[];
-      for(const feature of collection.features||[]){
-        if(!feature.geometry||feature.geometry.type!=='Point')continue;
-        const [lon,lat]=feature.geometry.coordinates;if(!Number.isFinite(lon)||!Number.isFinite(lat))continue;
-        const pin=L.marker([lat,lon],{icon:markerIcon});const box=document.createElement('div');
-        const title=document.createElement('div');title.className='map-popup-title';title.textContent=feature.properties.title||'Field report';
-        const meta=document.createElement('p');meta.className='map-popup-meta';meta.textContent=[feature.properties.reference,feature.properties.lga,feature.properties.verification_status].filter(Boolean).join(' • ');
-        const link=document.createElement('a');link.className='map-popup-link';link.textContent='Open report';link.href=feature.properties.url||'#';box.append(title,meta,link);pin.bindPopup(box).addTo(markers);points.push([lat,lon]);
-      }
-      msg.textContent=points.length+' authorized report location'+(points.length===1?'':'s')+' available. Reports without GPS remain in the reports list.';
-      if(points.length&&fields.lga.value==='')map.fitBounds(points,{maxZoom:11,padding:[40,40]});
-    }catch(err){if(err.name==='AbortError')return;msg.textContent=err.message||'Map data is temporarily unavailable.'}
-  };
-  const highlight=()=>{if(!shapeLayer)return;const sel=fields.lga.selectedOptions[0]?.textContent.trim();shapeLayer.eachLayer(layer=>{const active=sel&&fields.lga.value&&layer.feature.properties.name.toLowerCase()===sel.toLowerCase();shapeLayer.resetStyle(layer);if(active){layer.setStyle({fillColor:'#d7af62',fillOpacity:.34,color:'#1b6144',weight:2.5});map.fitBounds(layer.getBounds(),{padding:[30,30]})}});if(!fields.lga.value&&allBound?.isValid())map.fitBounds(allBound,{padding:[15,15]})};
-  for(const select of Object.values(fields))select.addEventListener('change',()=>{highlight();render()});
-  Promise.all([fetch('/geo/yobe-lgas.geojson',{cache:'force-cache'}).then(r=>{if(!r.ok)throw new Error('LGA layer unavailable');return r.json()}),Promise.resolve()]).then(([geo])=>{createLayers(geo);render()}).catch(err=>{msg.textContent=err.message;render()});
-  L.control.layers({'OpenStreetMap':basemap},{'17 LGA boundaries':polygons,'Report locations':markers},{collapsed:true}).addTo(map);
-})();
-</script>
+<script defer src="{{ asset('js/act-map-explorer.js') }}"></script>
 @endpush
 @endsection
