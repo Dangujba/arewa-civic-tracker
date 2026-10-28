@@ -3,6 +3,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\User;
+use App\Models\AdminActivityLog;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Validation\ValidationException;
 class AuthController extends Controller {
@@ -21,7 +22,8 @@ class AuthController extends Controller {
             $r->session()->put('two_factor_pending_id',$id);
             return redirect()->route('two-factor.challenge.form');
         }
+        AdminActivityLog::record($user,'account.login',$user);
         return redirect()->intended($user->must_change_password ? route('account.password.form') : route('dashboard'));
     }
-    public function logout(Request $r){Auth::logout();$r->session()->invalidate();$r->session()->regenerateToken();return redirect('/login');}
+    public function logout(Request $r){if($r->user())AdminActivityLog::record($r->user(),'account.logout',$r->user());Auth::logout();$r->session()->invalidate();$r->session()->regenerateToken();return redirect('/login');}
 }

@@ -14,7 +14,7 @@ class CaseReviewService {
         'approved'=>[], 'rejected'=>[],
     ];
     public function allowedTransitions(User $actor,CivicCase $case):array {
-        if (!$actor->canReview())return [];
+        if (!$actor->canReview() || ($actor->role==='meal' && $case->reviewer_id && (int)$case->reviewer_id !== (int)$actor->id))return [];
         $allowed=self::TRANSITIONS[$case->verification_status]??[];
         return $actor->isAdmin() ? $allowed : array_values(array_diff($allowed,['approved']));
     }
@@ -22,6 +22,7 @@ class CaseReviewService {
         return DB::transaction(function() use($actor,$case,$to,$comment){
             $locked=CivicCase::whereKey($case->id)->lockForUpdate()->firstOrFail();
             $from=$locked->verification_status;
+            if(!$actor->canReview() || ($actor->role==='meal' && $locked->reviewer_id && (int)$locked->reviewer_id !== (int)$actor->id))abort(403,'Report assigned to another reviewer.');
             if(!in_array($to,self::TRANSITIONS[$from]??[],true)){
                 throw ValidationException::withMessages(['status'=>"Transition {$from} to {$to} is not permitted."]);
             }

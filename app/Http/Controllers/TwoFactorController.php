@@ -2,6 +2,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Models\AdminActivityLog;
+use App\Models\OrganizationSetting;
 use Endroid\QrCode\QrCode;
 use Endroid\QrCode\Writer\PngWriter;
 use Illuminate\Http\Request;
@@ -43,6 +45,7 @@ class TwoFactorController extends Controller
         $request->session()->forget('two_factor_pending_id');
         Auth::login($user);
         $request->session()->regenerate();
+        AdminActivityLog::record($user,'account.login_2fa',$user);
         return redirect()->route($user->must_change_password?'account.password.form':'dashboard');
     }
 
@@ -90,6 +93,7 @@ class TwoFactorController extends Controller
             'two_factor_secret'=>$secret,'two_factor_confirmed_at'=>now(),
             'two_factor_recovery_codes'=>array_map(fn($code)=>hash('sha256',$code),$codes)
         ])->save();
+        AdminActivityLog::record($user,'account.mfa_enabled',$user);
         $request->session()->forget(['two_factor_setup_secret','two_factor_setup_at']);
         return redirect()->route('account.password.form')->with('recovery_codes',$codes)->with('message','Two-factor authentication is now enabled.');
     }
@@ -99,8 +103,10 @@ class TwoFactorController extends Controller
         $data=$request->validate(['current_password'=>['required','current_password'],'code'=>['required','string','max:40']]);
         $user=$request->user();
         abort_unless($user->two_factor_confirmed_at,409,'2FA is not enabled.');
+        abort_if(OrganizationSetting::requiresMfa($user->role),403,'Your organization requires two-factor authentication.');
         if(!$this->validateCode($user,$data['code']))throw ValidationException::withMessages(['code'=>'Authentication or recovery code not accepted.']);
         $user->forceFill(['two_factor_secret'=>null,'two_factor_confirmed_at'=>null,'two_factor_recovery_codes'=>null])->save();
+        AdminActivityLog::record($user,'account.mfa_disabled',$user);
         Auth::logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();

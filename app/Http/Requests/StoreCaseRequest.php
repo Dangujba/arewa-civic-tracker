@@ -10,7 +10,13 @@ class StoreCaseRequest extends FormRequest {
         'type'=>['required',Rule::in(['public_project','governance_issue'])],
         'title'=>['required','string','min:5','max:200'],
         'description'=>['required','string','min:15','max:10000'],
-        'lga_id'=>['required','integer','exists:lgas,id'],
+        'lga_id'=>['required','integer','exists:lgas,id',function($attribute,$value,$fail){
+            $user=$this->user();
+            if(!$user || $user->role!=='focal')return;
+            $assigned=$user->assignedLgas()->pluck('lgas.id')->all();
+            if(count($assigned) && !in_array((int)$value,array_map('intval',$assigned),true))
+                $fail('This local government is not assigned to your field account.');
+        }],
         'community'=>['required','string','max:150'],
         'sector_id'=>['required','integer',Rule::exists('sectors','id')->where('is_active',true)],
         'observation_date'=>['required','date','before_or_equal:today'],

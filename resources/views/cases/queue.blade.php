@@ -18,10 +18,10 @@
  @foreach(['submitted','under_review','clarification_requested','verified'] as $value)<option value="{{ $value }}" @selected(request('status')===$value)>{{ ucwords(str_replace('_',' ',$value)) }}</option>@endforeach
  </select><button type="submit" class="btn"><i class="fa-solid fa-filter" aria-hidden="true"></i> Filter</button>
  </form>
- <div style="overflow-x:auto"><table><thead><tr><th>Reference</th><th>Field report</th><th>LGA</th><th>Current state</th><th>Action</th></tr></thead><tbody>
+ <div style="overflow-x:auto"><table><thead><tr><th>Reference</th><th>Field report</th><th>LGA</th><th>Current state</th><th>Reviewer</th><th>Due</th><th>Action</th></tr></thead><tbody>
  @forelse($cases as $case)
- <tr><td>{{ $case->reference }}</td><td><strong>{{ $case->title }}</strong><div class="muted">{{ $case->sector?->name }} · {{ $case->created_at->format('d M Y') }}</div></td><td>{{ $case->lga?->name }}</td><td><span class="tag">{{ ucwords(str_replace('_',' ',$case->verification_status)) }}</span></td><td><a href="{{ route('cases.show',$case) }}" class="link">Open <i class="fa-solid fa-arrow-up-right-from-square" aria-hidden="true"></i></a></td></tr>
- @empty<tr><td colspan="5">No reports currently match this verification queue.</td></tr>@endforelse
+ <tr><td>{{ $case->reference }}</td><td><strong>{{ $case->title }}</strong><div class="muted">{{ $case->sector?->name }} · {{ $case->created_at->format('d M Y') }}</div></td><td>{{ $case->lga?->name }}</td><td><span class="tag">{{ ucwords(str_replace('_',' ',$case->verification_status)) }}</span></td><td>{{ $case->reviewer?->name??'Unassigned' }}</td><td>{{ $case->review_due_at?->format('d M Y')??'Not set' }}</td><td><a href="{{ route('cases.show',$case) }}" class="link">Open <i class="fa-solid fa-arrow-up-right-from-square" aria-hidden="true"></i></a></td></tr>
+ @empty<tr><td colspan="7">No reports currently match this verification queue.</td></tr>@endforelse
  </tbody></table></div>{{ $cases->withQueryString()->links() }}
 </section>
 @endsection

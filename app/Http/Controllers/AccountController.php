@@ -1,6 +1,7 @@
 <?php
 namespace App\Http\Controllers;
 use Illuminate\Http\Request;
+use App\Models\AdminActivityLog;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules\Password;
 class AccountController extends Controller {
@@ -18,6 +19,7 @@ class AccountController extends Controller {
         }
         $user->forceFill(['password'=>$data['password'],'must_change_password'=>false])->save();
         $request->session()->regenerate();
+        AdminActivityLog::record($user,'account.password_updated',$user);
         return redirect()->route('dashboard')->with('message','Password updated successfully.');
     }
 }

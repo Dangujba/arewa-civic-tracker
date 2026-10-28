@@ -9,6 +9,8 @@ use App\Http\Controllers\ClarificationController;
 use App\Http\Controllers\ProgressController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\SectorController;
+use App\Http\Controllers\Admin\OperationsController;
+use App\Http\Controllers\Admin\ReviewAssignmentController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AccountController;
 use App\Http\Controllers\ReportsController;
@@ -47,6 +49,10 @@ Route::middleware(['auth',EnsurePasswordIsChanged::class])->group(function(){
     Route::get('/map',[MapController::class,'page'])->name('map.index');
     Route::get('/map/data',[MapController::class,'data'])->name('map.data');
     Route::prefix('admin')->name('admin.')->group(function(){
+        Route::get('/operations',[OperationsController::class,'index'])->name('operations.index');
+        Route::get('/activity',[OperationsController::class,'audit'])->name('operations.audit');
+        Route::post('/operations/settings',[OperationsController::class,'settings'])->name('operations.settings');
+        Route::post('/cases/{case}/reviewer',[ReviewAssignmentController::class,'update'])->name('reviews.assign')->whereNumber('case');
         Route::get('/users',[UserController::class,'index'])->name('users.index');
         Route::get('/users/create',[UserController::class,'create'])->name('users.create');
         Route::post('/users',[UserController::class,'store'])->name('users.store');

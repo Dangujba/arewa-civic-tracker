@@ -47,6 +47,8 @@
       @if(auth()->user()->isAdmin())
       <span class="portal-nav-section">Administration</span>
       <a href="{{ route('admin.users.index') }}" class="portal-nav-link {{ request()->routeIs('admin.users.*')?'active':'' }}" @if(request()->routeIs('admin.users.*')) aria-current="page" @endif><i class="fa-solid fa-users-gear" aria-hidden="true"></i><span class="sidebar-label">Users & roles</span></a>
+      <a href="{{ route('admin.operations.index') }}" class="portal-nav-link {{ request()->routeIs('admin.operations.index')?'active':'' }}"><i class="fa-solid fa-clipboard-list" aria-hidden="true"></i><span class="sidebar-label">Field operations</span></a>
+      <a href="{{ route('admin.operations.audit') }}" class="portal-nav-link {{ request()->routeIs('admin.operations.audit')?'active':'' }}"><i class="fa-solid fa-list-check" aria-hidden="true"></i><span class="sidebar-label">Activity audit</span></a>
       <a href="{{ route('admin.sectors.index') }}" class="portal-nav-link {{ request()->routeIs('admin.sectors.*')?'active':'' }}" @if(request()->routeIs('admin.sectors.*')) aria-current="page" @endif><i class="fa-solid fa-layer-group" aria-hidden="true"></i><span class="sidebar-label">Monitoring sectors</span></a>
       @endif
       <span class="portal-nav-section">Account</span>

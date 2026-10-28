@@ -3,6 +3,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreCaseRequest;
 use App\Models\CivicCase;
 use App\Models\Lga;
+use App\Models\User;
 use App\Models\Sector;
 use App\Models\CaseEvent;
 use App\Models\CaseFollowup;
@@ -23,15 +24,17 @@ class CaseController extends Controller {
         abort_unless($r->user()->canReview(),403);
         $statuses=['submitted','under_review','clarification_requested','verified'];
         $data=$r->validate(['status'=>['nullable','in:submitted,under_review,clarification_requested,verified']]);
+        $base=CivicCase::query()->whereIn('verification_status',$statuses);
+        if($r->user()->role==='meal')$base->where(fn($q)=>$q->whereNull('reviewer_id')->orWhere('reviewer_id',$r->user()->id));
         $counts=array_fill_keys($statuses,0);
-        foreach (CivicCase::query()->whereIn('verification_status',$statuses)->selectRaw('verification_status,COUNT(*) AS aggregate')->groupBy('verification_status')->get() as $row) {
+        foreach ((clone $base)->selectRaw('verification_status,COUNT(*) AS aggregate')->groupBy('verification_status')->get() as $row) {
             $counts[$row->verification_status]=(int)$row->aggregate;
         }
-        $query=CivicCase::query()->whereIn('verification_status',$statuses)->with(['lga:id,name','sector:id,name'])->latest();
+        $query=(clone $base)->with(['lga:id,name','sector:id,name','reviewer:id,name'])->latest();
         if(!empty($data['status']))$query->where('verification_status',$data['status']);
         return view('cases.queue',['counts'=>$counts,'cases'=>$query->paginate(20)]);
     }
-    public function create(Request $r){$r->user()->can('create',CivicCase::class)||abort(403);return view('cases.create',['lgas'=>Lga::orderBy('name')->get(),'sectors'=>Sector::where('is_active',true)->orderBy('name')->get()]);}
+    public function create(Request $r){$r->user()->can('create',CivicCase::class)||abort(403);$lgas=$r->user()->role==='focal' && $r->user()->assignedLgas()->exists() ? $r->user()->assignedLgas()->orderBy('lgas.name')->get() : Lga::orderBy('name')->get();return view('cases.create',['lgas'=>$lgas,'sectors'=>Sector::where('is_active',true)->orderBy('name')->get()]);}
     public function store(StoreCaseRequest $r,CaseSubmissionService $service){
         $data=$r->validated();
         unset($data['evidence']);
@@ -42,7 +45,7 @@ class CaseController extends Controller {
         if($r->expectsJson()){return response()->json(['id'=>$case->id,'reference'=>$case->reference,'verification_status'=>$case->verification_status,'message'=>'Report submitted successfully.','redirect'=>route('cases.show',$case)],201);}
         return redirect()->route('cases.show',$case)->with('message','Report submitted: '.$case->reference);
     }
-    public function show(Request $r,CivicCase $case){$r->user()->can('view',$case)||abort(403);return view('cases.show',['case'=>$case->load(['lga','sector','events.actor','followups','evidence']),'allowedTransitions'=>app(CaseReviewService::class)->allowedTransitions($r->user(),$case)]);}
+    public function show(Request $r,CivicCase $case){$r->user()->can('view',$case)||abort(403);return view('cases.show',['case'=>$case->load(['lga','sector','events.actor','followups','evidence','reviewer']),'allowedTransitions'=>app(CaseReviewService::class)->allowedTransitions($r->user(),$case),'reviewers'=>$r->user()->isAdmin()?User::where('role','meal')->where('is_active',true)->orderBy('name')->get():collect()]);}
     public function review(Request $r,CivicCase $case,CaseReviewService $service){
         $r->user()->can('review',$case)||abort(403);
         $data=$r->validate(['status'=>['required','in:under_review,clarification_requested,verified,approved,rejected'],'comment'=>['nullable','string','max:5000']]);
