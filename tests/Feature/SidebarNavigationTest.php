@@ -26,7 +26,7 @@ class SidebarNavigationTest extends TestCase
         $this->actingAs($this->staff('admin'))->get('/dashboard')
             ->assertOk()
             ->assertSee('id="act-sidebar"', false)
-            ->assertSee('Users &amp; roles', false)
+            ->assertSee('Users & roles', false)
             ->assertSee('Verification queue')
             ->assertSee('GIS intelligence map')
             ->assertSee('act-sidebar.js');
@@ -38,7 +38,7 @@ class SidebarNavigationTest extends TestCase
             ->assertOk()
             ->assertSee('New field report')
             ->assertSee('GIS intelligence map')
-            ->assertDontSee('Users &amp; roles', false)
+            ->assertDontSee('Users & roles', false)
             ->assertDontSee('Verification queue');
     }
 
@@ -47,7 +47,7 @@ class SidebarNavigationTest extends TestCase
         $this->actingAs($this->staff('meal'))->get('/dashboard')
             ->assertOk()
             ->assertSee('Verification queue')
-            ->assertDontSee('Users &amp; roles', false)
+            ->assertDontSee('Users & roles', false)
             ->assertDontSee('New field report');
     }
 
