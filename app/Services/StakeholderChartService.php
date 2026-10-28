@@ -61,7 +61,7 @@ class StakeholderChartService
         $muted = $this->colour($image, self::MUTED);
         $grid = $this->colour($image, self::GRID);
         $left = 56; $right = 18; $top = 26; $bottom = 52;
-        $max = max(1, ...array_map('intval', $counts ?: [0]));
+        $max = max(4, (int) (ceil(max(1, ...array_map('intval', $counts ?: [0])) / 4) * 4));
         for ($line = 0; $line <= 4; $line++) {
             $y = $top + (int) (($height - $top - $bottom) * $line / 4);
             imageline($image, $left, $y, $width - $right, $y, $grid);

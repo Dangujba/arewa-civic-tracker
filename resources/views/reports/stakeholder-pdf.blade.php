@@ -89,16 +89,25 @@ while {{ number_format($pending) }} remain submitted, under review or awaiting c
 These are record statuses, not independent assessments of project delivery.</p>
 <table class="insight-table"><tr>
 <td><strong>{{ count($lgaCounts) }} LGAs</strong>Represented among the filtered observations</td>
-<td><strong>{{ array_key_first($lgaCounts) ?: 'No LGA reported' }}</strong>Highest recorded LGA count@if($lgaCounts) {{ number_format((int) reset($lgaCounts)) }}@endif</td>
-<td><strong>{{ array_key_first($sectorCounts) ?: 'No sector reported' }}</strong>Highest recorded sector count@if($sectorCounts) {{ number_format((int) reset($sectorCounts)) }}@endif</td>
+<td><strong>{{ array_key_first($lgaCounts) ?: 'No LGA reported' }}</strong>Highest recorded LGA count: {{ number_format((int) (array_values($lgaCounts)[0] ?? 0)) }} reports</td>
+<td><strong>{{ array_key_first($sectorCounts) ?: 'No sector reported' }}</strong>Highest recorded sector count: {{ number_format((int) (array_values($sectorCounts)[0] ?? 0)) }} reports</td>
 </tr></table>
 @else
 <div class="no-data">No field observations match the selected filters. The figures below are intentionally empty. No locations, activities or outcomes have been inferred.</div>
 @endif
 </div>
 
-@if($total > 0)
 <div class="section">
+<h2 class="section-heading">Interpretation & Data Quality</h2>
+<table class="insight-table"><tr>
+<td><strong>Source</strong>Authorized field submissions, filtered by the current user's access.</td>
+<td><strong>Verification</strong>Only records marked approved have completed the system review workflow.</td>
+<td><strong>Supporting Evidence</strong>Photographs and documents are accessed through authenticated report records, not this circulated summary.</td>
+</tr></table>
+</div>
+
+@if($total > 0)
+<div class="section pagebreak">
 <h2 class="section-heading">Reporting Activity & Verification</h2>
 @if(!empty($images['trend']))
 <div class="figure"><div class="figure-title">Figure 1 · Monthly Observations (Last 12 Months)</div>
