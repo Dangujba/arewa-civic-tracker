@@ -42,3 +42,17 @@
 @media(max-width:1180px){.portal-main .report-form>.grid{grid-template-columns:repeat(3,minmax(0,1fr))!important}}
 @media(max-width:850px){.portal-main .report-form>.grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}}
 @media(max-width:560px){.portal-main .report-form{padding:13px!important}.portal-main .report-form>.grid{grid-template-columns:1fr!important;row-gap:5px!important}.portal-main .report-form .report-location-section .grid{grid-template-columns:1fr}.evidence-dropzone{min-height:122px;padding:12px}.portal-main .report-form-heading h1{font-size:26px}}
+
+/* Compact genuine SweetAlert2 toast; confirmation dialogs retain normal dimensions. */
+.swal2-popup.swal2-toast.act-toast{width:min(290px,calc(100vw - 24px))!important;min-width:0!important;min-height:0!important;max-width:290px!important;padding:9px 12px!important;border:1px solid #d9e3db!important;border-radius:3px!important;box-shadow:0 5px 15px #1d32211a!important;align-items:center!important;column-gap:8px!important}
+.swal2-popup.swal2-toast.act-toast .swal2-title{font-size:12px!important;font-weight:600!important;line-height:1.4!important;margin:0!important;padding:0!important;white-space:normal!important;overflow-wrap:anywhere!important;text-align:left!important}
+.swal2-popup.swal2-toast.act-toast .swal2-icon{width:19px!important;height:19px!important;min-width:19px!important;min-height:19px!important;margin:0 6px 0 0!important;font-size:7px!important;transform:scale(.82)!important}
+.swal2-popup.swal2-toast.act-toast .swal2-timer-progress-bar-container{height:2px!important}
+.swal2-popup.swal2-toast.act-toast .swal2-actions{display:none!important}
+/* Dotted in-progress indicator across buttons, exports, navigation and sign-out. */
+.spin{display:inline-block!important;position:relative;flex:none;width:25px!important;height:9px!important;border:0!important;border-radius:0!important;background:radial-gradient(circle,currentColor 65%,transparent 72%) 50% 50%/6px 6px no-repeat!important;animation:none!important;vertical-align:middle!important;margin-right:3px}
+.spin:before,.spin:after{content:"";position:absolute;top:1.5px;width:6px;height:6px;border-radius:50%;background:currentColor;animation:act-dot-pulse 1s ease-in-out infinite}
+.spin:before{left:0;animation-delay:-.3s}.spin:after{right:0;animation-delay:.3s}
+@keyframes act-dot-pulse{0%,65%,100%{opacity:.25;transform:scale(.72)}33%{opacity:1;transform:scale(1.12)}}
+@media(prefers-reduced-motion:reduce){.spin:before,.spin:after{animation:none!important;opacity:1!important;transform:none!important}}
+.is-exporting{cursor:progress!important;opacity:.8;pointer-events:none}

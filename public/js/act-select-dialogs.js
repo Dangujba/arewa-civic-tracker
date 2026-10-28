@@ -3,7 +3,7 @@
 const dialog=window.Swal;
 const tone={success:'#16563b',error:'#a73532',warning:'#9e6e2b',info:'#236b85'};
 const showToast=(message,kind='success')=>{
- if(dialog){dialog.fire({toast:true,position:'top-end',icon:kind==='error'?'error':kind==='warning'?'warning':kind==='info'?'info':'success',title:String(message),showConfirmButton:false,timer:3600,timerProgressBar:true,showClass:{popup:'swal2-show'},hideClass:{popup:'swal2-hide'}});return}
+ if(dialog){dialog.fire({toast:true,position:'top-end',icon:kind==='error'?'error':kind==='warning'?'warning':kind==='info'?'info':'success',title:String(message),showConfirmButton:false,timer:3000,timerProgressBar:true,width:290,padding:'9px 12px',customClass:{popup:'act-toast'},showClass:{popup:'swal2-show'},hideClass:{popup:'swal2-hide'}});return}
  const holder=document.getElementById('toast-stack')||document.body;const e=document.createElement('div');e.className='toast'+(kind==='error'?' error':'');e.textContent=message;holder.append(e);setTimeout(()=>e.remove(),3600);
 };
 window.ACTToast=showToast;
@@ -42,7 +42,7 @@ const ready=()=>{
    confirmButtonColor:'#17563e',cancelButtonColor:'#68796d',reverseButtons:true,focusCancel:true,
    customClass:{popup:'act-confirm-dialog'},showLoaderOnConfirm:false
   });
-  if(choice.isConfirmed){logoutForm.dataset.confirmed='1';const btn=logoutForm.querySelector('button[type=submit]');if(btn){btn.disabled=true;btn.innerHTML='<i class="fa-solid fa-spinner fa-spin" aria-hidden="true"></i><span class="sidebar-label">Signing out…</span>'}HTMLFormElement.prototype.submit.call(logoutForm)}
+  if(choice.isConfirmed){logoutForm.dataset.confirmed='1';const btn=logoutForm.querySelector('button[type=submit]');if(btn){btn.disabled=true;btn.innerHTML='<span class="spin" aria-hidden="true"></span><span class="sidebar-label">Signing out…</span>'}HTMLFormElement.prototype.submit.call(logoutForm)}
  });
  document.querySelectorAll('.notice[role="status"]').forEach(item=>{const msg=item.textContent.trim();if(msg){showToast(msg,'success');item.hidden=true}});
 };

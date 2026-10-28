@@ -39,5 +39,24 @@ document.addEventListener('submit',async e=>{
   }catch(err){toast('Network interrupted. Your request may not have completed. Please check before retrying.',true);if(notice)notice.textContent='Network interrupted.'}
   finally{busy(button,false)}
 });
-document.querySelectorAll('a.btn,a.btn-outline').forEach(el=>el.addEventListener('click',()=>{const href=el.getAttribute('href');if(!href||href.startsWith('#')||el.dataset.busy==='1')return;el.setAttribute('aria-busy','true');const mark=document.createElement('span');mark.className='spin';mark.setAttribute('aria-hidden','true');el.prepend(mark);setTimeout(()=>mark.remove(),2200)}));
+document.querySelectorAll('[data-report-export]').forEach(link=>link.addEventListener('click',async e=>{
+  e.preventDefault();
+  if(link.dataset.busy==='1')return;
+  link.dataset.busy='1';link.setAttribute('aria-busy','true');
+  const spinner=document.createElement('span');spinner.className='spin';spinner.setAttribute('aria-hidden','true');
+  link.prepend(spinner);link.classList.add('is-exporting');
+  try{
+    const res=await fetch(link.href,{credentials:'same-origin',headers:{Accept:'application/pdf,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'}});
+    if(!res.ok){toast(res.status===403?'You do not have permission to export these reports.':'Export failed ('+res.status+'). Check your filters and retry.',true);return}
+    const blob=await res.blob();
+    const file=URL.createObjectURL(blob);
+    const cd=res.headers.get('Content-Disposition')||'';
+    const match=cd.match(/filename="?([^";]+)"?/i);
+    const save=document.createElement('a');save.href=file;save.download=match?.[1]||link.dataset.exportName||'arewa-report';document.body.appendChild(save);save.click();save.remove();
+    setTimeout(()=>URL.revokeObjectURL(file),10000);
+    toast('Report export ready.');
+  }catch(error){toast('Could not download the report. Check your connection and try again.',true)}
+  finally{spinner.remove();link.classList.remove('is-exporting');link.removeAttribute('aria-busy');delete link.dataset.busy}
+}));
+document.querySelectorAll('a.btn:not([data-report-export]),a.btn-outline:not([data-report-export])').forEach(el=>el.addEventListener('click',()=>{const href=el.getAttribute('href');if(!href||href.startsWith('#')||el.dataset.busy==='1')return;el.setAttribute('aria-busy','true');const mark=document.createElement('span');mark.className='spin';mark.setAttribute('aria-hidden','true');el.prepend(mark);setTimeout(()=>mark.remove(),2200)}));
 })();

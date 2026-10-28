@@ -6,8 +6,8 @@
  <div><span class="eyebrow">MANAGEMENT INTELLIGENCE</span><h1>Reports & Analytics</h1>
  <p class="muted">Filter field observations, review sector and LGA trends, then export authorized data to Excel or a PDF summary.</p></div>
  <div class="dash-actions">
- <a class="btn-outline" href="{{ route('reports.excel',request()->query()) }}"><i class="fa-solid fa-file-excel" aria-hidden="true"></i> Export Excel</a>
- <a class="btn" href="{{ route('reports.pdf',request()->query()) }}"><i class="fa-solid fa-file-pdf" aria-hidden="true"></i> Export PDF</a>
+ <a class="btn-outline" data-report-export data-export-name="arewa-monitoring.xlsx" href="{{ route('reports.excel',request()->query()) }}"><i class="fa-solid fa-file-excel" aria-hidden="true"></i> Export Excel</a>
+ <a class="btn" data-report-export data-export-name="arewa-monitoring.pdf" href="{{ route('reports.pdf',request()->query()) }}"><i class="fa-solid fa-file-pdf" aria-hidden="true"></i> Export PDF</a>
  </div>
 </section>
 <form method="GET" action="{{ route('reports.index') }}" class="card reporting-filters">

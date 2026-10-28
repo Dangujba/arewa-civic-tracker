@@ -66,6 +66,7 @@ class EvidenceGpsReportsTwoFactorTest extends TestCase
   $this->assertStringContainsString('.xlsx',$xlsx->headers->get('Content-Disposition',''));
   $pdf=$this->actingAs($admin)->get('/reports/export.pdf')->assertOk();
   $this->assertStringStartsWith('%PDF-',$pdf->getContent());
+  $this->assertGreaterThanOrEqual(4, preg_match_all('/\/Subtype\s*\/Image\b/', $pdf->getContent()), 'PDF should embed at least four chart images.');
   $this->actingAs($admin)->get('/reports/analytics?q=unmatched')->assertOk()->assertSee('No matching reports.');
   $this->actingAs($this->user('focal'))->get('/reports/export.xlsx')->assertForbidden();
   $this->get('/reports/export.pdf')->assertForbidden();

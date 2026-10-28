@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 use App\Models\CivicCase;
 use App\Models\Lga;
 use App\Models\Sector;
+use App\Services\ReportChartRenderer;
 use Dompdf\Dompdf;
 use Dompdf\Options;
 use Illuminate\Http\Request;
@@ -99,21 +100,102 @@ class ReportsController extends Controller
         ])->deleteFileAfterSend(true);
     }
 
-    public function pdf(Request $request)
+    public function pdf(Request $request, ReportChartRenderer $charts)
     {
-        $query=$this->filtered($request);
-        $total=(clone $query)->count();
-        $rows=(clone $query)->with(['lga:id,name','sector:id,name'])->orderByDesc('observation_date')->limit(150)->get();
-        $summary=(clone $query)->select('verification_status',DB::raw('COUNT(*) AS total'))->groupBy('verification_status')->pluck('total','verification_status');
-        $options=new Options();
-        $options->set('isRemoteEnabled',false);
-        $options->set('isPhpEnabled',false);
-        $options->set('defaultFont','DejaVu Sans');
-        $pdf=new Dompdf($options);
-        $pdf->loadHtml(view('reports.summary-pdf',compact('rows','total','summary'))->render());
-        $pdf->setPaper('a4','landscape');
+        // All PDF figures and tables derive from the exact same authorized filter scope.
+        $query = $this->filtered($request);
+        $total = (clone $query)->count();
+        $rows = (clone $query)->with(['lga:id,name','sector:id,name'])
+            ->orderByDesc('observation_date')->orderByDesc('id')->limit(150)->get();
+
+        $summary = (clone $query)->select('verification_status', DB::raw('COUNT(*) AS total'))
+            ->groupBy('verification_status')->pluck('total', 'verification_status');
+        $types = (clone $query)->selectRaw(
+            "SUM(CASE WHEN type='public_project' THEN 1 ELSE 0 END) AS projects, ".
+            "SUM(CASE WHEN verification_status='approved' THEN 1 ELSE 0 END) AS approved, ".
+            "SUM(CASE WHEN verification_status IN ('submitted','under_review','clarification_requested') THEN 1 ELSE 0 END) AS pending"
+        )->first();
+
+        $byLga = (clone $query)->select('lga_id', DB::raw('COUNT(*) AS total'))
+            ->with('lga:id,name')->groupBy('lga_id')->orderByDesc('total')->limit(8)->get();
+        $bySector = (clone $query)->select('sector_id', DB::raw('COUNT(*) AS total'))
+            ->with('sector:id,name')->groupBy('sector_id')->orderByDesc('total')->limit(8)->get();
+
+        $monthLabels = [];
+        $monthlyCounts = [];
+        for ($month = 11; $month >= 0; $month--) {
+            $date = now()->subMonthsNoOverflow($month)->startOfMonth();
+            $monthLabels[] = $date->format('M y');
+            $monthlyCounts[$date->format('Y-m')] = 0;
+        }
+        foreach ((clone $query)->whereDate('observation_date', '>=', now()->subMonthsNoOverflow(11)->startOfMonth())
+            ->select('observation_date')->cursor() as $entry) {
+            $key = $entry->observation_date?->format('Y-m');
+            if (isset($monthlyCounts[$key])) $monthlyCounts[$key]++;
+        }
+
+        $statusNames = [
+            'submitted'=>'Submitted', 'under_review'=>'Under review',
+            'clarification_requested'=>'Clarification', 'verified'=>'Verified',
+            'approved'=>'Approved', 'rejected'=>'Rejected',
+        ];
+        $statusPalette = [
+            'submitted'=>'#b38943', 'under_review'=>'#447fa1',
+            'clarification_requested'=>'#c47b49', 'verified'=>'#348c72',
+            'approved'=>'#206447', 'rejected'=>'#ba605a',
+        ];
+        $statusKeys = array_keys(array_filter($statusNames,
+            fn ($label, $key) => (int)($summary[$key] ?? 0) > 0, ARRAY_FILTER_USE_BOTH));
+
+        $figures = [
+            'trend'=>$charts->trend($monthLabels, array_values($monthlyCounts)),
+            'status'=>$charts->statuses(
+                array_map(fn ($key) => $statusNames[$key], $statusKeys),
+                array_map(fn ($key) => (int)$summary[$key], $statusKeys),
+                array_map(fn ($key) => $statusPalette[$key], $statusKeys)
+            ),
+            'lga'=>$charts->ranking(
+                $byLga->map(fn ($row) => $row->lga?->name ?? 'Unassigned')->all(),
+                $byLga->pluck('total')->map(fn ($n) => (int)$n)->all()
+            ),
+            'sector'=>$charts->ranking(
+                $bySector->map(fn ($row) => $row->sector?->name ?? 'Other')->all(),
+                $bySector->pluck('total')->map(fn ($n) => (int)$n)->all(),
+                '#b38943'
+            ),
+        ];
+
+        $applied = array_filter([
+            'Search' => $request->filled('q') ? trim((string)$request->input('q')) : null,
+            'LGA' => $request->filled('lga_id') ? Lga::find($request->integer('lga_id'))?->name : null,
+            'Sector' => $request->filled('sector_id') ? Sector::find($request->integer('sector_id'))?->name : null,
+            'Status' => $request->filled('verification_status')
+                ? ($statusNames[$request->input('verification_status')] ?? null) : null,
+            'Type' => $request->filled('type') ? ucwords(str_replace('_', ' ', $request->input('type'))) : null,
+            'From' => $request->input('date_from'),
+            'To' => $request->input('date_to'),
+        ], fn ($value) => $value !== null && $value !== '');
+
+        $logoPath = public_path('icons/act-192.png');
+        $logo = is_file($logoPath) ? 'data:image/png;base64,'.base64_encode(file_get_contents($logoPath)) : null;
+        $html = view('reports.summary-pdf', [
+            'rows'=>$rows, 'total'=>$total, 'summary'=>$summary, 'types'=>$types,
+            'byLga'=>$byLga, 'bySector'=>$bySector, 'figures'=>$figures,
+            'applied'=>$applied, 'logo'=>$logo,
+        ])->render();
+
+        $options = new Options();
+        $options->set('isRemoteEnabled', false);
+        $options->set('isPhpEnabled', false);
+        $options->set('defaultFont', 'DejaVu Sans');
+        $pdf = new Dompdf($options);
+        $pdf->loadHtml($html);
+        $pdf->setPaper('a4', 'landscape');
         $pdf->render();
-        return response($pdf->output(),200,[
+        $font = $pdf->getFontMetrics()->getFont('DejaVu Sans');
+        $pdf->getCanvas()->page_text(640, 574, 'RAWYOD  |  Page {PAGE_NUM} of {PAGE_COUNT}', $font, 8, [0.34,0.43,0.38]);
+
+        return response($pdf->output(), 200, [
             'Content-Type'=>'application/pdf',
             'Content-Disposition'=>'attachment; filename="arewa-monitoring-'.now()->format('Ymd').'.pdf"',
             'Cache-Control'=>'private, no-store',
