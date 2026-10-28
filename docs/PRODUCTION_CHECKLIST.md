@@ -45,7 +45,7 @@
 
 ### 04. Authentication & user administration
 - [x] Administrator-created focal/MEAL users require a new password on first login; protected actions redirect to secure password rotation, verified in integration tests.
-- [ ] Secure administrator initial enrollment, MFA option or approved 2FA policy.
+- [x] TOTP 2FA opt-in activation, QR provisioning, six-digit login challenge, throttling, one-time recovery codes and secure disable flow tested; mandatory organizational 2FA policy remains to be approved.
 - [ ] Role-specific login for RAWYOD administrator, MEAL reviewer and Civic Focal Person.
 - [ ] Account activation, deactivation, password reset, session expiry and rate limits tested.
 - [ ] Server-enforced permissions in every route, API, export, evidence download and map query.
@@ -63,8 +63,9 @@
 
 ### 06. Evidence and protected files
 - [x] Authenticated image upload with MIME/size validation and persisted file verified in isolated integration test.
-- [ ] Image resize/compression, mobile camera picker and multi-file upload UI.
-- [ ] Evidence is private and never retrievable via predictable public URLs.
+- [x] Initial report form supports five JPEG/PNG/WebP/PDF evidence files, local JPEG/WebP compression and preview; validated in Laravel tests.
+- [ ] Dedicated native Android camera UX and multi-image capture tested on physical devices.
+- [x] Evidence saved to private Laravel storage and fetched via an authorization-checked endpoint; further penetration testing remains pending.
 - [ ] Authorized preview/download, controlled deletion and evidence audit trail.
 - [ ] Storage quotas, integrity checks and upload-failure recovery tested.
 
@@ -89,18 +90,18 @@
 - [x] Dashboard template reads the current database-derived KPI and grouping variables (render tested).
 - [ ] Dashboard chart interactivity, KPI edge cases and full source-data reconciliation.
 - [ ] Time trends, charts, sector distribution and drill-down tables.
-- [ ] Working combined filters and CSV/Excel-compatible exports.
-- [ ] PDF report generation with correct date ranges and proper attribution.
-- [ ] Export permissions and protection from formula injection and excessive records.
+- [x] Authenticated management reports with combined filters, CSV compatibility and native XLSX exports tested.
+- [x] Role-restricted management PDF summary generator tested with selected filters and aggregate totals; final RAWYOD report layout approval pending.
+- [x] XLSX writes text cells explicitly, exports are role restricted and downloads have bounded row counts; further data-volume testing pending.
 - [ ] No placeholder numbers or fabricated metrics in live operational dashboards.
 
 ### 10. Offline PWA and sync
 - [x] 192px and 512px PWA application icons generated and served successfully.
 - [ ] Installable manifest and coherent authenticated offline shell tested in real browsers.
-- [ ] IndexedDB saved drafts including evidence metadata.
+- [x] IndexedDB stores draft fields and file blobs on the same browser/device; synthetic browser test confirmed retained evidence in a queued submission.
 - [ ] Offline outbox with exponential retry, unique submission IDs and conflict resolution.
-- [ ] Online/offline/sync/error indicators and user feedback.
-- [ ] Test flight mode → create report → reconnect → exactly one server record and complete evidence.
+- [x] Online/offline/sync/error feedback implemented for queued reports, including preserved file blobs.
+- [ ] Physical-device flight-mode/reconnect E2E remains pending. Synthetic browser QA verified offline file queue, multipart upload replay and queue clearing; isolated Laravel integration verified idempotent case/evidence persistence.
 - [ ] Logout/account-switch clearing local sensitive information tested.
 
 ### 11. Android APK
@@ -138,9 +139,9 @@
 - [ ] No cross-domain authentication or data sharing without explicit approval.
 
 ### 15. Automated testing, UAT and release
-- [x] Current automated suite passes: 24 tests, 171 assertions, in the default test environment and dedicated MySQL 8 QA database.
+- [x] Current automated suite passes: 28 tests, 239 assertions, in the default environment and dedicated MySQL 8 QA database.
 - [ ] Expanded release-wide test coverage including all contracted modules.
-- [x] Isolated MySQL 8 integration test database: migrations, password rotation, report submission, uploaded evidence, MEAL review, administrator approval, GIS feed and dashboard, 24 tests pass.
+- [x] Isolated MySQL 8 integration test database: migrations, password rotation, report submission, uploaded evidence, MEAL review, administrator approval, GIS feed and dashboard, 28 tests pass.
 - [ ] Browser E2E tests for three roles and entire submit→verify→dashboard/map workflow.
 - [ ] Performance tests at expected initial load, including upload and exports.
 - [ ] Android acceptance testing with representative supported devices.
@@ -169,11 +170,11 @@
 | Frontend pipeline | npm + Vite build | Asset build completed |
 | GIS boundaries | geoBoundaries NGA ADM2 | 17 unique Yobe LGAs, 122,897-byte GeoJSON; HTTP 200 |
 | Login async error path | Puppeteer invalid-credentials test | Feedback shown; login remains protected; submit button reset |
-| End-to-end operational workflow | Laravel HTTP feature test using isolated MySQL 8 database | 24 tests, 171 assertions; Focal submit, evidence, MEAL review, admin approval, GIS marker, dashboard and CSV confirmed |
+| End-to-end operational workflow | Laravel HTTP feature test using isolated MySQL 8 database | 28 tests, 239 assertions; Focal submit, evidence, MEAL review, admin approval, GIS marker, dashboard and CSV confirmed |
 | Secure onboarding | Password rotation and account policy tests | First login requires password change; wrong current password rejected |
 | JavaScript offline/AJAX coordination | Handler review + Node syntax check | AJAX form handler skips IndexedDB-managed reporting form; successful sync can open the created report |
 
-**Next verification gates:** provision first live administrator securely, real-browser three-role acceptance on isolated QA data, permission audit for all file/actions, mobile/offline evidence synchronization, PDF/Excel export, Android APK, and RAWYOD acceptance. No synthetic reports are stored in the staging production database.
+**Next verification gates:** real-browser three-role acceptance on isolated QA data, permission audit for all file/actions, mobile/offline evidence synchronization, PDF/Excel export, Android APK, and RAWYOD acceptance. No synthetic reports are stored in the staging production database.
 
 ### Release verification — 28 October 2026
 
@@ -183,3 +184,14 @@
 - Clean clone from `main`: `npm ci`, `npm run build`, generated Font Awesome/Lucide/Leaflet assets verified; Composer manifest validated.
 - Staging: landing page, login, local mapping assets and GeoJSON respond HTTP 200. One real administrator account preserved; zero synthetic production case records.
 - Remaining: real authenticated browser UAT, live-user training, large-data GIS performance, complete offline synchronization, Android APK and final security/RAWYOD acceptance. GitHub Actions CI status requires separate investigation.
+
+### Proposal gap closure — 28 October 2026
+
+- **Initial evidence submission:** supported, with up to five privately stored validated image/PDF attachments, multi-file previews and idempotent retries.
+- **Automatic GPS:** browser permission prompt, accuracy feedback, visible editable latitude and longitude, manual fallback; synthetic browser verification completed.
+- **Management reporting:** new role-restricted Reports & Analytics workspace, 12-month trend, verification distribution, LGA and sector breakdown, filterable register, native XLSX and PDF downloads.
+- **Two-factor authentication:** opt-in TOTP QR activation, encrypted secret/recovery hashes, verification challenge, recovery-code consumption and password/code-verified removal. Existing administrator not automatically enrolled.
+- **Offline evidence:** file blobs persisted in IndexedDB and synchronized through multipart upload; synthetic browser QA confirmed one image and real coordinates with zero JavaScript errors. End-to-end field Android acceptance still required.
+- **Environment:** Arewa-specific PHP-FPM upload limit increased to 6MB per file and 35MB per request; Arewa Nginx max request set to 35MB; configurations tested and reloaded. Other domains were not edited.
+- **Tests:** 28 passed, 239 assertions on SQLite and isolated MySQL, plus clean-clone composer/npm install and frontend build. No synthetic record inserted into the staging database.
+- **Outstanding:** mobile APK, organization-wide 2FA policy, offline evidence encryption on shared devices, actual staff UAT, security review, RAWYOD acceptance and broader performance testing.
