@@ -42,7 +42,7 @@ class GisBoundaryTest extends TestCase
         ]);
         $this->actingAs($user)->get('/map')
             ->assertOk()
-            ->assertSee('Yobe State Monitoring Map')
+            ->assertSee('Monitoring Intelligence Map')
             ->assertSee('geo/yobe-lgas.geojson')
             ->assertSee('Damaturu');
     }
