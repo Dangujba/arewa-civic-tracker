@@ -68,6 +68,7 @@
 <p class="geo-attribution">Boundaries: <a href="https://www.geoboundaries.org/" target="_blank" rel="noopener noreferrer">geoBoundaries / William & Mary</a>, CC BY 4.0. Tiles: OpenStreetMap contributors and CARTO. No synthetic report locations are shown. Device location is permission-based and is not stored by these map tools.</p>
 @push('scripts')
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<script src="https://unpkg.com/leaflet.heat@0.2.0/dist/leaflet-heat.js" crossorigin="anonymous"></script>
 <script defer src="{{ asset('js/act-map-explorer.js') }}"></script>
 @endpush
 @endsection
