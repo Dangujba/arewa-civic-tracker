@@ -16,9 +16,6 @@
       <button type="submit" class="btn"><i class="fa-solid fa-shield-halved" aria-hidden="true"></i> Save secure password</button>
       </form>
     </section>
-</div>
-@endsection
-
 <section class="card account-form two-factor-card">
  <h2><i class="fa-solid fa-shield-halved" aria-hidden="true"></i> Two-factor authentication (2FA)</h2>
  <p class="muted">Secure your account using an authenticator app such as Google Authenticator, Microsoft Authenticator or 1Password. An additional six-digit verification code is required at sign-in once enabled.</p>
@@ -50,3 +47,5 @@
  </div>
  @endif
 </section>
+</div>
+@endsection
