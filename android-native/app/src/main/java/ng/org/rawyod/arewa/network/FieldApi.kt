@@ -7,36 +7,18 @@ import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
 import okhttp3.OkHttpClient
-import okhttp3.Dns
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 import org.json.JSONObject
 import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.IOException
-import java.net.InetAddress
-import java.net.UnknownHostException
 import java.util.concurrent.TimeUnit
 
 class ApiFailure(val code: Int, message: String) : IOException(message)
 
 class FieldApi(private val vault: CryptoVault) {
-    // The device resolver is tried first. Only this approved API hostname uses
-    // a verified IPv4 fallback. Normal HTTPS hostname and CA checks are retained.
-    private val apiDns = object : Dns {
-        override fun lookup(hostname: String): List<InetAddress> {
-            return try {
-                Dns.SYSTEM.lookup(hostname)
-            } catch (ex: UnknownHostException) {
-                if (hostname.equals("arewa.kasua.ng", ignoreCase=true)) {
-                    listOf(InetAddress.getByAddress(hostname,
-                        byteArrayOf(212.toByte(), 90.toByte(), 121.toByte(), 132.toByte())))
-                } else throw ex
-            }
-        }
-    }
     private val client = OkHttpClient.Builder()
-        .dns(apiDns)
         .connectTimeout(15, TimeUnit.SECONDS)
         .readTimeout(60, TimeUnit.SECONDS)
         .writeTimeout(60, TimeUnit.SECONDS)
@@ -63,6 +45,31 @@ class FieldApi(private val vault: CryptoVault) {
             return payload
         }
     }
+
+    suspend fun profile(token:String):JSONObject =
+        kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {call("account/profile","GET",token)}
+    suspend fun changePassword(token:String,current:String,newPassword:String):JSONObject =
+        kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
+            call("account/password","POST",token,
+                JSONObject().put("current_password",current).put("password",newPassword)
+                    .put("password_confirmation",newPassword).toString().toRequestBody("application/json".toMediaType()))
+        }
+    suspend fun startTwoFactor(token:String,password:String):JSONObject =
+        kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
+            call("account/2fa/setup","POST",token,
+                JSONObject().put("current_password",password).toString().toRequestBody("application/json".toMediaType()))
+        }
+    suspend fun confirmTwoFactor(token:String,code:String):JSONObject =
+        kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
+            call("account/2fa/confirm","POST",token,
+                JSONObject().put("code",code).toString().toRequestBody("application/json".toMediaType()))
+        }
+    suspend fun disableTwoFactor(token:String,password:String,code:String):JSONObject =
+        kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
+            call("account/2fa/disable","POST",token,
+                JSONObject().put("current_password",password).put("code",code)
+                    .toString().toRequestBody("application/json".toMediaType()))
+        }
 
     suspend fun login(email: String, password: String): JSONObject =
         kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
