@@ -41,46 +41,41 @@ The EOI also names three design-stage outputs. These are not extra runtime modul
 | D11 | Search, combined filters, pagination | Case/analytics filtering and paginated registers | Large-volume UAT later |
 | D12 | Data exports and stakeholder reporting | CSV, XLSX and PDF reports with charts and permissions | Layout/UAT later |
 
-## B. Partially implemented software features
+## B. Development completion update (29 October 2026, after Android v0.3.0 and VPS rollout)
 
-| ID | Unified requirement | Already developed | Remaining development |
+The following status table supersedes the earlier pre-implementation list. **R2 activation is explicitly deferred at the project owner's request**, and formal UAT/release signing are separate later stages.
+
+| ID | Feature | Current software status | Evidence and remaining boundary |
 |---|---|---|---|
-| P01 | **Native Android and offline reliability** | Kotlin/Compose project, encrypted draft/evidence queue, camera and GPS, offline draft recovery/editing, JPEG size reduction, interrupted-upload recovery, token re-authentication, stable submission IDs; **v0.2.0 signed debug APK built and privately distributed from the administrator sidebar** | Production signing by RAWYOD and physical-device validation remain separate release/acceptance tasks. Full native report post-submission editing is not yet available. |
-| P02 | **Case resolution and closure** | Progress supports resolved/completed; follow-up events and reviewer state machine exist | Establish distinct Closed/Resolved lifecycle, closure reasons, re-open behavior if agreed, authorized actor and audit history |
-| P03 | **Configurable reference/master data** | 17 LGAs and administrator-managed sectors | Administrator-managed community options, report categories and relevant status options, preserving safeguards against arbitrary changes to review state machine |
-| P04 | **Comprehensive activity/change audit** | Login/logout, user, review, assignment, follow-up and progress events exist | Field-by-field report change history/version ledger, complete sensitive administrative audit coverage |
-| P05 | **Private storage and Cloudflare R2** | Local private file access, SHA-256 digests, deployed R2 readiness/admin dashboard and verified migration command | Activate real private R2 bucket with authorized credentials; verify upload/download and backups. Credentials are an external dependency, not missing source code |
-| P06 | **Automated backup and restore** | Manual database backups and operational notes exist | Schedule encrypted backups for database and evidence, monitor backup failures, implement safe restore workflow and recovery controls |
-| P07 | **Data protection lifecycle** | Authentication, authorization, controlled evidence access, basic security headers and file validation | Implement agreed retention/deletion options, audit-preserving retention, and appropriate administrator controls. Incident procedures are a separate operational document |
-| P08 | **Final UI/UX and device functionality** | Responsive flat interface, tagged LGA selection, filter alignment, profile photo, ring spinners, clear error feedback and navigation | Finalize accessible field flow, touch behavior, keyboard use and native mobile views. Formal device/UX testing follows development |
+| P01 | Native Android and offline field reporting | Core implementation completed, further parity work possible | Native Kotlin v0.3.0 debug APK compiled; authenticated API, camera/GPS, encrypted drafts/evidence, photo compression, edited offline drafts, resilient retry and optional online similarity checks. **Direct editing of an already-uploaded report in native Android is not yet supported**; users can make versioned amendments in the web portal. Physical-phone UAT and production signing are later activities. |
+| P02 | Formal case resolution, closure and reopening | **Implemented and staging-deployed** | Admin-only closure for approved and completed/resolved cases; reason, actor and event history; reopening with reason; closed-case changes restricted. |
+| P03 | Configurable reference data | **Implemented and staging-deployed** | Admin-managed sectors, LGA-scoped communities, project/issue categories, and display labels for status codes. Approval state transitions remain fixed for safety. |
+| P04 | Comprehensive activity/change audit | Substantially implemented | Versioned report edits show field changes; review, closure, reference management and key admin operations recorded. Broader consistency audit and log-retention policy remain for final review. |
+| P05 | Cloudflare R2 | **Deferred, excluded from active development scope** | Existing private local evidence storage continues. Do not activate or migrate until instructed. |
+| P06 | Encrypted backup/recovery | Backup automation implemented; restoration operations partial | AES-256 GPG snapshot command, database + private evidence archive, independent hash validation, scheduled 02:15 WAT, verified first live snapshot. An automated isolated restore procedure and **off-server copies** are not in place. Same-VPS backups cannot protect against total VPS loss. |
+| P07 | Data-protection lifecycle | Conservative controls implemented; policy-dependent features pending | Expired device tokens and web sessions older than 30 days are scheduled for cleanup. Reports, evidence, users and audit records are **never auto-deleted**. RAWYOD-approved retention periods and erasure authorizations must precede destructive features. |
+| P08 | UI/UX | Substantially implemented | Responsive web and flat admin tables, managed reference lists, revision history and native field interface. Cross-device accessibility and field-persona acceptance remain in QA. |
+| M01 | Authorized post-submission report editing with version history | **Implemented on the web** | Versioned, permission-restricted changes, reasons, old/new values and conflict protection. Native post-submission editing would be an additional parity improvement. |
+| M02 | Similar-report warning | **Implemented on web and native Android** | LGA-scoped, title/community/sector/date matching; non-blocking suggestions; unauthorized report details masked. Native similarity requires online access and does not prevent offline saving. |
 
-## C. Not yet implemented: explicit functional gaps
+### Verified rollout
 
-| ID | Required functionality | Current condition | Development required |
-|---|---|---|---|
-| M01 | **Post-submission report field editing with version-aware history** | Clarification, progress and follow-up notes exist, but they do not modify prior report fields as an auditable revision | Add authorized report revisions, old/new field snapshots, change reason, reviewer and approval safeguards, immutable history and UI/API paths |
-| M02 | **Warning about potentially similar existing reports** | Idempotency protects repeated submission IDs; no semantic near-duplicate warning is established | Suggest potentially matching cases based on report type, LGA/community, title, date and other features before submission; allow valid distinct cases |
+- Source: GitHub main commit `72bf525d81e06fcf1667f16619a8f95268b34fcd`.
+- Web: `https://arewa.kasua.ng` staging is online. Migrations `2026_10_29_000009_add_case_closure` and `2026_10_29_000010_create_reference_data` have been applied.
+- Automated Laravel checks: **92 passing, 699 assertions**.
+- Android debug version: **v0.3.0**, checksum `81214d731350c6925952de2717b2ac73102e352f6840526700e21136e8b577c7`, 11,607,431 bytes, Android v2 debug signature verified. Admin-only route: `/admin/native/android-debug`.
+- First AES-256 encrypted private backup generated and verified successfully on 29 October 2026. Live cron invokes the Laravel scheduler every minute.
+- No production signing, physical-device acceptance, external backup redundancy, RAWYOD training or formal handover is being claimed.
 
-## Native Android v0.2.0 delivery update (29 October 2026)
+## C. Remaining actionable software work, excluding R2 and later delivery phases
 
-- Native debug APK successfully compiled with JDK 17 and Android SDK Platform 36; eight native JVM unit tests passed.
-- Debug APK SHA-256: `f6e28addb0117163b6dc4370b061f3462f175f2b39ceff51abd89b015e1e5dc1`; size: 11,694,776 bytes.
-- Administrator-only authenticated download: `https://arewa.kasua.ng/admin/native/android-debug`; regular focal personnel and unauthenticated visitors cannot download it.
-- Laravel test suite: 79 passed with 640 assertions, including route access protection.
-- Source code: native Android `v0.2.0`, with offline draft editing, encrypted attachments, photo optimization, WorkManager claim and retry handling, and token reauthentication.
-- This is **debug-signed only**, not a RAWYOD signed production release. Physical-phone testing, installation, GPS/camera permission behavior, prolonged offline recovery, Android battery restriction effects, and field acceptance remain outstanding.
-- Staging host API is still `https://arewa.kasua.ng/api/v1/`; production must use the approved domain and a RAWYOD-owned signing key.
+1. **Native Android parity:** assess and implement direct amendments to an already submitted report through the secure revision API, if the agreed field workflow requires the same capability on mobile.
+2. **Recovery operations:** implement a strictly isolated restoration flow and validate it using independent recovery storage. Obtain an approved off-server backup destination to protect against VPS loss.
+3. **Privacy controls:** finalize RAWYOD-approved record retention/erasure rules; any deletion must be permission-gated, auditable and reversible where lawful.
+4. **UI consistency/accessibility:** finish remaining responsive navigation, searchable controls, error states and keyboard/touch accessibility. Formal user/device testing remains a later phase.
+5. **Technical design baselines:** complete URS, architecture/API/offline designs and UI/UX baseline as design-stage outputs, not runtime bugs.
 
-## D. Recommended software implementation order
-
-1. Full report editing and version-aware audit trail (**M01** and **P04**).
-2. Native Android device validation and production signing following the now-built v0.2.0 debug APK (**P01**, release/acceptance stage).
-3. Similar-report suggestions that are distinct from idempotency checks (**M02**).
-4. Formal resolution/closure workflow (**P02**).
-5. Configurable master data, with state-machine safety (**P03**).
-6. Automated backup/recovery and lifecycle security controls (**P06**, **P07**).
-7. Remaining mobile/UX refinements (**P08**).
-8. Cloudflare R2 real-bucket activation when authorized credentials are supplied (**P05**).
+The web core, similar warnings, closure and reference administration are no longer missing software modules. **Do not include R2 activation, formal UAT, production signing, manuals, training, hosting handover or support in unfinished development counts.**
 
 ## E. Later phases: deliberately excluded from incomplete software counts
 
@@ -103,4 +98,4 @@ The EOI also names three design-stage outputs. These are not extra runtime modul
 - **Proposal pp. 11–13:** encrypted backup/restore, controlled evidence, privacy-by-design, low-bandwidth and responsive interface → P01, P05–P08.
 - **Proposal pp. 14–17:** formal QA/UAT and later deployment, training, 60-day support and handover → later phases, not development gaps.
 
-**Decision:** The web core is substantially implemented. Finish genuine report revisions and native Android first. Do not expand the scope with PWA-specific tasks and do not artificially treat later handover obligations as unimplemented features.
+**Decision (updated):** Core web features, versioned web report editing, similarity warnings, case closure, reference administration and native Android v0.3.0 are implemented in staging. Remaining work concerns selective native parity, robust recovery tooling, policy-dependent privacy controls and final interface refinements. Cloudflare R2 activation and later contractual delivery phases are excluded.
