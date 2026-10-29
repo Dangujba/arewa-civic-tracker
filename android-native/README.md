@@ -12,7 +12,7 @@ This is the **native Kotlin / Jetpack Compose** Android application for RAWYOD. 
 
 ## v0.3.2 branded launcher and fingerprint setting
 
-**Build status:** The source has been updated, but a verified v0.3.2 APK has not yet been produced or published. The existing public download still serves the older v0.3.1 debug build. The connected staging build machine is currently offline. Do not tell end users that the fingerprint feature is already available in that older APK.
+**Build and staging distribution:** v0.3.2 compiled successfully on the connected Arewa VPS (Android SDK 36, JDK 17). Android unit tests and debug APK assembly succeeded. Its signer SHA-256 matched the existing v0.3.1 debug build, enabling in-place update. The public download now serves v0.3.2. Fingerprint behavior still requires physical-device acceptance before a production release.
 
 
 - The launcher uses the same approved hand-drawn Arewa map-and-pin WebP mark as the website, reused from the repository's original asset blob. The adaptive icon scales across launchers.
@@ -58,7 +58,7 @@ The debug APK is for controlled testing, not production distribution. It uses An
 - Report form includes an optional online check for potentially related field reports. It never blocks offline submission.
 - Enrolled officers can select published categories and communities for their assigned LGAs while retaining manual community entry.
 - Category IDs are transmitted only when a valid category for the selected report type has been chosen.
-- The staging v0.3.1 debug APK is available to all visitors at https://arewa.kasua.ng/download/android without signing in to the web portal. Staff authentication inside the app remains required to access monitoring data. This is not production-signed.
+- The staging v0.3.2 debug APK is available to all visitors at https://arewa.kasua.ng/download/android without signing in to the web portal. Staff authentication inside the app remains required to access monitoring data. This is not production-signed.
 
 ## v0.3.1 submitted report amendments
 
