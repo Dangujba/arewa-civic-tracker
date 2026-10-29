@@ -58,4 +58,34 @@ class UserController extends Controller {
   });
   return redirect()->route('admin.users.index')->with('message','User details updated.');
  }
+ public function destroy(Request $r,User $user){
+  $this->gate($r);
+  if($user->id===$r->user()->id)
+   return redirect()->route('admin.users.index')->withErrors(['user'=>'You cannot delete your own administrator account.']);
+  $historicalLinks=[
+   ['civic_cases','reporter_id'],['civic_cases','reviewer_id'],
+   ['case_events','actor_id'],['case_followups','author_id'],['case_evidence','uploaded_by'],
+   ['admin_activity_logs','actor_id']
+  ];
+  foreach($historicalLinks as [$table,$column]){
+   if(DB::table($table)->where($column,$user->id)->exists())
+    return redirect()->route('admin.users.index')->withErrors([
+     'user'=>'This account has reporting, review or audit history and cannot be deleted. Set its access to Inactive instead.'
+    ]);
+  }
+  DB::transaction(function()use($r,$user){
+   AdminActivityLog::record($r->user(),'user.deleted',$user,[
+    'name'=>$user->name,'email'=>$user->email,'role'=>$user->role
+   ]);
+   $user->tokens()->delete();
+   $user->assignedLgas()->detach();
+   DB::table('sessions')->where('user_id',$user->id)->delete();
+   DB::table('password_reset_tokens')->where('email',$user->email)->delete();
+   DB::table('notifications')->where('notifiable_type',$user->getMorphClass())
+    ->where('notifiable_id',$user->id)->delete();
+   $user->delete();
+  });
+  return redirect()->route('admin.users.index')->with('message','Staff account deleted.');
+ }
+
 }

@@ -1,0 +1,84 @@
+/* Flat, compact administration UI: actual staff table and tag-based LGA assignment. */
+.act-visually-hidden{position:absolute!important;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+.portal-main .act-staff-heading{margin-bottom:19px}
+.portal-main .act-staff-heading h1{font-size:29px;margin:5px 0 5px}
+.portal-main .act-staff-heading p{font-size:12px;margin:0}
+.portal-main .act-staff-heading .btn,.portal-main .act-staff-heading .btn-outline{height:41px;font-size:12px}
+.act-staff-toolbar{display:flex;align-items:center;justify-content:space-between;gap:16px;margin:0 0 12px}
+.act-staff-search{display:flex;position:relative;align-items:center;gap:8px;flex:1;max-width:510px;margin:0!important}
+.act-staff-search>.fa-magnifying-glass{position:absolute;left:14px;color:#648171;font-size:13px;pointer-events:none}
+.portal-main .act-staff-search input{height:40px;min-width:0;padding:9px 12px 9px 38px;border:1px solid #ccdacf;font-size:12px}
+.portal-main .act-staff-search button{flex:none;height:40px;padding:0 17px;font-size:12px}
+.act-staff-reset{font-size:12px;color:#2b6850;font-weight:700}
+.act-staff-count{font-size:12px;font-weight:700;color:#65786b;white-space:nowrap}
+.portal-main .act-staff-panel{padding:0!important;overflow:visible}
+.act-staff-table{min-width:740px;border-collapse:collapse;width:100%}
+.portal-main .act-staff-table th{background:#f7f9f6!important;color:#677b6e;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.07em;padding:13px 17px;border-bottom:1px solid #dce7df;white-space:nowrap}
+.portal-main .act-staff-table td{padding:13px 17px!important;vertical-align:middle!important;font-size:12px;border-bottom:1px solid #edf0eb}
+.act-staff-table tbody tr:hover{background:#fbfdfb}
+.act-staff-table tbody tr:last-child td{border-bottom:0}
+.act-staff-person{display:flex;gap:11px;align-items:center;min-width:0}
+.act-staff-avatar{display:grid;place-items:center;flex:none;width:34px;height:34px;color:#1a6444;background:#e8f2e9;font-weight:850;font-size:13px}
+.act-staff-person strong{display:block;font-size:12px;color:#203b2b;line-height:1.4}
+.act-staff-person small{display:block;font-size:11px;color:#748779;line-height:1.5;overflow-wrap:anywhere;margin-top:2px}
+.act-staff-role{font-size:11px;color:#375642;font-weight:730}
+.act-staff-tags{display:flex;align-items:center;flex-wrap:wrap;gap:4px;max-width:390px}
+.act-staff-chip,.act-staff-more{display:inline-flex;align-items:center;min-height:23px;background:#edf5ee;border:1px solid #d8e8db;padding:2px 7px;font-weight:650;font-size:10px;color:#2b6443;white-space:nowrap}
+.act-staff-more{background:#fff;color:#648071}
+.act-staff-empty{color:#829588;font-size:11px}
+.act-staff-access{display:inline-flex;align-items:center;gap:7px;font-weight:740;font-size:11px}
+.act-staff-access i{font-size:6px}
+.act-staff-access.is-active{color:#276e46}
+.act-staff-access.is-inactive{color:#986f43}
+.act-staff-actions{display:flex;align-items:center;justify-content:flex-end;gap:7px}
+.act-staff-actions form{margin:0}
+.portal-main .act-staff-icon{width:32px;height:32px;min-width:32px;padding:0!important;display:inline-grid;place-items:center;color:#30684b!important;background:#fff!important;border:1px solid #cbdccf!important;box-shadow:none!important}
+.portal-main .act-staff-icon i{font-size:12px}
+.portal-main .act-staff-icon:hover{background:#eaf3ec!important;border-color:#a9cbb2!important}
+.portal-main .act-staff-delete{color:#a44742!important;border-color:#ecd2ce!important}
+.portal-main .act-staff-delete:hover{background:#fff0ee!important;border-color:#d6aaa3!important}
+.portal-main .act-staff-icon:disabled{opacity:.32!important;cursor:not-allowed!important}
+.act-actions-head{text-align:right!important}
+.act-staff-no-results{text-align:center!important;padding:40px!important;color:#819186}
+.act-staff-pagination{padding:10px 18px;border-top:1px solid #eef1ed}
+.portal-main .act-user-create-panel{padding:24px 26px!important;max-width:1000px;overflow:visible!important}
+.act-user-section-heading{display:flex;align-items:baseline;justify-content:space-between;gap:15px;margin-bottom:15px}
+.act-user-section-heading h2{font-size:15px;margin:0;color:#204d36;font-weight:830;letter-spacing:-.01em}
+.act-user-section-heading>span{font-size:11px;color:#819183}
+.act-user-password-heading{border-top:1px solid #e4ebe5;margin-top:22px;padding-top:20px}
+.act-user-fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));column-gap:18px;row-gap:15px}
+.act-user-field{min-width:0;margin:0!important}
+.portal-main .act-user-field label{font-size:11px;color:#355542;font-weight:800;display:block;margin-bottom:7px}
+.portal-main .act-user-field input,.portal-main .act-user-field select{font-size:12px;height:42px;min-height:42px;width:100%;padding:10px 12px;border:1px solid #c7d7cb;background:#fff;border-radius:0;box-shadow:none}
+.portal-main .act-user-field input:focus,.portal-main .act-user-field select:focus{border-color:#397955;outline:2px solid #3979551c}
+.act-user-field small{display:block;color:#7b8b7c;font-size:10px;line-height:1.6;margin-top:6px}
+.act-user-field[hidden]{display:none!important}
+.act-user-field-wide{grid-column:1/-1}
+.act-user-actions{display:flex;align-items:center;justify-content:flex-end;gap:10px;margin-top:24px;padding-top:17px;border-top:1px solid #e4ebe5}
+.act-user-actions .btn,.act-user-actions .btn-outline{height:41px;min-height:41px;padding:10px 17px;font-size:12px}
+.portal-main .act-user-field .ts-wrapper.multi .ts-control,.portal-main .act-user-field .ts-wrapper.multi.input-active .ts-control{border:1px solid #c7d7cb!important;border-radius:0!important;background:#fff;box-shadow:none!important;min-height:42px;height:auto;padding:6px 9px!important;font-size:12px;gap:5px}
+.portal-main .act-user-field .ts-wrapper.multi .ts-control .item{background:#e8f2e9!important;color:#215c3b!important;border:1px solid #cce0d0!important;border-radius:0!important;font-weight:690;font-size:11px;padding:5px 8px;line-height:1.3;white-space:nowrap}
+.act-user-field .ts-wrapper.multi .ts-control .item .remove{color:#376e4b!important;border-left:1px solid #c4d7c8!important;padding:4px 7px!important;font-size:15px!important}
+.act-user-field .ts-dropdown{z-index:130;max-height:260px!important}
+.act-user-field .ts-dropdown .option{font-size:12px}
+.act-user-field .ts-control>input{height:24px!important;min-width:115px!important;font-size:12px!important}
+.act-user-dialog{width:min(660px,calc(100vw - 32px));max-height:calc(100vh - 50px);overflow-y:auto;padding:0;border:1px solid #d0dfd2;border-radius:0;box-shadow:none;background:#fff;color:#223c2c}
+.act-user-dialog::backdrop{background:#09281bd0}
+.act-user-dialog-head{display:flex;justify-content:space-between;align-items:start;padding:22px 24px 16px;border-bottom:1px solid #e3ece4}
+.act-user-dialog-head .eyebrow{margin:0 0 5px;font-size:9px}
+.act-user-dialog-head h2{font-size:21px;letter-spacing:-.03em;margin:0}
+.portal-main .act-user-dialog-close{border:1px solid #d9e3dc!important;background:#fff!important;color:#486851!important;width:32px;height:32px;padding:0!important}
+.act-user-dialog form{padding:20px 24px 22px}
+.act-user-dialog .act-user-actions{margin-top:18px}
+@media(max-width:700px){
+ .act-staff-toolbar{align-items:stretch;flex-direction:column;gap:9px}
+ .act-staff-search{max-width:none}
+ .portal-main .act-user-create-panel{padding:18px!important}
+ .act-user-fields{grid-template-columns:1fr}
+ .act-user-field-wide{grid-column:auto}
+ .act-user-section-heading{align-items:start;flex-direction:column;gap:4px}
+ .act-user-dialog-head{padding:17px}
+ .act-user-dialog form{padding:16px}
+ .act-user-actions{justify-content:stretch;flex-wrap:wrap}
+ .act-user-actions>*{flex:1}
+}

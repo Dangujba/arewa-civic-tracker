@@ -60,6 +60,7 @@ Route::middleware(['auth',EnsurePasswordIsChanged::class])->group(function(){
         Route::get('/users/create',[UserController::class,'create'])->name('users.create');
         Route::post('/users',[UserController::class,'store'])->name('users.store');
         Route::put('/users/{user}',[UserController::class,'update'])->name('users.update');
+        Route::delete('/users/{user}',[UserController::class,'destroy'])->name('users.destroy');
         Route::get('/sectors',[SectorController::class,'index'])->name('sectors.index');
         Route::post('/sectors',[SectorController::class,'store'])->name('sectors.store');
         Route::put('/sectors/{sector}',[SectorController::class,'update'])->name('sectors.update');
