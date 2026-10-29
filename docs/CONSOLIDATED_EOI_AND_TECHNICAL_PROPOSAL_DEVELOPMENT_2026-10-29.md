@@ -45,7 +45,7 @@ The EOI also names three design-stage outputs. These are not extra runtime modul
 
 | ID | Unified requirement | Already developed | Remaining development |
 |---|---|---|---|
-| P01 | **Native Android and offline reliability** | Native Kotlin/Compose project, authentication API, encrypted offline data/outbox, synchronization logic and QA debug build work | Finish native report/evidence flows, camera/GPS, photo size reduction, sync/retry/expiry recovery, installable final release and supporting app UX. Physical device UAT is a subsequent stage. |
+| P01 | **Native Android and offline reliability** | Kotlin/Compose project, encrypted draft/evidence queue, camera and GPS, offline draft recovery/editing, JPEG size reduction, interrupted-upload recovery, token re-authentication, stable submission IDs; **v0.2.0 signed debug APK built and privately distributed from the administrator sidebar** | Production signing by RAWYOD and physical-device validation remain separate release/acceptance tasks. Full native report post-submission editing is not yet available. |
 | P02 | **Case resolution and closure** | Progress supports resolved/completed; follow-up events and reviewer state machine exist | Establish distinct Closed/Resolved lifecycle, closure reasons, re-open behavior if agreed, authorized actor and audit history |
 | P03 | **Configurable reference/master data** | 17 LGAs and administrator-managed sectors | Administrator-managed community options, report categories and relevant status options, preserving safeguards against arbitrary changes to review state machine |
 | P04 | **Comprehensive activity/change audit** | Login/logout, user, review, assignment, follow-up and progress events exist | Field-by-field report change history/version ledger, complete sensitive administrative audit coverage |
@@ -61,10 +61,20 @@ The EOI also names three design-stage outputs. These are not extra runtime modul
 | M01 | **Post-submission report field editing with version-aware history** | Clarification, progress and follow-up notes exist, but they do not modify prior report fields as an auditable revision | Add authorized report revisions, old/new field snapshots, change reason, reviewer and approval safeguards, immutable history and UI/API paths |
 | M02 | **Warning about potentially similar existing reports** | Idempotency protects repeated submission IDs; no semantic near-duplicate warning is established | Suggest potentially matching cases based on report type, LGA/community, title, date and other features before submission; allow valid distinct cases |
 
+## Native Android v0.2.0 delivery update (29 October 2026)
+
+- Native debug APK successfully compiled with JDK 17 and Android SDK Platform 36; eight native JVM unit tests passed.
+- Debug APK SHA-256: `f6e28addb0117163b6dc4370b061f3462f175f2b39ceff51abd89b015e1e5dc1`; size: 11,694,776 bytes.
+- Administrator-only authenticated download: `https://arewa.kasua.ng/admin/native/android-debug`; regular focal personnel and unauthenticated visitors cannot download it.
+- Laravel test suite: 79 passed with 640 assertions, including route access protection.
+- Source code: native Android `v0.2.0`, with offline draft editing, encrypted attachments, photo optimization, WorkManager claim and retry handling, and token reauthentication.
+- This is **debug-signed only**, not a RAWYOD signed production release. Physical-phone testing, installation, GPS/camera permission behavior, prolonged offline recovery, Android battery restriction effects, and field acceptance remain outstanding.
+- Staging host API is still `https://arewa.kasua.ng/api/v1/`; production must use the approved domain and a RAWYOD-owned signing key.
+
 ## D. Recommended software implementation order
 
 1. Full report editing and version-aware audit trail (**M01** and **P04**).
-2. Native Android completion with offline and evidence flows (**P01**).
+2. Native Android device validation and production signing following the now-built v0.2.0 debug APK (**P01**, release/acceptance stage).
 3. Similar-report suggestions that are distinct from idempotency checks (**M02**).
 4. Formal resolution/closure workflow (**P02**).
 5. Configurable master data, with state-machine safety (**P03**).
