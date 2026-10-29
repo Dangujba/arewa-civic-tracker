@@ -38,6 +38,20 @@ class FieldViewModel(application: Application) : AndroidViewModel(application) {
     var userId by mutableStateOf(app.store.userId())
         private set
     var message by mutableStateOf("")
+    var refreshingReports by mutableStateOf(false)
+        private set
+    var refreshingCatalog by mutableStateOf(false)
+        private set
+    var account by mutableStateOf(app.store.account() ?: app.store.user() ?: JSONObject())
+        private set
+    var twoFactorSecret by mutableStateOf("")
+        private set
+    var recoveryCodes by mutableStateOf(emptyList<String>())
+        private set
+    var offlinePinEnabled by mutableStateOf(app.store.offlinePinEnabled())
+        private set
+    private var offlineUnlocked=false
+    private var pinFailures=0
         private set
     var busy by mutableStateOf(false)
         private set
@@ -55,7 +69,8 @@ class FieldViewModel(application: Application) : AndroidViewModel(application) {
         private set
     var drafts by mutableStateOf(emptyList<Draft>())
         private set
-    var reports by mutableStateOf(emptyList<ReportRow>())
+    var reports by mutableStateOf(readReports(app.store.reports()))
+        private set
         private set
     var selectedReport by mutableStateOf<ReportDetails?>(null)
         private set
@@ -68,17 +83,20 @@ class FieldViewModel(application: Application) : AndroidViewModel(application) {
     var fingerprintEnabled by mutableStateOf(app.store.fingerprintEnabled())
         private set
     var isBiometricLocked by mutableStateOf(
-        fingerprintEnabled && userId!=null && app.store.token()!=null
+        (fingerprintEnabled || offlinePinEnabled) && userId!=null && app.store.token()!=null
     )
         private set
 
     /** Sensitive screens must stay hidden after the activity leaves the foreground. */
     fun lockOnBackground() {
-        if(fingerprintEnabled && userId!=null && !requiresAuthentication) isBiometricLocked=true
+        if((fingerprintEnabled || offlinePinEnabled) && userId!=null && !requiresAuthentication) isBiometricLocked=true
     }
     fun unlockWithFingerprint() {
-        if(fingerprintEnabled && userId!=null && !requiresAuthentication && app.store.token()!=null)
+        if(fingerprintEnabled && userId!=null) {
+            offlineUnlocked=true
+            requiresAuthentication=false
             isBiometricLocked=false
+        }
     }
     fun changeFingerprintSetting(enabled:Boolean) {
         if(userId==null || requiresAuthentication) return
@@ -89,12 +107,49 @@ class FieldViewModel(application: Application) : AndroidViewModel(application) {
           else "Fingerprint lock disabled."
     }
 
+    fun unlockWithPin(pin:String) {
+        if(!offlinePinEnabled || userId==null) return
+        if(pinFailures>=5){message="Too many incorrect PIN attempts. Sign in online.";return}
+        if(app.store.verifyOfflinePin(pin)) {
+            pinFailures=0;offlineUnlocked=true;requiresAuthentication=false;isBiometricLocked=false
+            message="Offline access unlocked."
+        } else {
+            pinFailures++
+            message=if(pinFailures>=5)"Too many attempts. Sign in online." else "Incorrect offline PIN."
+        }
+    }
+    fun enableOfflinePin(pin:String,confirm:String) {
+        if(pin!=confirm) {message="PINs do not match.";return}
+        if(pin.length !in 6..12 || !pin.all(Char::isDigit)) {message="Choose a 6 to 12 digit PIN.";return}
+        viewModelScope.launch {
+            busy=true
+            try {
+                kotlinx.coroutines.withContext(Dispatchers.Default){app.store.setOfflinePin(pin)}
+                offlinePinEnabled=true;message="Offline PIN enabled for this device."
+            } catch(e:Exception){message=e.message ?: "Unable to save offline PIN"}
+            finally{busy=false}
+        }
+    }
+    fun removeOfflinePin(pin:String) {
+        if(!app.store.verifyOfflinePin(pin)) {message="Enter your current offline PIN.";return}
+        app.store.removeOfflinePin();offlinePinEnabled=false
+        message="Offline PIN removed."
+    }
+    private fun readReports(json:JSONObject?):List<ReportRow> {
+        val rows=json?.optJSONArray("reports") ?: return emptyList()
+        return (0 until rows.length()).map {i->rows.getJSONObject(i).let {
+            ReportRow(it.getLong("id"),it.optString("reference"),it.optString("title"),it.optString("verification_status"))
+        }}
+    }
     private var observing: Job? = null
 
     init {
         parseCatalog(app.store.catalog())
         observe()
-        if (userId != null) refreshCatalog()
+        if (userId != null) {
+            refreshCatalog()
+            refreshProfile()
+        }
     }
 
     private fun parseCatalog(json: JSONObject?) {
@@ -157,7 +212,7 @@ class FieldViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun checkAuthentication() {
-        if(userId!=null && app.store.token()==null)requiresAuthentication=true
+        if(userId!=null && app.store.token()==null && !offlineUnlocked)requiresAuthentication=true
     }
 
     fun beginReauthentication() {
@@ -169,10 +224,10 @@ class FieldViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     private fun networkError(error: Exception): String = when(error) {
-        is UnknownHostException ->
-            "Cannot reach the Arewa server. Check mobile data, Wi-Fi or Private DNS settings."
-        is SocketTimeoutException -> "Connection timed out. Check your internet and retry."
-        else -> error.message ?: "Unable to sign in."
+        is UnknownHostException, is SocketTimeoutException, is java.net.ConnectException ->
+            "Server unavailable. You can work with saved offline data."
+        else -> if(error is ApiFailure) error.message?.take(160) ?: "Request failed"
+            else "Connection unavailable. You can continue with saved offline data."
     }
 
     fun login(email: String, password: String) {
@@ -223,8 +278,12 @@ class FieldViewModel(application: Application) : AndroidViewModel(application) {
         requiresAuthentication=false
         isBiometricLocked=false
         fingerprintEnabled=app.store.fingerprintEnabled()
+        offlinePinEnabled=app.store.offlinePinEnabled()
+        offlineUnlocked=true
         loginChallenge=null
         userName=user.optString("name");userId=user.optLong("id")
+        account=user
+        app.store.cacheAccount(user)
         observe()
         try {
             val catalog=app.api.bootstrap(token)
@@ -232,18 +291,83 @@ class FieldViewModel(application: Application) : AndroidViewModel(application) {
         } catch(e:Exception) {
             message="Signed in. Assigned areas will refresh when connected."
         }
+        refreshProfile()
+        refreshReports()
         SyncScheduler.enqueue(app)
     }
 
     fun refreshCatalog() {
         val token=app.store.token() ?: return
         viewModelScope.launch {
+            refreshingCatalog=true
             try {
                 val catalog=app.api.bootstrap(token)
                 app.store.cacheCatalog(catalog);parseCatalog(catalog)
             } catch (e: Exception) {
-                if (app.store.catalog()==null)message="Connect to internet to retrieve your assigned LGAs."
-            }
+                if (app.store.catalog()==null)message="Sign in online once to load your assigned LGAs."
+            } finally {refreshingCatalog=false}
+        }
+    }
+
+    fun refreshProfile() {
+        val token=app.store.token() ?: return
+        viewModelScope.launch {
+            refreshingCatalog=true
+            try {
+                val p=app.api.profile(token).getJSONObject("user")
+                account=p;app.store.cacheAccount(p)
+            } catch(_:Exception) {} finally {refreshingCatalog=false}
+        }
+    }
+    fun changePassword(current:String,next:String,confirmation:String) {
+        if(next!=confirmation){message="New passwords do not match.";return}
+        if(next.length<10){message="Use at least 10 characters.";return}
+        val token=app.store.token() ?: run{message="Connect and sign in to change your password.";return}
+        viewModelScope.launch {
+            busy=true
+            try { app.api.changePassword(token,current,next)
+                message="Password updated successfully."
+            }catch(e:Exception){message=networkError(e)}
+            finally {busy=false}
+        }
+    }
+    fun beginTwoFactor(password:String) {
+        val token=app.store.token() ?: run{message="Connect to set up two-factor authentication.";return}
+        viewModelScope.launch {
+            busy=true;twoFactorSecret="";recoveryCodes=emptyList()
+            try {
+                val result=app.api.startTwoFactor(token,password)
+                twoFactorSecret=result.getString("secret")
+                message="Enter the setup key in your authenticator, then confirm its 6-digit code."
+            }catch(e:Exception){message=networkError(e)}finally{busy=false}
+        }
+    }
+    fun confirmTwoFactor(code:String) {
+        val token=app.store.token() ?: return
+        viewModelScope.launch {
+            busy=true
+            try {
+                val result=app.api.confirmTwoFactor(token,code)
+                val codes=result.getJSONArray("recovery_codes")
+                recoveryCodes=(0 until codes.length()).map{codes.getString(it)}
+                twoFactorSecret=""
+                account=JSONObject(account.toString()).put("two_factor_enabled",true)
+                app.store.cacheAccount(account)
+                message="2FA enabled. Save the one-time recovery codes in a safe place."
+            }catch(e:Exception){message=networkError(e)}finally{busy=false}
+        }
+    }
+    fun disableTwoFactor(password:String,code:String) {
+        val token=app.store.token() ?: run{message="Connect to disable two-factor authentication.";return}
+        viewModelScope.launch {
+            busy=true
+            try {
+                app.api.disableTwoFactor(token,password,code)
+                recoveryCodes=emptyList();twoFactorSecret=""
+                account=JSONObject(account.toString()).put("two_factor_enabled",false)
+                app.store.cacheAccount(account)
+                message="Two-factor authentication disabled."
+            }catch(e:Exception){message=networkError(e)}finally{busy=false}
         }
     }
 
@@ -261,6 +385,8 @@ class FieldViewModel(application: Application) : AndroidViewModel(application) {
             app.store.clearSession()
             userName="";userId=null;lgas=emptyList();sectors=emptyList()
             reports=emptyList();selectedReport=null;observing?.cancel();drafts=emptyList()
+            account=JSONObject();offlinePinEnabled=false;offlineUnlocked=false
+            twoFactorSecret="";recoveryCodes=emptyList()
             restoredDraft=null;attachments=emptyList();requiresAuthentication=false
             fingerprintEnabled=false;isBiometricLocked=false
             message="Signed out."
@@ -372,25 +498,39 @@ class FieldViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun refreshReports() {
-        val token=app.store.token() ?: run { message="Please sign in";return }
+        if(refreshingReports)return
+        val token=app.store.token() ?: run {
+            message="Showing saved reports. Sign in online to refresh.";return
+        }
         viewModelScope.launch {
+            refreshingReports=true
             try {
-                val rows=app.api.reports(token).getJSONArray("reports")
-                reports=(0 until rows.length()).map { i ->
-                    rows.getJSONObject(i).let {
-                        ReportRow(it.getLong("id"),it.optString("reference"),
-                            it.optString("title"),it.optString("verification_status"))
-                    }
-                }
-            }catch(e:Exception){message=e.message ?: "Connect to refresh submitted reports"}
+                val response=app.api.reports(token)
+                app.store.cacheReports(response)
+                reports=readReports(response)
+                message="Reports updated."
+            }catch(e:Exception){
+                message="Offline: showing last saved reports."
+            }finally {refreshingReports=false}
         }
     }
 
     fun selectReport(id: Long) {
-        val token=app.store.token() ?: return
+        val token=app.store.token()
+        if(token==null) {
+            val cached=app.store.report(id)
+            if(cached!=null) {
+                val item=cached.getJSONObject("report")
+                selectedReport=ReportDetails(id,item.optString("reference"),item.optString("title"),
+                    item.optString("verification_status"),item.optString("description"),emptyList(),
+                    cached.optJSONObject("fields") ?: JSONObject(),cached.optInt("version",0),false)
+            }else message="Open this report online once to save its details."
+            return
+        }
         viewModelScope.launch {
             try {
                 val response=app.api.report(token,id)
+                app.store.cacheReport(id,response)
                 val item=response.getJSONObject("report")
                 val follows=item.optJSONArray("followups")
                 selectedReport=ReportDetails(id,item.optString("reference"),item.optString("title"),
@@ -399,7 +539,20 @@ class FieldViewModel(application: Application) : AndroidViewModel(application) {
                         .map { follows.getJSONObject(it).optString("note") },
                     response.optJSONObject("fields") ?: JSONObject(),
                     response.optInt("version",0),response.optBoolean("editable",false))
-            } catch(e:Exception){message=e.message ?: "Cannot load report"}
+            } catch(e:Exception){
+                val saved=app.store.report(id)
+                if(saved!=null){
+                    val item=saved.getJSONObject("report")
+                    val follows=item.optJSONArray("followups")
+                    selectedReport=ReportDetails(id,item.optString("reference"),item.optString("title"),
+                        item.optString("verification_status"),item.optString("description"),
+                        if(follows==null) emptyList() else (0 until follows.length())
+                            .map{follows.getJSONObject(it).optString("note")},
+                        saved.optJSONObject("fields") ?: JSONObject(),
+                        saved.optInt("version",0),false)
+                    message="Showing last saved report."
+                }else message="This report has not been saved on this device."
+            }
         }
     }
 
