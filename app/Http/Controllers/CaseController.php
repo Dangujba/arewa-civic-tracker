@@ -45,7 +45,7 @@ class CaseController extends Controller {
         if($r->expectsJson()){return response()->json(['id'=>$case->id,'reference'=>$case->reference,'verification_status'=>$case->verification_status,'message'=>'Report submitted successfully.','redirect'=>route('cases.show',$case)],201);}
         return redirect()->route('cases.show',$case)->with('message','Report submitted: '.$case->reference);
     }
-    public function show(Request $r,CivicCase $case){$r->user()->can('view',$case)||abort(403);return view('cases.show',['case'=>$case->load(['lga','sector','events.actor','followups','evidence','reviewer']),'allowedTransitions'=>app(CaseReviewService::class)->allowedTransitions($r->user(),$case),'reviewers'=>$r->user()->isAdmin()?User::where('role','meal')->where('is_active',true)->orderBy('name')->get():collect()]);}
+    public function show(Request $r,CivicCase $case){$r->user()->can('view',$case)||abort(403);return view('cases.show',['case'=>$case->load(['lga','sector','events.actor','revisions.actor','followups','evidence','reviewer']),'allowedTransitions'=>app(CaseReviewService::class)->allowedTransitions($r->user(),$case),'reviewers'=>$r->user()->isAdmin()?User::where('role','meal')->where('is_active',true)->orderBy('name')->get():collect()]);}
     public function review(Request $r,CivicCase $case,CaseReviewService $service){
         $r->user()->can('review',$case)||abort(403);
         $data=$r->validate(['status'=>['required','in:under_review,clarification_requested,verified,approved,rejected'],'comment'=>['nullable','string','max:5000']]);

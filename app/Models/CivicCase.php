@@ -10,6 +10,7 @@ class CivicCase extends Model {
     public function lga(){return $this->belongsTo(Lga::class);}
     public function sector(){return $this->belongsTo(Sector::class);}
     public function evidence(){return $this->hasMany(CaseEvidence::class,'case_id');}
+    public function revisions(){return $this->hasMany(CaseRevision::class,'case_id')->orderByDesc('version');}
     public function events(){return $this->hasMany(CaseEvent::class,'case_id')->orderBy('created_at');}
     public function followups(){return $this->hasMany(CaseFollowup::class,'case_id')->orderBy('created_at');}
     public function scopeVisibleTo($query,User $user){if($user->isAdmin())return $query;
