@@ -15,7 +15,7 @@ Civic monitoring, public project reporting and evidence verification for **Roadm
 - Evidence-aware mobile report form with image/PDF attachments, permission-based editable GPS coordinates, local image compression and offline evidence outbox
 - Optional authenticator-app two-factor sign-in with secure QR setup, one-time recovery codes and account security controls
 
-**Development status (29 October 2026):** The EOI and technical-proposal development baseline is implemented, including the final six closing items. The isolated Laravel suite passed **110 tests, 799 assertions**. This is not RAWYOD acceptance. The staging Android v0.3.2 debug APK is publicly downloadable at https://arewa.kasua.ng/download/android without website login. Native app access still requires authorized staff credentials. Production signing, physical-device offline acceptance and final deployment remain separate work.
+**Development status (29 October 2026):** The EOI and technical-proposal development baseline is implemented, including the final six closing items. The isolated Laravel suite passed **110 tests, 799 assertions**. This is not RAWYOD acceptance. The staging Android v0.3.3 debug APK is publicly downloadable at https://arewa.kasua.ng/download/android without website login. Native app access still requires authorized staff credentials. Production signing, physical-device offline acceptance and final deployment remain separate work.
 
 ## Development deliverables
 
@@ -62,3 +62,7 @@ RAWYOD acceptance, ownership and handover requirements are governed by the signe
 - The responsive browser's optional offline evidence queue can retain data in local browser storage; avoid sensitive field drafts on shared devices. The separate **native Android app** encrypts local report drafts and evidence using Android Keystore AES-GCM, with server authentication required before upload. Device lifecycle, retention and real-device acceptance must still be confirmed before production.
 - 2FA secrets and recovery-code hashes are stored in encrypted database fields. The initial admin account is not automatically enrolled in 2FA.
 - The management XLSX export is limited to 10,000 filtered records and the PDF summary prints up to 150 records alongside an aggregate total. Both require authenticated review permissions.
+
+### Public transparency view
+
+The read-only `/transparency` page is open to everyone, with no registration. Staff administrators explicitly publish approved report metadata using the case-detail publication control. Unpublished and unapproved reports stay private, while edits to public fields withdraw visibility until republished. The map uses approximate coordinates, with private evidence and staff identities excluded. The Android v0.3.3 login screen offers **Browse public reports** for anonymous use of the same view.
