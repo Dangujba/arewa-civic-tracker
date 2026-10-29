@@ -19,6 +19,7 @@ class ReviewAssignmentController extends Controller {
    $locked->reviewer_id=$data['reviewer_id']??null;
    $locked->review_due_at=($data['reviewer_id']??null)
     ?($data['review_due_at']??now()->addDays(OrganizationSetting::reviewDays())):null;
+   $locked->review_last_notified_on=null;
    $locked->save();
    CaseEvent::create(['case_id'=>$locked->id,'actor_id'=>$r->user()->id,
     'event_type'=>'reviewer_assigned','comment'=>'Reviewer assignment updated.']);
@@ -26,6 +27,12 @@ class ReviewAssignmentController extends Controller {
     'previous_reviewer_id'=>$previous,'reviewer_id'=>$locked->reviewer_id,
     'review_due_at'=>$locked->review_due_at?->toDateTimeString()]);
   });
+  $updated=$case->fresh();
+  if($updated->reviewer_id && $updated->reviewer?->is_active) {
+   $updated->reviewer->notify(new \App\Notifications\CaseActionNotification(
+    $updated->id,$updated->reference,'New review assignment',
+    'This report was assigned to you. Review due: '.($updated->review_due_at?->format('d M Y')??'Not specified')));
+  }
   return redirect()->route('cases.show',$case)->with('message','Reviewer assignment updated.');
  }
 }

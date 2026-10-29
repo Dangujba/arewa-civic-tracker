@@ -1,0 +1,12 @@
+node_modules/
+dist/
+.gradle/
+android/.gradle/
+android/local.properties
+android/.idea/
+android/build/
+android/app/build/
+*.apk
+*.aab
+
+android/

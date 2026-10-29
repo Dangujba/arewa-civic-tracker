@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AccountController;
 use App\Http\Controllers\ReportsController;
 use App\Http\Controllers\TwoFactorController;
+use App\Http\Controllers\NotificationController;
 use App\Http\Middleware\EnsurePasswordIsChanged;
 Route::view('/','welcome')->name('home');
 Route::middleware('guest')->group(function(){
@@ -32,6 +33,8 @@ Route::middleware(['auth',EnsurePasswordIsChanged::class])->group(function(){
     Route::get('/reviews/queue',[CaseController::class,'queue'])->name('cases.queue');
     Route::post('/logout',[AuthController::class,'logout'])->name('logout');
     Route::get('/dashboard',[DashboardController::class,'index'])->name('dashboard');
+    Route::get('/notifications',[NotificationController::class,'index'])->name('notifications.index');
+    Route::post('/notifications/{id}/read',[NotificationController::class,'read'])->name('notifications.read');
     Route::get('/reports/analytics',[ReportsController::class,'index'])->name('reports.index');
     Route::get('/reports/export.xlsx',[ReportsController::class,'excel'])->name('reports.excel');
     Route::get('/reports/export.pdf',[ReportsController::class,'pdf'])->name('reports.pdf');

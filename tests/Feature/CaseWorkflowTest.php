@@ -14,6 +14,7 @@ class CaseWorkflowTest extends TestCase {
     private function payload():array{
         $l=Lga::firstOrCreate(['name'=>'Damaturu'],['code'=>'DAM']);
         $s=Sector::firstOrCreate(['name'=>'Health']);
+        User::where('role','focal')->get()->each(fn($u)=>$u->assignedLgas()->syncWithoutDetaching([$l->id]));
         return ['client_submission_id'=>(string)Str::uuid(),'type'=>'governance_issue','title'=>'Sample reported observation','description'=>'A labelled synthetic test submission for report validation','lga_id'=>$l->id,'community'=>'TEST ONLY','sector_id'=>$s->id,'observation_date'=>now()->toDateString(),'progress_status'=>'observed'];
     }
     public function test_focal_can_submit_and_duplicate_idempotently():void{

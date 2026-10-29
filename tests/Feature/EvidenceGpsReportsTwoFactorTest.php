@@ -23,6 +23,7 @@ class EvidenceGpsReportsTwoFactorTest extends TestCase
  private function payload():array{
   $lga=Lga::firstOrCreate(['name'=>'Damaturu'],['code'=>'DAM']);
   $sector=Sector::firstOrCreate(['name'=>'Health']);
+  User::where('role','focal')->get()->each(fn($u)=>$u->assignedLgas()->syncWithoutDetaching([$lga->id]));
   return [
    'client_submission_id'=>(string)Str::uuid(), 'type'=>'public_project',
    'title'=>'QA synthetic building inspection','description'=>'This is an isolated QA report with captured evidence.',

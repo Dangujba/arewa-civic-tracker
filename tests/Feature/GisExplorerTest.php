@@ -29,6 +29,7 @@ class GisExplorerTest extends TestCase
     {
         $lga = Lga::firstOrCreate(['name'=>'Damaturu'], ['code'=>'DAM']);
         $sector = Sector::firstOrCreate(['name'=>'Health']);
+        if($user->role==='focal')$user->assignedLgas()->syncWithoutDetaching([$lga->id]);
         $r = $this->actingAs($user)->postJson('/cases', [
             'client_submission_id'=>(string)Str::uuid(),
             'type'=>$type,

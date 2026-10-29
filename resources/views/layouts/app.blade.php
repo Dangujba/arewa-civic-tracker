@@ -52,6 +52,7 @@
       <a href="{{ route('admin.sectors.index') }}" class="portal-nav-link {{ request()->routeIs('admin.sectors.*')?'active':'' }}" @if(request()->routeIs('admin.sectors.*')) aria-current="page" @endif><i class="fa-solid fa-layer-group" aria-hidden="true"></i><span class="sidebar-label">Monitoring sectors</span></a>
       @endif
       <span class="portal-nav-section">Account</span>
+      <a href="{{ route('notifications.index') }}" class="portal-nav-link {{ request()->routeIs('notifications.*')?'active':'' }}"><i class="fa-regular fa-bell" aria-hidden="true"></i><span class="sidebar-label">Notifications @if(auth()->user()->unreadNotifications()->exists())<strong>({{ auth()->user()->unreadNotifications()->count() }})</strong>@endif</span></a>
       <a href="{{ route('account.password.form') }}" class="portal-nav-link {{ request()->routeIs('account.*')?'active':'' }}" @if(request()->routeIs('account.*')) aria-current="page" @endif><i class="fa-solid fa-shield-halved" aria-hidden="true"></i><span class="sidebar-label">Security settings</span></a>
       <a href="{{ route('home') }}" class="portal-nav-link"><i class="fa-solid fa-arrow-up-right-from-square" aria-hidden="true"></i><span class="sidebar-label">Public website</span></a>
     </nav>

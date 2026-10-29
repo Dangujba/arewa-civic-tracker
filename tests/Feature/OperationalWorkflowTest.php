@@ -51,6 +51,7 @@ class OperationalWorkflowTest extends TestCase
         $this->assertFalse($focal->must_change_password);
         $this->actingAs($focal)->get('/cases/new')->assertOk();
         $lga=Lga::firstOrCreate(['name'=>'Damaturu'],['code'=>'DAM']);
+        $focal->assignedLgas()->sync([$lga->id]);
         $sector=Sector::firstOrCreate(['name'=>'Education']);
         $payload=[
             'client_submission_id'=>(string)Str::uuid(),

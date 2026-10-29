@@ -30,6 +30,10 @@ class CaseReviewService {
             if(in_array($to,['rejected','clarification_requested'],true) && !$comment){throw ValidationException::withMessages(['comment'=>'A written reason is required.']);}
             $locked->verification_status=$to;$locked->save();
             CaseEvent::create(['case_id'=>$locked->id,'actor_id'=>$actor->id,'event_type'=>'review_status_changed','from_status'=>$from,'to_status'=>$to,'comment'=>$comment]);
+            if($to==='clarification_requested' && $locked->reporter?->is_active)
+                $locked->reporter->notify(new \App\Notifications\CaseActionNotification(
+                  $locked->id,$locked->reference,'Clarification requested',
+                  'Your report requires a response from the field.'));
             return $locked;
         });
     }

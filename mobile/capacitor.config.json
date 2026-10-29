@@ -1,0 +1,8 @@
+{
+  "appId": "ng.org.rawyod.arewa",
+  "appName": "Arewa Civic Tracker",
+  "webDir": "dist",
+  "android": {
+    "allowMixedContent": false
+  }
+}

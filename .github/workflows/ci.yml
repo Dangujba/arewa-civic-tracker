@@ -49,6 +49,10 @@ jobs:
         run: npm ci --no-audit --no-fund
       - name: Build frontend and locally bundled icon assets
         run: npm run build
+      - name: Verify Android field bundle
+        run: |
+          npm ci --prefix mobile --no-audit --no-fund
+          npm run build --prefix mobile
       - name: Verify JavaScript syntax
         run: |
           node --check public/js/act-sidebar.js

@@ -92,4 +92,63 @@ class RoleOperationsTest extends TestCase {
   $this->get('/account/security')->assertOk();
   $this->actingAs($admin)->get('/dashboard')->assertOk();
  }
+
+ public function test_unassigned_focal_cannot_submit_until_lga_assigned():void{
+  $officer=$this->staff('focal');
+  $lga=Lga::firstOrCreate(['name'=>'Damaturu'],['code'=>'DAM']);
+  $sector=Sector::firstOrCreate(['name'=>'Education']);
+  $this->actingAs($officer)->get('/cases/new')->assertOk()
+   ->assertSee('You have not been assigned an LGA');
+  $payload=['client_submission_id'=>(string)Str::uuid(),'type'=>'public_project',
+   'title'=>'Synthetic unassigned focal report',
+   'description'=>'An unassigned focal officer must be blocked by the server.',
+   'lga_id'=>$lga->id,'sector_id'=>$sector->id,'community'=>'QA',
+   'observation_date'=>today()->toDateString(),'progress_status'=>'ongoing'];
+  $this->postJson('/cases',$payload)->assertUnprocessable()->assertJsonValidationErrors('lga_id');
+  $this->assertDatabaseCount('civic_cases',0);
+ }
+
+ public function test_assigned_meal_is_the_only_meal_allowed_case_access_and_evidence():void{
+  $admin=$this->staff('admin');$reviewerA=$this->staff('meal');$reviewerB=$this->staff('meal');
+  $focal=$this->staff('focal');
+  $lga=Lga::firstOrCreate(['name'=>'Damaturu'],['code'=>'DAM']);
+  $case=$this->case($focal,$lga);
+  $case->forceFill(['reviewer_id'=>$reviewerA->id,'latitude'=>11.74,'longitude'=>11.96])->save();
+  $this->actingAs($reviewerB)->get('/cases/'.$case->id)->assertForbidden();
+  $this->get('/cases')->assertOk()->assertDontSee($case->reference);
+  $this->getJson('/map/data')->assertOk()->assertJsonCount(0,'features');
+  $this->post('/cases/'.$case->id.'/progress',[
+   'progress_status'=>'completed','note'=>'Unauthorized reviewer update'
+  ])->assertForbidden();
+  $this->post('/cases/'.$case->id.'/evidence',[])->assertForbidden();
+  $this->actingAs($reviewerA)->get('/cases/'.$case->id)->assertOk()->assertSee($case->reference);
+  $this->actingAs($admin)->get('/cases/'.$case->id)->assertOk();
+ }
+
+ public function test_assignment_clarification_and_due_reminders_are_private_and_idempotent():void{
+  $admin=$this->staff('admin');$reviewer=$this->staff('meal');
+  $outsider=$this->staff('meal');$focal=$this->staff('focal');
+  $lga=Lga::firstOrCreate(['name'=>'Damaturu'],['code'=>'DAM']);
+  $case=$this->case($focal,$lga);
+  $this->actingAs($admin)->post('/admin/cases/'.$case->id.'/reviewer',[
+   'reviewer_id'=>$reviewer->id,'review_due_at'=>now()->addDays(2)->toDateString()
+  ])->assertRedirect('/cases/'.$case->id);
+  $this->assertSame(1,$reviewer->notifications()->count());
+  $note=$reviewer->notifications()->firstOrFail();
+  $this->actingAs($outsider)->post('/notifications/'.$note->id.'/read')->assertNotFound();
+  $this->actingAs($reviewer)->get('/notifications')->assertOk()->assertSee('New review assignment');
+  $this->post('/notifications/'.$note->id.'/read')->assertRedirect('/cases/'.$case->id);
+  $this->assertNotNull($note->fresh()->read_at);
+
+  $this->postJson('/cases/'.$case->id.'/review',[
+   'status'=>'clarification_requested','comment'=>'Please upload clearer evidence.'
+  ])->assertOk();
+  $this->assertSame(1,$focal->notifications()->count());
+  $case->forceFill(['review_due_at'=>now()->subDay(),'review_last_notified_on'=>null])->save();
+  \Illuminate\Support\Facades\Artisan::call('act:review-deadlines');
+  $this->assertSame(2,$reviewer->notifications()->count());
+  \Illuminate\Support\Facades\Artisan::call('act:review-deadlines');
+  $this->assertSame(2,$reviewer->notifications()->count());
+ }
+
 }

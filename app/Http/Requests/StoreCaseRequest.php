@@ -14,7 +14,8 @@ class StoreCaseRequest extends FormRequest {
             $user=$this->user();
             if(!$user || $user->role!=='focal')return;
             $assigned=$user->assignedLgas()->pluck('lgas.id')->all();
-            if(count($assigned) && !in_array((int)$value,array_map('intval',$assigned),true))
+            if(!count($assigned))$fail('Your account has no assigned LGA. Contact your RAWYOD Administrator.');
+            elseif(!in_array((int)$value,array_map('intval',$assigned),true))
                 $fail('This local government is not assigned to your field account.');
         }],
         'community'=>['required','string','max:150'],

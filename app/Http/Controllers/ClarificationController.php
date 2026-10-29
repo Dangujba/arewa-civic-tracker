@@ -16,6 +16,10 @@ class ClarificationController extends Controller {
             CaseFollowup::create(['case_id'=>$locked->id,'author_id'=>$r->user()->id,'note'=>$data['response']]);
             $locked->verification_status='under_review';$locked->save();
             CaseEvent::create(['case_id'=>$locked->id,'actor_id'=>$r->user()->id,'event_type'=>'clarification_response','from_status'=>'clarification_requested','to_status'=>'under_review','comment'=>$data['response']]);
+            if($locked->reviewer?->is_active)
+                $locked->reviewer->notify(new \App\Notifications\CaseActionNotification(
+                    $locked->id,$locked->reference,'Field clarification received',
+                    'The focal person has provided a clarification for your review.'));
         });
         return redirect()->route('cases.show',$case)->with('message','Clarification submitted for review.');
     }

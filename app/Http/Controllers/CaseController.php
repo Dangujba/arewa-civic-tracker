@@ -34,7 +34,7 @@ class CaseController extends Controller {
         if(!empty($data['status']))$query->where('verification_status',$data['status']);
         return view('cases.queue',['counts'=>$counts,'cases'=>$query->paginate(20)]);
     }
-    public function create(Request $r){$r->user()->can('create',CivicCase::class)||abort(403);$lgas=$r->user()->role==='focal' && $r->user()->assignedLgas()->exists() ? $r->user()->assignedLgas()->orderBy('lgas.name')->get() : Lga::orderBy('name')->get();return view('cases.create',['lgas'=>$lgas,'sectors'=>Sector::where('is_active',true)->orderBy('name')->get()]);}
+    public function create(Request $r){$r->user()->can('create',CivicCase::class)||abort(403);$lgas=$r->user()->role==='focal' ? $r->user()->assignedLgas()->orderBy('lgas.name')->get() : Lga::orderBy('name')->get();return view('cases.create',['lgas'=>$lgas,'sectors'=>Sector::where('is_active',true)->orderBy('name')->get()]);}
     public function store(StoreCaseRequest $r,CaseSubmissionService $service){
         $data=$r->validated();
         unset($data['evidence']);
