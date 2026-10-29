@@ -28,7 +28,13 @@ final class DataGovernanceController extends Controller
     $preview['audit']=AdminActivityLog::where('created_at','<',now()->subDays($policy->audit_retention_days))->count();
   }
   $base=config('act.backup_dir');
-  $files=$base && is_dir($base) ? glob(rtrim($base,'/').'/arewa-*.tar.gpg') ?: [] : [];
+  // open_basedir raises an ErrorException for paths outside the PHP-FPM
+  // sandbox. Backup inspection must be non-fatal and must not weaken the sandbox.
+  $allowedRoots=array_filter(explode(PATH_SEPARATOR,(string)ini_get('open_basedir')));
+  $canInspect=$base && (!$allowedRoots || collect($allowedRoots)->contains(
+    fn($root)=>str_starts_with(rtrim($base,'/').'/',rtrim($root,'/').'/')
+  ));
+  $files=$canInspect && is_dir($base) ? (glob(rtrim($base,'/').'/arewa-*.tar.gpg') ?: []) : [];
   $latest=null;$lastMtime=0;
   foreach($files as $file){
    $mtime=filemtime($file)?:0;
@@ -38,7 +44,7 @@ final class DataGovernanceController extends Controller
    'policy'=>$policy,'preview'=>$preview,
    'holds'=>CivicCase::where('legal_hold',true)->count(),
    'backup'=>[
-    'exists'=>(bool)$latest,'last_at'=>$latest?\Carbon\Carbon::createFromTimestamp($lastMtime):null,
+    'accessible'=>(bool)$canInspect,'exists'=>(bool)$latest,'last_at'=>$latest?\Carbon\Carbon::createFromTimestamp($lastMtime):null,
     'age_hours'=>$latest?round((time()-$lastMtime)/3600,1):null,'count'=>count($files)
    ],
    'offsite_configured'=>filled(config('act.offsite_backup_dir')),

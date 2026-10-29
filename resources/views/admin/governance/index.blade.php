@@ -5,9 +5,9 @@
 <section class="dash-heading"><div><span class="eyebrow">ADMINISTRATION</span><h1>Data Governance & Backups</h1><p class="muted">Retention policies, legal holds and encrypted backup readiness. Reports and evidence are never automatically deleted.</p></div></section>
 <div class="act-governance-overview">
 <section class="dash-panel"><h2>Retention Policy</h2><strong>{{ $policy?->state==='approved'?'Approved':'Draft / Unapproved' }}</strong><p class="muted">{{ $policy?->approval_reference??'Policy approval reference has not been recorded.' }}</p></section>
-<section class="dash-panel"><h2>Encrypted Backup</h2><strong>{{ $backup['exists']?'Available':'Not Found' }}</strong><p class="muted">@if($backup['last_at'])Latest: {{ $backup['last_at']->timezone('Africa/Lagos')->format('d M Y H:i') }} WAT · {{ $backup['count'] }} snapshot(s)
+<section class="dash-panel"><h2>Encrypted Backup</h2><strong>{{ !$backup['accessible']?'Restricted by server policy':($backup['exists']?'Available':'Not Found') }}</strong><p class="muted">@if($backup['last_at'])Latest: {{ $backup['last_at']->timezone('Africa/Lagos')->format('d M Y H:i') }} WAT · {{ $backup['count'] }} snapshot(s)
 @else
-No snapshot available
+{{ !$backup['accessible']?'Backup directory is outside the PHP web-process sandbox. Backup status is checked by the authorized server operator.':'No snapshot available' }}
 @endif</p></section>
 <section class="dash-panel"><h2>Off-server Backup</h2><strong>{{ $offsite_configured?'Destination Set':'Not Configured' }}</strong><p class="muted">An independent mounted backup location must be supplied by an authorized operator.</p></section>
 <section class="dash-panel"><h2>Legal Holds</h2><strong>{{ $holds }} reports</strong><p class="muted">Hold status is managed from each report's details.</p></section>
