@@ -23,6 +23,7 @@
     toggle.textContent=enabled?'Choose from listed wards':'Ward not listed? Enter manually';
   }
   function populate(reset=false){
+    if(reset)search.value='';
     const selectedLga=lga.value;
     const q=norm(search.value);
     const current=reset?'':select.value;

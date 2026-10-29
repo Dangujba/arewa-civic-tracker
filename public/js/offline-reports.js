@@ -27,7 +27,7 @@ async function optimizedAttachments(){
  validateFiles(originals);
  return originals;
 }
-function loadFields(data){for(const [key,value] of Object.entries(data||{})){const input=form.elements.namedItem(key);if(input&&typeof value==='string')input.value=value}window.dispatchEvent(new CustomEvent('act:ward-restore',{detail:{ward:data?.ward||''}}))}
+function loadFields(data){for(const [key,value] of Object.entries(data||{})){if(key==='ward')continue;const input=form.elements.namedItem(key);if(input&&typeof value==='string')input.value=value}window.dispatchEvent(new CustomEvent('act:ward-restore',{detail:{ward:data?.ward||''}}))}
 async function recoverDraft(){try{const saved=await tx('drafts','readonly',s=>s.get(userId));if(saved?.payload){loadFields(saved.payload);draftFiles=saved.files||[];report(saved.files?.length?'Recovered draft with '+saved.files.length+' stored evidence file(s). Save or submit to synchronize.':'Recovered your local draft.')}else report('Field reporting ready. Reports and evidence can be queued for synchronization.')}catch(e){report(e.message)}}
 async function saveDraft(){try{const files=await optimizedAttachments();await tx('drafts','readwrite',s=>s.put({userId,payload:fields(),files,savedAt:Date.now()}));report('Draft and evidence saved on this device.');toast('Draft saved successfully')}catch(e){report('Draft saving failed: '+e.message)}}
 async function clearDraft(){draftFiles=[];return tx('drafts','readwrite',s=>s.delete(userId))}

@@ -8,7 +8,7 @@
       <option value="{{ $ward->name }}" data-lga="{{ $ward->lga_id }}">{{ $ward->name }}</option>
     @endforeach
   </select>
-  <input class="act-ward-manual" type="text" data-ward-manual maxlength="150" placeholder="Enter ward name" autocomplete="off" disabled hidden>
+  <input class="act-ward-manual" type="text" name="ward" data-ward-manual maxlength="150" placeholder="Enter ward name" autocomplete="off" disabled hidden>
   <button class="act-ward-switch" type="button" data-ward-switch aria-pressed="false">Ward not listed? Enter manually</button>
   <small class="muted">Ward is recorded separately from the community.</small>
 </div>

@@ -29,7 +29,7 @@
  <div id="act-similar-results"></div>
 </section>
 <div style="display:flex;gap:10px;flex-wrap:wrap"><button type="submit" id="submit-btn">Submit report</button><button type="button" class="secondary" id="save-draft">Save on this device</button><button type="button" class="secondary" id="sync-outbox">Sync pending reports</button><button type="button" class="secondary" id="new-report">Start another report</button></div><p class="muted" id="offline-status" role="status">Ready to submit online. Offline drafts are available if needed.</p></form>
-@push('scripts')<script defer src="{{ asset('js/act-similar-reports.js') }}?v=20261029-similar1"></script><script defer src="{{ asset('js/act-report-location.js') }}?v=20261029-ring1"></script><script defer src="{{ asset('js/offline-reports.js') }}?v=20261029-wards1"></script><script defer src="{{ asset('js/act-wards.js') }}?v=20261029-wards1"></script>@endpush
+@push('scripts')<script defer src="{{ asset('js/act-similar-reports.js') }}?v=20261029-similar1"></script><script defer src="{{ asset('js/act-report-location.js') }}?v=20261029-ring1"></script><script defer src="{{ asset('js/offline-reports.js') }}?v=20261029-wards2"></script><script defer src="{{ asset('js/act-wards.js') }}?v=20261029-wards1"></script>@endpush
 @endsection
 
 @push('scripts')<script defer src="{{ asset('js/act-reference-forms.js') }}?v=20261029-master1"></script>@endpush

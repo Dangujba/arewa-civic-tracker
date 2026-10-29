@@ -23,4 +23,4 @@
 </form>
 @endsection
 
-@push('scripts')<script defer src="{{ asset('js/act-reference-forms.js') }}?v=20261029-master1"></script><script defer src="{{ asset('js/act-wards.js') }}?v=20261029-wards1"></script>@endpush
+@push('scripts')<script defer src="{{ asset('js/act-reference-forms.js') }}?v=20261029-master1"></script><script defer src="{{ asset('js/act-wards.js') }}?v=20261029-wards2"></script>@endpush
