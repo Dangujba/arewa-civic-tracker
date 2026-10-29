@@ -14,14 +14,16 @@
 <link rel="stylesheet" href="{{ asset('vendor/ui/sweetalert2.css') }}">
 <link rel="stylesheet" href="{{ asset('css/act-form-polish.css') }}?v=20261029-ring1">
 <link rel="stylesheet" href="{{ asset('css/act-workspace-refinement.css') }}?v=20261029-master1">
+<link rel="stylesheet" href="{{ asset('css/act-accessibility.css') }}?v=20261029-final1">
 <title>@yield('title','Arewa Civic Tracker')</title>@stack('head')
 <script defer src="{{ asset('vendor/ui/tom-select.js') }}"></script>
 <script defer src="{{ asset('vendor/ui/sweetalert2.js') }}"></script>
 <script defer src="{{ asset('js/act-select-dialogs.js') }}?v=20261029"></script>
 <script defer src="{{ asset('js/act-interactions.js') }}?v=20261029-ring1"></script>
-<script defer src="{{ asset('js/act-sidebar.js') }}"></script>
+<script defer src="{{ asset('js/act-sidebar.js') }}?v=20261029-access1"></script>
 </head>
 <body class="@auth has-portal-sidebar @else guest-portal @endauth">
+<a class="act-skip-link" href="#main-content">Skip to main content</a>
 @auth
 <div class="portal-shell" id="portal-shell">
   <aside class="portal-sidebar" id="portal-sidebar" aria-label="Application sidebar">
@@ -52,7 +54,8 @@
       <a href="{{ route('admin.native.android-debug') }}" class="portal-nav-link"><i class="fa-solid fa-mobile-screen-button" aria-hidden="true"></i><span class="sidebar-label">Android App</span></a>
       <a href="{{ route('admin.operations.storage') }}" class="portal-nav-link {{ request()->routeIs('admin.operations.storage*')?'active':'' }}" @if(request()->routeIs('admin.operations.storage*')) aria-current="page" @endif><i class="fa-solid fa-database" aria-hidden="true"></i><span class="sidebar-label">Evidence Storage</span></a>
       <a href="{{ route('admin.operations.audit') }}" class="portal-nav-link {{ request()->routeIs('admin.operations.audit')?'active':'' }}"><i class="fa-solid fa-list-check" aria-hidden="true"></i><span class="sidebar-label">Activity Audit</span></a>
-      <a href="{{ route('admin.reference.index') }}" class="portal-nav-link {{ request()->routeIs('admin.reference.*')?'active':'' }}"><i class="fa-solid fa-list-check" aria-hidden="true"></i><span class="sidebar-label">Reference Data</span></a>
+      <a href="{{ route('admin.governance.index') }}" class="portal-nav-link {{ request()->routeIs('admin.governance.*')?'active':'' }}" @if(request()->routeIs('admin.governance.*')) aria-current="page" @endif><i class="fa-solid fa-shield-halved" aria-hidden="true"></i><span class="sidebar-label">Data Governance</span></a>
+      <a href="{{ route('admin.reference.index') }}" class="portal-nav-link {{ request()->routeIs('admin.reference.*')?'active':'' }}" @if(request()->routeIs('admin.reference.*')) aria-current="page" @endif><i class="fa-solid fa-list-check" aria-hidden="true"></i><span class="sidebar-label">Reference Data</span></a>
       <a href="{{ route('admin.sectors.index') }}" class="portal-nav-link {{ request()->routeIs('admin.sectors.*')?'active':'' }}" @if(request()->routeIs('admin.sectors.*')) aria-current="page" @endif><i class="fa-solid fa-layer-group" aria-hidden="true"></i><span class="sidebar-label">Monitoring Sectors</span></a>
       @endif
       <span class="portal-nav-section">Account</span>
@@ -79,7 +82,7 @@
         <a href="{{ route('account.profile') }}" class="portal-topbar-user" title="My Profile" aria-label="My Profile">@if(auth()->user()->profile_photo_path)<img src="{{ route('account.profile.photo') }}?v={{ auth()->user()->updated_at?->timestamp??0 }}" alt="" width="35" height="35">@else{{ strtoupper(mb_substr(auth()->user()->name,0,1)) }}@endif</a>
       </div>
     </header>
-    <main class="app-main portal-main"><div class="container">
+    <main id="main-content" tabindex="-1" class="app-main portal-main"><div class="container">
       @if(session('message'))<div class="notice" role="status">{{ session('message') }}</div>@endif
       @if($errors->any())<div class="card error" role="alert"><strong>Please correct the following:</strong><ul>@foreach($errors->all() as $err)<li>{{ $err }}</li>@endforeach</ul></div>@endif
       @yield('content')
@@ -92,12 +95,12 @@
 <a class="brand" href="{{ route('home') }}"><img class="portal-logo-image" src="{{ asset('icons/arewa-handdrawn-map.webp') }}" alt="" width="34" height="34"><span class="act-portal-wordmark">arewa.<small>Civic Tracker</small></span></a>
 <nav class="app-nav"><a href="{{ route('home') }}"><i class="fa-solid fa-arrow-left" aria-hidden="true"></i> Back to website</a></nav>
 </div></header>
-<main class="app-main guest-main"><div class="container">
+<main id="main-content" tabindex="-1" class="app-main guest-main"><div class="container">
 @if(session('message'))<div class="notice" role="status">{{ session('message') }}</div>@endif
 @if($errors->any())<div class="card error" role="alert"><strong>Please correct the following:</strong><ul>@foreach($errors->all() as $err)<li>{{ $err }}</li>@endforeach</ul></div>@endif
 @yield('content')
 </div></main>
 <footer class="site-footer"><div class="container footer-bottom" style="margin-top:0"><span>Arewa Civic Tracker · RAWYOD</span><span>Secure civic monitoring platform</span></div></footer>
 @endauth
-<div class="toast-stack" id="toast-stack" aria-live="polite"></div>@stack('scripts')
+<div class="toast-stack" id="toast-stack" aria-live="polite" aria-atomic="true"></div>@stack('scripts')
 </body></html>

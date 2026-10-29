@@ -3,6 +3,18 @@
 @section('content')
 <p><a href="{{ route('cases.index') }}"><i class="fa-solid fa-arrow-left" aria-hidden="true"></i> Reports</a></p><div class="card"><p class="muted">{{ $case->reference }} · {{ $case->lga->name }} · {{ $case->community }}</p><h1>{{ $case->title }}</h1><div class="grid"><div><strong>Verification</strong><p>{{ \App\Models\WorkflowStatusLabel::label('verification',$case->verification_status) }}</p></div><div><strong>Progress</strong><p>{{ \App\Models\WorkflowStatusLabel::label('progress',$case->progress_status) }}</p></div><div><strong>Sector</strong><p>{{ $case->sector->name }}</p></div><div><strong>Observed</strong><p>{{ $case->observation_date->format('d M Y') }}</p></div></div>@if($case->category)<p><strong>Category:</strong> {{ $case->category->name }}</p>@endif
 <h3>Description</h3><p>{{ $case->description }}</p><h3>Observations</h3><p>{{ $case->observations ?: 'None recorded' }}</p><h3>Duty bearers</h3><p>{{ $case->duty_bearers ?: 'None recorded' }}</p></div>
+@if(auth()->user()->isAdmin())
+<section class="card act-legal-hold-panel">
+ <h2>Legal Hold</h2>
+ <p><strong>{{ $case->legal_hold?'Protection Active':'No Legal Hold' }}</strong></p>
+ @if($case->legal_hold)<p class="muted">Reason: {{ $case->legal_hold_reason }}</p>@endif
+ <form method="POST" action="{{ route('admin.governance.hold',$case) }}" data-no-ajax>@csrf
+  <input type="hidden" name="hold" value="{{ $case->legal_hold?'0':'1' }}">
+  <div class="field"><label for="hold-reason">{{ $case->legal_hold?'Reason for Releasing Hold':'Reason for Applying Hold' }}</label><textarea name="reason" id="hold-reason" required minlength="10" maxlength="3000" rows="2"></textarea></div>
+  <button class="btn-outline" type="submit">{{ $case->legal_hold?'Release Legal Hold':'Apply Legal Hold' }}</button>
+ </form>
+</section>
+@endif
 <section class="card">
  <h2>Case Closure</h2>
  <p><strong>Case status:</strong> {{ $case->closure_status==='closed'?'Closed':'Open' }}</p>

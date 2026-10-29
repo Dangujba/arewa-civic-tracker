@@ -25,3 +25,12 @@ Set `ACT_RECOVERY_DIR=/var/backups/arewa-recovery` (outside the application and 
 `php artisan act:backup-restore-sandbox arewa-YYYYMMDD-hhmmss-xxxxxx.tar.gpg sandbox-test --confirm-isolated`
 
 This confirms the archive manifest hashes, checks entry paths, and unpacks the database SQL and private evidence into an isolated private directory. It **never imports SQL into the live database or replaces active evidence**. Review it on a separate authorized recovery host and destroy the decrypted temporary data when finished. The decryption key must be protected independently from the VPS.
+
+
+## Optional independent encrypted snapshot copying
+
+RAWYOD must approve and mount an independent off-server storage destination. Set ACT_OFFSITE_BACKUP_DIR to the exact mount point, not a local directory. The act:copy-backup-offsite command copies only encrypted GPG snapshots, verifies the transferred SHA-256 checksum, never overwrites conflicting archives, and refuses missing mounts or identical source/destination devices. A conditional scheduler runs at 02:55 WAT only when a destination is configured. Off-server redundancy must be separately established by the operator; a mounted drive is not in itself proof of geographic independence.
+
+## Data governance
+
+The administrator's Data Governance page supports draft retention periods, recorded RAWYOD authorization references, non-destructive counts and audited case legal holds. No field report, evidence file, user or audit event is ever automatically deleted. Retention approval does not authorize purging. Expired authentication tokens and old web sessions remain the only automatically removed records.

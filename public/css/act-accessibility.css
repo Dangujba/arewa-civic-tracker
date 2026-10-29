@@ -1,0 +1,33 @@
+/* Accessible keyboard navigation and mobile touch targets; no new rounded cards. */
+.act-skip-link{position:fixed;top:-80px;left:12px;z-index:99999;padding:11px 15px;background:#174f39;color:#fff;font-weight:800;text-decoration:none;border:2px solid #efd69b;transition:none}
+.act-skip-link:focus,.act-skip-link:focus-visible{top:10px}
+:where(a,button,input,textarea,select,[role=button],summary):focus-visible{outline:3px solid #d49a30!important;outline-offset:3px!important}
+.portal-sidebar .portal-nav-link:focus-visible{outline-color:#f5d181!important;outline-offset:-3px!important}
+:where(.portal-main,.guest-main) :where(label,legend){line-height:1.45}
+.portal-main .dash-table-wrap{overscroll-behavior-x:contain}
+.portal-main table caption{text-align:left;padding:8px 12px;font-weight:650}
+.portal-main .act-governance-panel{padding:18px 20px!important;margin-bottom:18px!important;border-radius:0!important;box-shadow:none!important}
+.act-governance-overview{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:18px}
+.portal-main .act-governance-overview .dash-panel{margin:0;padding:16px!important;border-radius:0;box-shadow:none;min-width:0}
+.portal-main .act-governance-overview h2{font-size:12px;margin:0 0 8px}
+.portal-main .act-governance-overview strong{font-size:16px;color:#234f38;overflow-wrap:anywhere}
+.portal-main .act-governance-overview p{font-size:11px;margin:8px 0 0}
+.act-governance-fields{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.portal-main .act-governance-panel .field label{font-size:12px;font-weight:800;display:block;margin:0 0 6px}
+.portal-main .act-governance-panel input:not([type=checkbox]),.portal-main .act-governance-panel textarea{width:100%;min-height:40px;border:1px solid #c6d9c8;border-radius:0;padding:9px}
+.act-governance-actions{display:flex;flex-wrap:wrap;gap:14px;align-items:center}
+.portal-main .act-governance-approval{margin-top:22px;border-top:1px solid #d9e6dc;padding-top:17px}
+.act-governance-confirm{display:flex;gap:8px;align-items:start;margin:11px 0 14px;font-size:12px;font-weight:650}
+.act-governance-confirm input{margin-top:3px}
+@media(max-width:1100px){.act-governance-overview{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:650px){
+ .act-governance-overview,.act-governance-fields{grid-template-columns:1fr}
+ .portal-main .act-governance-panel{padding:15px!important}
+ .portal-main .act-governance-actions .btn{min-height:44px}
+ :where(.portal-icon-button,.portal-header-action,.portal-nav-link,.act-table-icon-link){min-height:44px!important}
+}
+@media(prefers-reduced-motion:reduce){
+ *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;scroll-behavior:auto!important;transition-duration:0ms!important}
+}
+
+#sidebar-backdrop[hidden]{display:none!important}
