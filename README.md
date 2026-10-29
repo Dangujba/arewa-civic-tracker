@@ -15,7 +15,16 @@ Civic monitoring, public project reporting and evidence verification for **Roadm
 - Evidence-aware mobile report form with image/PDF attachments, permission-based editable GPS coordinates, local image compression and offline evidence outbox
 - Optional authenticator-app two-factor sign-in with secure QR setup, one-time recovery codes and account security controls
 
-**Development status:** Active. Features not yet accepted are tracked in [Production Readiness Checklist](docs/PRODUCTION_CHECKLIST.md). The staging Android v0.3.1 debug APK is publicly downloadable at https://arewa.kasua.ng/download/android without website login. Native app access still requires authorized staff credentials. Production signing, physical-device offline acceptance and final deployment to RAWYOD hosting remain separate work.
+**Development status (29 October 2026):** The EOI and technical-proposal development baseline is implemented, including the final six closing items. The isolated Laravel suite passed **110 tests, 799 assertions**. This is not RAWYOD acceptance. The staging Android v0.3.1 debug APK is publicly downloadable at https://arewa.kasua.ng/download/android without website login. Native app access still requires authorized staff credentials. Production signing, physical-device offline acceptance and final deployment remain separate work.
+
+## Development deliverables
+
+- [Development closure and EOI compliance](docs/DEVELOPMENT_CLOSURE_2026-10-29.md)
+- [User Requirements Specification (URS v1.0)](docs/URS_AREWA_CIVIC_TRACKER_V1.md)
+- [System Architecture and Technical Design (v1.0)](docs/ARCHITECTURE_AND_TECHNICAL_DESIGN_V1.md)
+- [UI/UX Design and Screen Baseline (v1.0)](docs/UI_UX_DESIGN_BASELINE_V1.md)
+
+Formal testing, deployment, onboarding and handover remain tracked separately in the [Production Readiness Checklist](docs/PRODUCTION_CHECKLIST.md).
 
 ## Technology
 
@@ -50,6 +59,6 @@ RAWYOD acceptance, ownership and handover requirements are governed by the signe
 
 - Uploaded evidence lives in non-public Laravel storage, and downloads require report access permissions. File types are restricted to JPEG, PNG, WebP and PDF, up to five files of 5MB each.
 - Camera/GPS capture depends on browser permission and device support. Manual location entry remains possible when unavailable.
-- Offline drafts and evidence are stored **unencrypted in IndexedDB** on the reporting device. Do not use shared devices for sensitive field data. Device encryption, retention policy and real-device acceptance remain required before release.
+- The responsive browser's optional offline evidence queue can retain data in local browser storage; avoid sensitive field drafts on shared devices. The separate **native Android app** encrypts local report drafts and evidence using Android Keystore AES-GCM, with server authentication required before upload. Device lifecycle, retention and real-device acceptance must still be confirmed before production.
 - 2FA secrets and recovery-code hashes are stored in encrypted database fields. The initial admin account is not automatically enrolled in 2FA.
 - The management XLSX export is limited to 10,000 filtered records and the PDF summary prints up to 150 records alongside an aggregate total. Both require authenticated review permissions.
