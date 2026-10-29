@@ -496,7 +496,7 @@ private fun FormScreen(vm:FieldViewModel) {
                 Text("Add evidence")
             }
         }
-        Text("Up to 5 photographs or PDFs, maximum 5 MB each.",
+        Text("Original photos preserved: up to 10 MB each. PDFs up to 5 MB.",
             style=MaterialTheme.typography.bodySmall)
         vm.attachments.forEachIndexed{index,file->
             Row(Modifier.fillMaxWidth(),

@@ -29,6 +29,14 @@ class StoreCaseRequest extends FormRequest {
         'latitude'=>['nullable','required_with:longitude','numeric','between:-90,90'],
         'longitude'=>['nullable','required_with:latitude','numeric','between:-180,180'],
         'evidence'=>['sometimes','array','max:5'],
-        'evidence.*'=>['file','mimes:jpg,jpeg,png,webp,pdf','max:10240'],
+        'evidence.*'=>['file','mimes:jpg,jpeg,png,webp,pdf',
+            function($attribute,$value,$fail) {
+                if (!$value instanceof \\Illuminate\\Http\\UploadedFile) return;
+                $limit=$value->getMimeType()==='application/pdf'?5120:10240;
+                if($value->getSize()>$limit*1024)
+                    $fail($value->getMimeType()==='application/pdf'
+                        ?'PDF evidence must not exceed 5 MB.'
+                        :'Photo evidence must not exceed 10 MB.');
+            }],
     ];}
 }

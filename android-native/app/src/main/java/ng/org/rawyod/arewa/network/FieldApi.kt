@@ -133,7 +133,9 @@ class FieldApi(private val vault: CryptoVault) {
                 val out = ByteArrayOutputStream()
                 vault.decryptTo(file,out)
                 val bytes=out.toByteArray()
-                require(bytes.size <= 5 * 1024 * 1024) { "Evidence exceeds 5 MB" }
+                require(bytes.size <= (if(e.mimeType=="application/pdf") 5 else 10) * 1024 * 1024) {
+                    "Evidence file exceeds upload limit"
+                }
                 multipart.addFormDataPart(
                     "evidence[]",e.name,
                     bytes.toRequestBody(e.mimeType.toMediaTypeOrNull()

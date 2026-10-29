@@ -25,7 +25,7 @@ class FieldRepository(
     private val context: Context, val dao: FieldDao, val vault: CryptoVault,
     val store: SessionStore, val api: FieldApi
 ) {
-    val maxEvidenceBytes = 5L * 1024L * 1024L
+    val maxEvidenceBytes = 10L * 1024L * 1024L
     private val privateFiles by lazy { File(context.filesDir, "field_evidence").apply { mkdirs() } }
 
     fun pending(owner: Long): Flow<List<Draft>> = dao.observeDrafts(owner)
@@ -46,36 +46,38 @@ class FieldRepository(
                     if (s >= 0 && !it.isNull(s)) declared = it.getLong(s)
                 }
             }
-            require(declared <= 50L*1024L*1024L || declared<0) {
-                "Choose a photograph below 50 MB, or a PDF below 5 MB"
-            }
             val isPhoto=mime in setOf("image/jpeg","image/png","image/webp")
-            val bytes = if(isPhoto) {
-                EvidenceOptimizer.optimize(cr,uri,mime)
-            } else {
-                require(declared <= maxEvidenceBytes || declared<0) { "PDF exceeds 5 MB" }
-                cr.openInputStream(uri)?.use { input ->
-                    val buffer=java.io.ByteArrayOutputStream()
-                    val chunk=ByteArray(8192)
-                    while(buffer.size()<=maxEvidenceBytes) {
-                        val take=input.read(chunk,0,
-                            minOf(chunk.size.toLong(),maxEvidenceBytes+1-buffer.size()).toInt())
-                        if(take<0)break
-                        if(take==0)continue
-                        buffer.write(chunk,0,take)
-                    }
-                    buffer.toByteArray()
-                } ?: error("Cannot open evidence file")
+            val maxBytes=if(isPhoto)maxEvidenceBytes else 5L*1024L*1024L
+            require(declared<0 || declared<=maxBytes) {
+                if(isPhoto) "Photograph exceeds 10 MB. Select a smaller image."
+                else "PDF exceeds 5 MB"
             }
-            require(bytes.size <= maxEvidenceBytes) { "Evidence file exceeds 5 MB" }
+            // Upload the original bytes exactly, without downscaling, re-encoding or
+            // stripping EXIF. The backend creates a sanitized, high-quality preview.
+            val bytes = cr.openInputStream(uri)?.use { input ->
+                val buffer=java.io.ByteArrayOutputStream()
+                val chunk=ByteArray(8192)
+                while(buffer.size().toLong()<=maxBytes){
+                    val limit=minOf(chunk.size.toLong(),maxBytes+1L-buffer.size()).toInt()
+                    if(limit<=0)break
+                    val count=input.read(chunk,0,limit)
+                    if(count<0)break
+                    if(count==0)continue
+                    buffer.write(chunk,0,count)
+                }
+                buffer.toByteArray()
+            } ?: error("Cannot open evidence file")
+            require(bytes.isNotEmpty() && bytes.size.toLong()<=maxBytes) {
+                if(isPhoto) "Photograph exceeds 10 MB" else "PDF exceeds 5 MB"
+            }
             val id = UUID.randomUUID().toString()
             val output = File(privateFiles, "$id.aes")
             try {
                 bytes.inputStream().use { vault.encryptStream(it, output) }
                 StagedEvidence(id, output.absolutePath,
-                    (if(isPhoto) display.substringBeforeLast('.',display)+".jpg" else display)
+                    display
                         .replace(Regex("[\\r\\n/\\\\]"), "_").take(120),
-                    if(isPhoto) "image/jpeg" else mime, bytes.size.toLong())
+                    mime, bytes.size.toLong())
             } catch (e: Exception) { output.delete(); throw e }
         }
 

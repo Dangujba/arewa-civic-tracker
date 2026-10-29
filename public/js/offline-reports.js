@@ -19,25 +19,13 @@ request.onsuccess=()=>{db=request.result;form.dataset.offlineManaged='1';recover
 function tx(store,mode,fn){return new Promise((resolve,reject)=>{if(!db)return reject(Error('Offline storage unavailable'));const t=db.transaction(store,mode),r=fn(t.objectStore(store));t.oncomplete=()=>resolve(r.result);t.onerror=()=>reject(t.error||Error('Device storage unavailable'));t.onabort=()=>reject(t.error||Error('Device storage aborted'))})}
 function fields(){const f=new FormData(form),out={};for(const [key,value] of f.entries())if(key!=='_token'&&key!=='evidence[]'&&typeof value==='string')out[key]=value;if(!out.client_submission_id){out.client_submission_id=crypto.randomUUID();idInput.value=out.client_submission_id}return out}
 function attachments(){const live=filesInput?[...filesInput.files].filter(f=>f.size>0):[];return live.length?live:draftFiles}
-function validateFiles(files){if(files.length>5)throw Error('Choose up to five evidence files.');for(const f of files){if(f.size>5*1024*1024)throw Error(f.name+' is larger than 5MB.');if(!['image/jpeg','image/png','image/webp','application/pdf'].includes(f.type))throw Error('Unsupported evidence format: '+f.name)}}
-async function optimizeImage(file){
- if(!['image/jpeg','image/webp'].includes(file.type)||file.size<750000||!globalThis.createImageBitmap)return file;
- let bitmap;
- try{
-  bitmap=await createImageBitmap(file);
-  const max=1600,scale=Math.min(1,max/Math.max(bitmap.width,bitmap.height));
-  const canvas=document.createElement('canvas');canvas.width=Math.max(1,Math.round(bitmap.width*scale));canvas.height=Math.max(1,Math.round(bitmap.height*scale));
-  canvas.getContext('2d').drawImage(bitmap,0,0,canvas.width,canvas.height);
-  const blob=await new Promise(resolve=>canvas.toBlob(resolve,file.type,.79));
-  if(!blob||blob.size>=file.size)return file;
-  return new File([blob],file.name,{type:blob.type,lastModified:file.lastModified});
- }catch{return file}
- finally{bitmap?.close?.()}
-}
+function validateFiles(files){if(files.length>5)throw Error('Choose up to five evidence files.');for(const f of files){const limit=f.type==='application/pdf'?5:10;if(f.size>limit*1024*1024)throw Error(f.name+' exceeds '+limit+'MB.');if(!['image/jpeg','image/png','image/webp','application/pdf'].includes(f.type))throw Error('Unsupported evidence format: '+f.name)}}
+// Do not compress archival evidence before upload. The server builds a separate
+// smaller private preview while keeping exact original bytes and their checksum.
 async function optimizedAttachments(){
- const original=attachments();validateFiles(original);
- const optimized=await Promise.all(original.map(optimizeImage));validateFiles(optimized);
- return optimized;
+ const originals=attachments();
+ validateFiles(originals);
+ return originals;
 }
 function loadFields(data){for(const [key,value] of Object.entries(data||{})){const input=form.elements.namedItem(key);if(input&&typeof value==='string')input.value=value}}
 async function recoverDraft(){try{const saved=await tx('drafts','readonly',s=>s.get(userId));if(saved?.payload){loadFields(saved.payload);draftFiles=saved.files||[];report(saved.files?.length?'Recovered draft with '+saved.files.length+' stored evidence file(s). Save or submit to synchronize.':'Recovered your local draft.')}else report('Field reporting ready. Reports and evidence can be queued for synchronization.')}catch(e){report(e.message)}}
