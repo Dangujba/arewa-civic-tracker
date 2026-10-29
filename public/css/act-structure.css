@@ -26,3 +26,11 @@
 .spin[hidden]{display:none!important}
 button:disabled,a[aria-busy=true],button[aria-busy=true]{cursor:pointer!important}
 @media(prefers-reduced-motion:reduce){.spin{animation-duration:1.7s}}
+
+
+/* Public Android app download, responsive and square-edged. */
+.mobile-download-link{display:none}
+.download-note{margin:16px 0 0;color:#52665c;font-size:12px;line-height:1.6}
+.download-note i{color:#166044;margin-right:6px}
+@media(max-width:830px){.main-nav .mobile-download-link{display:inline-flex;align-items:center;font-weight:800;color:#18553e}}
+@media(max-width:580px){.header-actions .download-header{display:none}}

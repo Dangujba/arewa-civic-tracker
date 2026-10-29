@@ -1,5 +1,6 @@
 <?php
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\AndroidDownloadController;
 use App\Http\Controllers\CaseController;
 use App\Http\Controllers\EvidenceController;
 use App\Http\Controllers\MapController;
@@ -18,6 +19,11 @@ use App\Http\Controllers\TwoFactorController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Middleware\EnsurePasswordIsChanged;
 Route::view('/','welcome')->name('home');
+// The APK is a public installation artifact; app accounts remain authenticated.
+Route::get('/download/android',[AndroidDownloadController::class,'download'])
+    ->middleware('throttle:30,1')->name('downloads.android');
+// Preserve previously shared download URLs without requiring portal access.
+Route::redirect('/admin/native/android-debug','/download/android');
 Route::middleware('guest')->group(function(){
  Route::get('/login',[AuthController::class,'form'])->name('login');
  Route::post('/login',[AuthController::class,'login']);
@@ -62,7 +68,6 @@ Route::middleware(['auth',EnsurePasswordIsChanged::class])->group(function(){
     Route::get('/map',[MapController::class,'page'])->name('map.index');
     Route::get('/map/data',[MapController::class,'data'])->name('map.data');
     Route::prefix('admin')->name('admin.')->group(function(){
-        Route::get('/native/android-debug',[\App\Http\Controllers\Admin\NativeReleaseController::class,'download'])->name('native.android-debug');
         Route::get('/operations',[OperationsController::class,'index'])->name('operations.index');
         Route::get('/operations/storage',[OperationsController::class,'storage'])->name('operations.storage');
         Route::post('/operations/storage/check',[OperationsController::class,'checkStorage'])->middleware('throttle:4,1')->name('operations.storage.check');

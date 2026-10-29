@@ -19,10 +19,10 @@
 <header class="site-header"><div class="shell header-inner">
 <a class="wordmark" href="{{ route('home') }}" aria-label="Arewa Civic Tracker, home"><img src="{{ asset('icons/arewa-handdrawn-map.webp') }}" class="site-brand-icon" width="37" height="37" alt=""><strong>arewa.</strong><small>Civic Tracker</small></a>
 <nav class="main-nav" id="site-navigation" aria-label="Primary navigation">
- <a href="#about">About</a><a href="#capabilities">Features</a><a href="#how-it-works">How it works</a><a href="#yobe">Yobe in focus</a>
+ <a href="#about">About</a><a href="#capabilities">Features</a><a href="#how-it-works">How it works</a><a href="#yobe">Yobe in focus</a><a class="mobile-download-link" href="{{ route('downloads.android') }}" download>Download Android app</a>
 </nav>
 <button class="menu-button" type="button" aria-controls="site-navigation" aria-expanded="false" data-mobile-nav aria-label="Toggle menu"><i class="fa-solid fa-bars" aria-hidden="true"></i></button>
-<div class="header-actions"><a class="btn" href="{{ route('login') }}"><i class="fa-solid fa-right-to-bracket" aria-hidden="true"></i> Staff portal</a></div>
+<div class="header-actions"><a class="btn download-header" href="{{ route('downloads.android') }}" download><i class="fa-solid fa-download" aria-hidden="true"></i> Download app</a><a class="btn" href="{{ route('login') }}"><i class="fa-solid fa-right-to-bracket" aria-hidden="true"></i> Staff portal</a></div>
 </div></header>
 <main id="main-content">
 <section class="hero"><div class="shell hero-grid">
@@ -30,7 +30,8 @@
   <span class="eyebrow">Civic monitoring • Project accountability</span>
   <h1>Evidence for <span>better communities.</span></h1>
   <p>Every community observation matters. Arewa Civic Tracker brings together public project monitoring, geographic intelligence and verified civic reports in one secure platform designed for RAWYOD's VOICES TO VOTES initiative.</p>
-  <div class="hero-actions"><a class="btn" href="#about">Explore the platform <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a><a class="btn outline" href="{{ route('login') }}">Access reporting portal <i class="fa-solid fa-arrow-up-right-from-square" aria-hidden="true"></i></a></div>
+  <div class="hero-actions"><a class="btn" href="#about">Explore the platform <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a><a class="btn outline" href="{{ route('login') }}">Access reporting portal <i class="fa-solid fa-arrow-up-right-from-square" aria-hidden="true"></i></a><a class="btn" href="{{ route('downloads.android') }}" download><i class="fa-solid fa-download" aria-hidden="true"></i> Download Android app</a></div>
+  <p class="download-note"><i class="fa-brands fa-android" aria-hidden="true"></i> Android preview build for testing. Download without signing in; staff credentials are required to use the app.</p>
   <div class="hero-support"><img class="sicon" src="{{ asset('vendor/lucide/shield-check.svg') }}" alt="" aria-hidden="true"><p>Secure role-based workspaces for field focal persons, reviewers and administrators.</p></div>
  </div>
  <div class="hero-visual" data-carousel aria-roledescription="carousel" aria-label="Photographs of Yobe State public infrastructure">
@@ -104,7 +105,7 @@
 <section class="cta"><div class="shell cta-inner"><div><span class="eyebrow">Arewa Civic Tracker</span><h2>Turn field observations into clearer decisions.</h2><p>Sign in to your authorized workspace to document issues, review evidence and monitor activities across Yobe State.</p></div><a class="btn white" href="{{ route('login') }}">Open staff portal <i class="fa-solid fa-arrow-up-right-from-square" aria-hidden="true"></i></a></div></section>
 </main>
 <footer class="footer"><div class="shell">
- <div class="footer-top"><div><a class="wordmark" href="{{ route('home') }}"><strong>arewa.</strong><small>Civic Tracker</small></a><p class="footer-about">A civic monitoring initiative for Roadmap for Women and Youth Development (RAWYOD), under VOICES TO VOTES. Implemented by InnoBytes Lab LTD.</p></div><nav class="footer-links" aria-label="Footer"><a href="#about">About</a><a href="#capabilities">Features</a><a href="#how-it-works">Reporting process</a><a href="#yobe">Yobe in focus</a><a href="{{ route('login') }}">Staff portal</a></nav></div>
+ <div class="footer-top"><div><a class="wordmark" href="{{ route('home') }}"><strong>arewa.</strong><small>Civic Tracker</small></a><p class="footer-about">A civic monitoring initiative for Roadmap for Women and Youth Development (RAWYOD), under VOICES TO VOTES. Implemented by InnoBytes Lab LTD.</p></div><nav class="footer-links" aria-label="Footer"><a href="#about">About</a><a href="#capabilities">Features</a><a href="#how-it-works">Reporting process</a><a href="#yobe">Yobe in focus</a><a href="{{ route('downloads.android') }}" download>Download Android app</a><a href="{{ route('login') }}">Staff portal</a></nav></div>
  <div class="footer-bottom"><span>© {{ date('Y') }} Arewa Civic Tracker. All rights reserved.</span><span>Infrastructure photography: Wikimedia Commons creators · Boundary data: geoBoundaries.</span></div>
 </div></footer>
 <div class="toast-stack" id="toast-stack" aria-live="polite"></div>

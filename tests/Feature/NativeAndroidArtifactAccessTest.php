@@ -8,25 +8,31 @@ use Tests\TestCase;
 class NativeAndroidArtifactAccessTest extends TestCase
 {
     use RefreshDatabase;
-    private function account(string $role,string $email):User {
-        return User::create([
-            'name'=>'APK Test','email'=>$email,'password'=>'pass',
-            'role'=>$role,'is_active'=>true,'must_change_password'=>false
-        ]);
-    }
 
-    public function test_debug_apk_requires_an_authenticated_administrator():void {
-        $url=route('admin.native.android-debug');
-        $this->get($url)->assertRedirect(route('login'));
-        $focal=$this->account('focal','apk-field@example.test');
-        $this->actingAs($focal)->get($url)->assertForbidden();
-        $admin=$this->account('admin','apk-admin@example.test');
-        $path=storage_path('app/private/native-release/arewa-civic-tracker-v0.3.1-debug.apk');
-        @mkdir(dirname($path),0700,true);
-        file_put_contents($path,'temporary-test-content');
+    public function test_android_app_can_be_downloaded_by_visitors_and_all_staff_roles(): void
+    {
+        $path = tempnam(sys_get_temp_dir(), 'act-apk-role-');
+        file_put_contents($path, 'test APK artifact');
+        config(['native.android_apk_path' => $path]);
         try {
-            $this->actingAs($admin)->get($url)->assertOk()
-                ->assertHeader('Content-Type','application/vnd.android.package-archive');
-        } finally { unlink($path); }
+            $url = route('downloads.android');
+            $this->get($url)->assertOk();
+            foreach (['focal', 'meal', 'admin'] as $role) {
+                $user = User::create([
+                    'name' => 'APK '.ucfirst($role),
+                    'email' => 'apk-'.$role.'@example.test',
+                    'password' => 'temporary-test-password',
+                    'role' => $role,
+                    'is_active' => true,
+                    'must_change_password' => false,
+                ]);
+                $this->actingAs($user)->get($url)->assertOk()
+                    ->assertDownload('arewa-civic-tracker-v0.3.1-debug.apk');
+            }
+        } finally {
+            unlink($path);
+        }
     }
 }
+
+[executed on device: vmi3166522 (70daa77f-145f-4200-b39a-e3102b71f5e4)]
