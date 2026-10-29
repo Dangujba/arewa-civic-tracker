@@ -15,7 +15,7 @@ Civic monitoring, public project reporting and evidence verification for **Roadm
 - Evidence-aware mobile report form with image/PDF attachments, permission-based editable GPS coordinates, unchanged original evidence, private optimized previews, and offline evidence outbox
 - Optional authenticator-app two-factor sign-in with secure QR setup, one-time recovery codes and account security controls
 
-**Development status (29 October 2026):** The EOI and technical-proposal development baseline is implemented, including the final six closing items. The isolated Laravel suite passed **116 tests, 859 assertions**. This is not RAWYOD acceptance. The staging Android v0.3.4 debug APK is publicly downloadable at https://arewa.kasua.ng/download/android without website login. Native app access still requires authorized staff credentials. Production signing, physical-device offline acceptance and final deployment remain separate work.
+**Development status (29 October 2026):** The EOI and technical-proposal development baseline is implemented, including the final six closing items. The isolated Laravel suite passed **116 tests, 859 assertions**. This is not RAWYOD acceptance. The staging Android v0.3.5 debug APK is publicly downloadable at https://arewa.kasua.ng/download/android without website login. Native app access still requires authorized staff credentials. Production signing, physical-device offline acceptance and final deployment remain separate work.
 
 ## Development deliverables
 
@@ -70,3 +70,11 @@ The read-only `/transparency` page is open to everyone, with no registration. St
 ### Original-quality photographic evidence (Android v0.3.4)
 
 Uploaded JPEG/PNG/WebP photos are retained byte-for-byte in private evidence storage, with a SHA-256 checksum. The server separately generates a metadata-stripped, high-quality WebP preview for authorized staff. The preview is displayed within the restricted case detail screen, while **Download original** serves the unmodified file. A preview-generation failure does not change the original. The current cap is 10 MB/photo, 5 MB/PDF, five files per submission. Web reporting also uploads originals instead of lossy precompressed copies; the Android offline outbox encrypts its staged originals. This feature does not publish private evidence in the public transparency view. RAWYOD production signing and device UAT remain separate.
+
+### Android v0.3.5 field application UX and offline access
+
+- Safe system-bar layout, actual material navigation/action icons, snackbar notices instead of blocking inline error banners, native observation-date picker, form state preservation during tab navigation and external pickers, and explicit sign-out confirmation.
+- Profile page shows the signed-in focal person's cached account details. Settings provides fingerprint lock, optional locally secured offline PIN, authenticated password changes, and an end-to-end TOTP enable/disable flow via field-only bearer-protected APIs. Save displayed one-time recovery codes securely.
+- A *previously paired* device may be unlocked with its enrolled fingerprint or preconfigured offline PIN; saved assigned LGAs/categories, encrypted queued drafts/evidence, cached profile and previously loaded report listings can be viewed offline. First account enrollment, changes to password/2FA, reports not yet cached, live public web content and server synchronization necessarily require internet; never imply otherwise.
+- Network failures present short actionable messages rather than raw socket diagnostics; legacy hard-coded IP resolution fallback was removed. GPS and camera/file-picking callbacks fail safely and preserve form state; runtime behavior on the affected physical device remains pending acceptance.
+- Staff profile/password/2FA API regression tests passed; a native debug APK was compiled and tested, pending physical-device crash reproduction and acceptance.

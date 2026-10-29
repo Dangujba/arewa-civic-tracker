@@ -79,3 +79,11 @@ Field officers can open their submitted reports and edit eligible records online
 - The server archives the original with SHA-256 and generates a separate private high-quality WebP preview at up to 1800 pixels on the longest edge (quality 85); the preview strips EXIF location. Staff can view the preview and retrieve the unchanged original after authorization.
 - Original EXIF metadata is retained only with the private original. No evidence is exposed on public transparency pages.
 - v0.3.4 Android testDebugUnitTest and assembleDebug passed on the Arewa VPS. It uses the same debug signing certificate as v0.3.3, allowing in-place staging updates. Physical-device acceptance and production signing remain outstanding.
+
+## v0.3.5 revised interface and offline field use
+
+- Five-tab native UI: Report, Outbox, Reports, Profile, Settings. Material iconography, Android-safe content insets, date picker, short notifications, refresh spinners and sign-out confirmation.
+- Form fields remain saved when leaving for camera, document picker, device location permission, tabs or biometric lock. Physical-device acceptance is still required to confirm vendor-specific camera and GPS issues are gone.
+- Offline unlock requires one successful online enrollment and a configured device PIN or enrolled fingerprint. An offline PIN verifier uses PBKDF2-HMAC-SHA256 with unique salt, protected by the device Keystore. PIN failure throttling is local convenience, not a substitute for server authentication.
+- Previously loaded profile, report list and assigned reference data are cached locally with encrypted storage. Server-only password changes, TOTP setup/disable, uncached data, uploading and the public website need a connection.
+- The native profile/password/2FA endpoints use account-scoped bearer authorization and current-password/TOTP verification. Account recovery codes are presented once after enrollment.
