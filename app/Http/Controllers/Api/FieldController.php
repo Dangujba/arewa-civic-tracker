@@ -93,6 +93,7 @@ class FieldController extends Controller {
    'lgas'=>$u->assignedLgas()->orderBy('lgas.name')->get(['lgas.id','lgas.name']),
    'sectors'=>Sector::where('is_active',true)->orderBy('name')->get(['id','name']),
    'categories'=>\App\Models\ReportCategory::where('is_active',true)->get(['id','type','name']),
+   'wards'=>\App\Models\Ward::where('is_active',true)->whereIn('lga_id',$u->assignedLgas()->pluck('lgas.id'))->orderBy('name')->get(['lga_id','name']),
    'communities'=>\App\Models\Community::where('is_active',true)
      ->whereIn('lga_id',$u->assignedLgas()->pluck('lgas.id'))->get(['id','lga_id','name']),
    'status_labels'=>\App\Models\WorkflowStatusLabel::get(['kind','code','label']),
@@ -110,11 +111,11 @@ class FieldController extends Controller {
   abort_unless((int)$case->reporter_id===(int)$u->id,403);
   $case->load(['lga:id,name','sector:id,name','followups:id,case_id,author_id,note,created_at',
    'evidence:id,case_id,original_name,mime_type,size_bytes']);
-  $fields=$case->only(['type','title','description','lga_id','community','sector_id','report_category_id',
+  $fields=$case->only(['type','title','description','lga_id','ward','community','sector_id','report_category_id',
     'observations','duty_bearers','progress_status','latitude','longitude']);
   $fields['observation_date']=$case->observation_date->format('Y-m-d');
   return response()->json(['report'=>$case->only(['id','reference','title','description','verification_status','progress_status',
-   'observation_date','community','latitude','longitude','lga','sector','followups','evidence','closure_status']),
+   'observation_date','ward','community','latitude','longitude','lga','sector','followups','evidence','closure_status']),
    'editable'=>$u->can('update',$case),
    'version'=>(int)\App\Models\CaseRevision::where('case_id',$case->id)->max('version'),
    'fields'=>$fields])
@@ -135,6 +136,7 @@ class FieldController extends Controller {
   $data=$r->validate([
    'title'=>['required','string','min:5','max:200'],
    'lga_id'=>['required','integer','exists:lgas,id'],
+   'ward'=>['nullable','string','max:150'],
    'community'=>['nullable','string','max:150'],
    'sector_id'=>['nullable','integer','exists:sectors,id'],
    'type'=>['nullable','in:public_project,governance_issue'],

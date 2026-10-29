@@ -77,6 +77,7 @@ class PublicTransparencyController extends Controller
                         'title'=>$case->title,
                         'reference'=>$case->reference,
                         'type'=>$case->type,
+                        'ward'=>$case->ward,
                         'community'=>$case->community,
                         'lga'=>$case->lga?->name,
                         'sector'=>$case->sector?->name,

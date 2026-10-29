@@ -36,6 +36,7 @@ class CaseController extends Controller {
     }
     public function create(Request $r){$r->user()->can('create',CivicCase::class)||abort(403);$lgas=$r->user()->role==='focal' ? $r->user()->assignedLgas()->orderBy('lgas.name')->get() : Lga::orderBy('name')->get();return view('cases.create',['lgas'=>$lgas,'sectors'=>Sector::where('is_active',true)->orderBy('name')->get(),
         'categories'=>\App\Models\ReportCategory::where('is_active',true)->orderBy('name')->get(),
+        'wards'=>\App\Models\Ward::where('is_active',true)->whereIn('lga_id',$lgas->pluck('id'))->orderBy('name')->get(['lga_id','name']),
         'communities'=>\App\Models\Community::where('is_active',true)
             ->whereIn('lga_id',$lgas->pluck('id'))->orderBy('name')->get()]);}
     public function store(StoreCaseRequest $r,CaseSubmissionService $service){

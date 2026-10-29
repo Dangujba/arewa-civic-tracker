@@ -11,12 +11,13 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 class CaseRevisionController extends Controller {
- private const FIELDS=['type','title','description','lga_id','community','sector_id','report_category_id','observation_date','observations','duty_bearers','latitude','longitude'];
+ private const FIELDS=['type','title','description','lga_id','ward','community','sector_id','report_category_id','observation_date','observations','duty_bearers','latitude','longitude'];
  public function edit(Request $r,CivicCase $case){
   $r->user()->can('update',$case)||abort(403);
   $lgas=$r->user()->role==='focal'?$r->user()->assignedLgas()->orderBy('lgas.name')->get():Lga::orderBy('name')->get();
   return view('cases.edit',['case'=>$case,'lgas'=>$lgas,'sectors'=>Sector::where('is_active',true)->orWhere('id',$case->sector_id)->orderBy('name')->get(),
      'categories'=>\App\Models\ReportCategory::where('is_active',true)->orWhere('id',$case->report_category_id)->orderBy('name')->get(),
+     'wards'=>\App\Models\Ward::whereIn('lga_id',$lgas->pluck('id'))->where('is_active',true)->orderBy('name')->get(['lga_id','name']),
      'communities'=>\App\Models\Community::whereIn('lga_id',$lgas->pluck('id'))->where('is_active',true)->orderBy('name')->get()]);
  }
  public function update(Request $r,CivicCase $case){
@@ -48,6 +49,7 @@ class CaseRevisionController extends Controller {
      if($r->user()->role!=='focal')return;
      if(!$r->user()->assignedLgas()->where('lgas.id',$value)->exists())$fail('This LGA is not assigned to your account.');
    }],
+   'ward'=>['nullable','string','max:150'],
    'community'=>['required','string','max:150'],
    'sector_id'=>['required','integer','exists:sectors,id'],
    'report_category_id'=>['nullable','integer',\Illuminate\Validation\Rule::exists('report_categories','id')

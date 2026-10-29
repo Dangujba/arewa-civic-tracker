@@ -22,6 +22,7 @@ class ReportsController extends Controller
         $f=$request->validate([
             'lga_id'=>['nullable','integer','exists:lgas,id'],
             'sector_id'=>['nullable','integer','exists:sectors,id'],
+            'ward'=>['nullable','string','max:150'],
             'community'=>['nullable','string','max:150'],
             'verification_status'=>['nullable','in:submitted,under_review,clarification_requested,verified,approved,rejected'],
             'type'=>['nullable','in:public_project,governance_issue'],
@@ -31,12 +32,13 @@ class ReportsController extends Controller
         ]);
         $query=CivicCase::visibleTo($request->user());
         foreach(['lga_id','sector_id','verification_status','type'] as $key)if(isset($f[$key]))$query->where($key,$f[$key]);
+        if(!empty($f['ward']))$query->whereRaw('LOWER(TRIM(ward)) = ?', [mb_strtolower(trim($f['ward']))]);
         if(!empty($f['community']))$query->whereRaw('LOWER(TRIM(community)) = ?', [mb_strtolower(trim($f['community']))]);
         if(isset($f['date_from']))$query->whereDate('observation_date','>=',$f['date_from']);
         if(isset($f['date_to']))$query->whereDate('observation_date','<=',$f['date_to']);
         if(!empty($f['q'])){
             $search=addcslashes(trim($f['q']),'%_\\');
-            $query->where(fn($q)=>$q->where('title','like',"%{$search}%")->orWhere('reference','like',"%{$search}%")->orWhere('community','like',"%{$search}%"));
+            $query->where(fn($q)=>$q->where('title','like',"%{$search}%")->orWhere('reference','like',"%{$search}%")->orWhere('ward','like',"%{$search}%")->orWhere('community','like',"%{$search}%"));
         }
         return $query;
     }

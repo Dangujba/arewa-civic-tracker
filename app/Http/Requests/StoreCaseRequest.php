@@ -18,6 +18,7 @@ class StoreCaseRequest extends FormRequest {
             elseif(!in_array((int)$value,array_map('intval',$assigned),true))
                 $fail('This local government is not assigned to your field account.');
         }],
+        'ward'=>['nullable','string','max:150'],
         'community'=>['required','string','max:150'],
         'sector_id'=>['required','integer',Rule::exists('sectors','id')->where('is_active',true)],
         'report_category_id'=>['nullable','integer',
