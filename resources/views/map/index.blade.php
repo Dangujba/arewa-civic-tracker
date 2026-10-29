@@ -40,7 +40,7 @@
   <aside class="gis-results-panel" aria-label="Map results and layers">
     <div class="gis-panel-title"><div><small>MAP EXPLORER</small><strong>Explore the data</strong></div><i class="fa-solid fa-chart-pie" aria-hidden="true"></i></div>
     <div class="gis-panel-tabs" role="tablist" aria-label="Explorer content"><button class="active" type="button" data-panel="reports" role="tab" aria-selected="true"><i class="fa-regular fa-file-lines" aria-hidden="true"></i> Reports</button><button type="button" data-panel="lgas" role="tab" aria-selected="false"><i class="fa-solid fa-map" aria-hidden="true"></i> LGAs</button><button type="button" data-panel="layers" role="tab" aria-selected="false"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Layers</button></div>
-    <div class="gis-panel-content" data-panel-content="reports"><div class="gis-panel-section-head"><strong>Matching reports</strong><span id="gis-results-count">0 records</span></div><div id="gis-report-results" class="gis-report-results" role="list"><div class="gis-empty"><i class="fa-solid fa-spinner fa-spin" aria-hidden="true"></i><p>Loading authorized field reports…</p></div></div></div>
+    <div class="gis-panel-content" data-panel-content="reports"><div class="gis-panel-section-head"><strong>Matching reports</strong><span id="gis-results-count">0 records</span></div><div id="gis-report-results" class="gis-report-results" role="list"><div class="gis-empty"><span class="spin" aria-hidden="true"></span><p>Loading authorized field reports…</p></div></div></div>
     <div class="gis-panel-content" data-panel-content="lgas" hidden><div class="gis-panel-section-head"><strong>Yobe LGAs</strong><span>17 areas</span></div><div id="gis-lga-results" class="gis-lga-results" role="list"><p class="gis-empty">Loading administrative geography…</p></div></div>
     <div class="gis-panel-content" data-panel-content="layers" hidden>
       <div class="gis-panel-section-head"><strong>Map visualization</strong></div>
@@ -66,7 +66,7 @@
     </div>
     <div id="map" data-feed="{{ route('map.data') }}" data-boundaries="{{ asset('geo/yobe-lgas.geojson') }}" role="application" aria-label="Interactive map of Yobe administrative boundaries and authorized field reports"></div>
     <div class="gis-map-legend" aria-label="Verification legend"><strong>VERIFICATION STATUS</strong><span><i class="gis-dot" style="--dot:#c09c55"></i>Submitted</span><span><i class="gis-dot" style="--dot:#3083ae"></i>In review</span><span><i class="gis-dot" style="--dot:#1e7852"></i>Approved</span><span><i class="gis-dot" style="--dot:#b85455"></i>Needs attention</span></div>
-    <div class="gis-map-bottom"><div id="gis-message" role="status" aria-live="polite"><i class="fa-solid fa-spinner fa-spin" aria-hidden="true"></i> Loading map…</div><span id="gis-coordinate">Yobe State, Nigeria</span></div>
+    <div class="gis-map-bottom"><div id="gis-message" role="status" aria-live="polite"><span class="spin" aria-hidden="true"></span> Loading map…</div><span id="gis-coordinate">Yobe State, Nigeria</span></div>
   </div>
 </section>
 <p class="gis-attribution">The map represents actual LGA polygons and authorized records, not invented report locations. Boundary data: <a href="https://www.geoboundaries.org/" target="_blank" rel="noopener noreferrer">geoBoundaries / William & Mary</a> (CC BY 4.0). Map tiles: OpenStreetMap contributors and CARTO. GPS use requires explicit device permission. Exports must be handled as confidential operational records.</p>

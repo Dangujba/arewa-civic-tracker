@@ -25,6 +25,10 @@ Route::middleware('guest')->group(function(){
  Route::post('/two-factor/challenge',[TwoFactorController::class,'challenge'])->middleware('throttle:10,1')->name('two-factor.challenge.submit');
 });
 Route::middleware(['auth',EnsurePasswordIsChanged::class])->group(function(){
+    Route::get('/account/profile',[AccountController::class,'profile'])->name('account.profile');
+    Route::get('/account/profile/photo',[AccountController::class,'photo'])->name('account.profile.photo');
+    Route::post('/account/profile/photo',[AccountController::class,'uploadPhoto'])->middleware('throttle:10,1')->name('account.profile.photo.upload');
+    Route::delete('/account/profile/photo',[AccountController::class,'removePhoto'])->name('account.profile.photo.remove');
     Route::get('/account/security',[AccountController::class,'form'])->name('account.password.form');
     Route::post('/account/security/password',[AccountController::class,'update'])->name('account.password.update');
     Route::post('/account/two-factor/setup',[TwoFactorController::class,'setup'])->middleware('throttle:5,1')->name('two-factor.setup');

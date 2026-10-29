@@ -6,7 +6,7 @@
  <section class="card account-form">
  <form method="POST" action="{{ route('two-factor.challenge.submit') }}">@csrf
  <div class="field"><label for="totp-code">Authentication or recovery code</label><input id="totp-code" type="text" name="code" required autocomplete="one-time-code" inputmode="text" maxlength="40" autofocus></div>
- <button type="submit" class="btn"><i class="fa-solid fa-spinner fa-spin" aria-hidden="true" hidden></i> Verify & sign in</button>
+ <button type="submit" class="btn"><span class="spin" aria-hidden="true" hidden></span> Verify & sign in</button>
  </form>
  </section>
 </div>

@@ -49,13 +49,15 @@
 .swal2-popup.swal2-toast.act-toast .swal2-icon{width:19px!important;height:19px!important;min-width:19px!important;min-height:19px!important;margin:0 6px 0 0!important;font-size:7px!important;transform:scale(.82)!important}
 .swal2-popup.swal2-toast.act-toast .swal2-timer-progress-bar-container{height:2px!important}
 .swal2-popup.swal2-toast.act-toast .swal2-actions{display:none!important}
-/* Dotted in-progress indicator across buttons, exports, navigation and sign-out. */
-.spin{display:inline-block!important;position:relative;flex:none;width:25px!important;height:9px!important;border:0!important;border-radius:0!important;background:radial-gradient(circle,currentColor 65%,transparent 72%) 50% 50%/6px 6px no-repeat!important;animation:none!important;vertical-align:middle!important;margin-right:3px}
-.spin:before,.spin:after{content:"";position:absolute;top:1.5px;width:6px;height:6px;border-radius:50%;background:currentColor;animation:act-dot-pulse 1s ease-in-out infinite}
-.spin:before{left:0;animation-delay:-.3s}.spin:after{right:0;animation-delay:.3s}
-@keyframes act-dot-pulse{0%,65%,100%{opacity:.25;transform:scale(.72)}33%{opacity:1;transform:scale(1.12)}}
-@media(prefers-reduced-motion:reduce){.spin:before,.spin:after{animation:none!important;opacity:1!important;transform:none!important}}
-.is-exporting{cursor:progress!important;opacity:.8;pointer-events:none}
+/* Small continuous ring spinner for buttons, exports and navigation. */
+.spin{display:inline-block!important;position:relative!important;vertical-align:-3px!important;flex:none!important;width:15px!important;height:15px!important;margin-right:6px!important;background:none!important;border:2px solid currentColor!important;border-right-color:transparent!important;border-radius:50%!important;animation:act-ring-spin .65s linear infinite!important}
+.spin::before,.spin::after{content:none!important;display:none!important;animation:none!important}
+.spin[hidden]{display:none!important}
+@keyframes act-ring-spin{to{transform:rotate(360deg)}}
+@media(prefers-reduced-motion:reduce){.spin{animation-duration:1.7s!important}}
+.is-exporting{cursor:inherit!important;opacity:.88;pointer-events:none}
+button:disabled,.portal-main button:disabled,.auth-card button:disabled{cursor:pointer!important}
+a[aria-busy=true],button[aria-busy=true]{cursor:pointer!important}
 
 /* Login feedback is displayed above the inputs, never as inline field text. */
 .auth-login-feedback{margin:0 0 16px;padding:11px 13px;border:1px solid #e5b4ad;border-left:3px solid #ac3430;background:#fff5f1;color:#883127;font-size:12px;line-height:1.6;border-radius:0;box-shadow:none}

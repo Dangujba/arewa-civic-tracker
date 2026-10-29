@@ -1,0 +1,33 @@
+/* Flat personal-profile layout. Photo is stored privately and served only to its owner. */
+.portal-main .act-profile-heading{margin:0 0 18px}
+.portal-main .act-profile-heading h1{font-size:29px;letter-spacing:-.035em;margin:4px 0 6px}
+.portal-main .act-profile-heading p{font-size:12px;margin:0}
+.portal-main .act-profile-layout{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(280px,.8fr);gap:18px;align-items:start}
+.portal-main .act-profile-panel{padding:0!important;margin:0!important;box-shadow:none;border-radius:0;overflow:hidden}
+.portal-main .act-profile-panel-heading{padding:17px 20px;border-bottom:1px solid #e7eee7}
+.portal-main .act-profile-panel-heading h2{font-size:16px;font-family:inherit;font-weight:850;color:#205239;margin:0}
+.portal-main .act-profile-content{display:flex;gap:23px;align-items:flex-start;padding:23px 20px}
+.portal-main .act-profile-preview{height:116px;width:116px;flex:none;display:grid;place-items:center;background:#e6f1e8;color:#19563b;font-weight:900;font-size:38px;border:1px solid #d3e3d7}
+.portal-main .act-profile-preview img{display:block;width:100%;height:100%;object-fit:cover}
+.portal-main .act-profile-controls{min-width:0;flex:1}
+.portal-main .act-profile-controls p{font-size:12px;color:#617565;line-height:1.6;margin:0 0 15px}
+.portal-main .act-profile-controls form{display:flex;flex-wrap:wrap;align-items:center;gap:9px;margin:0 0 9px}
+.portal-main .act-profile-file-label{display:inline-flex;align-items:center;justify-content:center;background:#fff;border:1px solid #bacfc0;padding:10px 13px;min-height:39px;font-weight:760;color:#215c3c;font-size:12px;cursor:pointer;white-space:nowrap}
+.portal-main .act-profile-controls input[type=file]{position:absolute;width:1px;height:1px;opacity:0;overflow:hidden;clip:rect(0,0,0,0);padding:0;border:0}
+.portal-main #act-profile-file:focus-visible+.act-profile-file-label{outline:2px solid #2a8455;outline-offset:2px}
+.portal-main .act-profile-controls #act-profile-file-name{font-size:11px;color:#6b806e;flex-basis:100%;word-break:break-word;line-height:1.5}
+.portal-main .act-profile-controls button{font-size:12px;min-height:39px;padding:10px 14px}
+.portal-main .act-profile-controls .act-profile-remove{border-color:#dfbab8;color:#934541;background:#fff}
+.portal-main .act-profile-detail-list{margin:0;padding:5px 20px}
+.portal-main .act-profile-detail-list>div{display:grid;gap:5px;padding:13px 0;border-bottom:1px solid #e8efe8}
+.portal-main .act-profile-detail-list>div:last-child{border-bottom:0}
+.portal-main .act-profile-detail-list dt{font-size:10px;letter-spacing:.06em;color:#798c7d;text-transform:uppercase;font-weight:850}
+.portal-main .act-profile-detail-list dd{font-size:12px;color:#254b34;margin:0;font-weight:700;overflow-wrap:anywhere}
+.portal-main .act-profile-security{padding:13px 20px 19px}
+.portal-main .act-profile-security a{display:inline-flex;align-items:center;gap:8px;font-size:12px;min-height:40px;padding:9px 14px}
+.sidebar-avatar img,.portal-topbar-user img{display:block;width:100%;height:100%;object-fit:cover}
+.sidebar-account:hover{background:#f2f7f1}
+.portal-topbar-user{overflow:hidden;text-decoration:none}
+.portal-topbar-user:focus-visible,.sidebar-account:focus-visible{outline:2px solid #298550;outline-offset:2px}
+@media(max-width:930px){.portal-main .act-profile-layout{grid-template-columns:1fr}}
+@media(max-width:540px){.portal-main .act-profile-content{flex-direction:column;gap:15px;padding:17px}.portal-main .act-profile-preview{height:96px;width:96px}.portal-main .act-profile-controls{width:100%}}

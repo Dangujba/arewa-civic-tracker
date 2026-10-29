@@ -2,7 +2,7 @@
 'use strict';
 const reduce=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 const toast=(message,error=false)=>{if(window.ACTToast){window.ACTToast(message,error?'error':'success');return}let root=document.getElementById('toast-stack');if(!root){root=document.createElement('div');root.className='toast-stack';root.id='toast-stack';root.setAttribute('aria-live','polite');document.body.appendChild(root)}const e=document.createElement('div');e.className='toast'+(error?' error':'');e.textContent=message;root.appendChild(e);setTimeout(()=>e.remove(),5500)};
-const busy=(button,on,label='Processing...')=>{if(!button)return; if(on){if(button.dataset.busy==='1')return;button.dataset.busy='1';button.dataset.label=button.innerHTML;button.disabled=true;button.setAttribute('aria-busy','true');button.innerHTML='<span class="spin" aria-hidden="true"></span><span>'+label+'</span>'}else{button.innerHTML=button.dataset.label||button.innerHTML;button.disabled=false;button.removeAttribute('aria-busy');button.dataset.busy='0'}};
+const busy=(button,on)=>{if(!button)return; if(on){if(button.dataset.busy==='1')return;button.dataset.busy='1';button.dataset.label=button.innerHTML;button.disabled=true;button.setAttribute('aria-busy','true');button.innerHTML='<span class="spin" aria-hidden="true"></span>'+button.dataset.label}else{button.innerHTML=button.dataset.label||button.innerHTML;button.disabled=false;button.removeAttribute('aria-busy');button.dataset.busy='0'}};
 const nav=document.querySelector('[data-mobile-nav]');if(nav){nav.addEventListener('click',()=>{const el=document.getElementById('site-navigation');const open=el.classList.toggle('open');nav.setAttribute('aria-expanded',String(open));const icon=nav.querySelector('i');if(icon){icon.classList.toggle('fa-bars',!open);icon.classList.toggle('fa-xmark',open)}});document.querySelectorAll('#site-navigation a').forEach(a=>a.addEventListener('click',()=>{document.getElementById('site-navigation').classList.remove('open');nav.setAttribute('aria-expanded','false')}))}
 const gallery=document.querySelector('[data-carousel]');
 if(gallery){
@@ -38,11 +38,11 @@ document.addEventListener('submit',async e=>{
   };
   if(notice){
     if(isLogin){notice.hidden=true;notice.textContent=''}
-    else{notice.hidden=false;notice.textContent='Submitting securely…'}
+    else{notice.hidden=true;notice.textContent=''}
   }
   form.querySelectorAll('[data-error-for]').forEach(node=>node.remove());
   form.querySelectorAll('[aria-invalid]').forEach(input=>input.removeAttribute('aria-invalid'));
-  busy(button,true,isLogin?'Sign in':'Processing...');
+  busy(button,true);
   try{
     const res=await fetch(form.action,{method:'POST',body:new FormData(form),headers:{'Accept':'application/json','X-Requested-With':'XMLHttpRequest'},credentials:'same-origin',redirect:'follow'});
     if(res.status===422){
@@ -84,6 +84,14 @@ document.addEventListener('submit',async e=>{
     fail(isLogin?'Connection interrupted. Please check your internet and try again.':'Network interrupted. Your request may not have completed. Please check before retrying.');
     if(notice&&!isLogin)notice.textContent='Network interrupted.';
   }finally{busy(button,false)}
+});
+document.querySelectorAll('form[data-no-ajax]:not([data-logout-confirm]):not([data-user-delete])').forEach(form=>{
+ form.addEventListener('submit',event=>{
+  if(event.defaultPrevented||!form.reportValidity())return;
+  const submit=event.submitter||form.querySelector('button[type="submit"]');
+  if(submit?.dataset.busy==='1'){event.preventDefault();return}
+  busy(submit,true);
+ });
 });
 document.querySelectorAll('[data-report-export]').forEach(link=>link.addEventListener('click',async e=>{
   e.preventDefault();

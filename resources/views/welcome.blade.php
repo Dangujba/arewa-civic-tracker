@@ -11,8 +11,8 @@
 <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('icons/apple-touch-icon.png') }}?v=4">
 <title>Arewa Civic Tracker | Evidence for Better Communities</title>
 <link rel="stylesheet" href="{{ asset('vendor/fontawesome/all.min.css') }}">
-<link rel="stylesheet" href="{{ asset('css/act-structure.css') }}">
-<script defer src="{{ asset('js/act-interactions.js') }}"></script>
+<link rel="stylesheet" href="{{ asset('css/act-structure.css') }}?v=20261029-ring1">
+<script defer src="{{ asset('js/act-interactions.js') }}?v=20261029-ring1"></script>
 </head><body>
 <a class="skip" href="#main-content">Skip to content</a>
 <div class="topline"><div class="shell"><span><i class="fa-solid fa-location-dot" aria-hidden="true"></i> Yobe State, Nigeria</span><span>RAWYOD · VOICES TO VOTES</span></div></div>

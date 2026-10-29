@@ -8,17 +8,17 @@
 <link rel="shortcut icon" href="{{ asset('favicon.ico') }}?v=4">
 <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('icons/apple-touch-icon.png') }}?v=4">
 <link rel="stylesheet" href="{{ asset('vendor/fontawesome/all.min.css') }}">
-<link rel="stylesheet" href="{{ asset('css/act-design.css') }}">
+<link rel="stylesheet" href="{{ asset('css/act-design.css') }}?v=20261029-ring1">
 <link rel="stylesheet" href="{{ asset('css/act-portal.css') }}?v=20261029-art1">
 <link rel="stylesheet" href="{{ asset('vendor/ui/tom-select.css') }}">
 <link rel="stylesheet" href="{{ asset('vendor/ui/sweetalert2.css') }}">
-<link rel="stylesheet" href="{{ asset('css/act-form-polish.css') }}?v=20261029-login1">
-<link rel="stylesheet" href="{{ asset('css/act-workspace-refinement.css') }}?v=20261029-operations2">
+<link rel="stylesheet" href="{{ asset('css/act-form-polish.css') }}?v=20261029-ring1">
+<link rel="stylesheet" href="{{ asset('css/act-workspace-refinement.css') }}?v=20261029-profile1">
 <title>@yield('title','Arewa Civic Tracker')</title>@stack('head')
 <script defer src="{{ asset('vendor/ui/tom-select.js') }}"></script>
 <script defer src="{{ asset('vendor/ui/sweetalert2.js') }}"></script>
 <script defer src="{{ asset('js/act-select-dialogs.js') }}?v=20261029"></script>
-<script defer src="{{ asset('js/act-interactions.js') }}?v=20261029-login1"></script>
+<script defer src="{{ asset('js/act-interactions.js') }}?v=20261029-ring1"></script>
 <script defer src="{{ asset('js/act-sidebar.js') }}"></script>
 </head>
 <body class="@auth has-portal-sidebar @else guest-portal @endauth">
@@ -54,11 +54,12 @@
       @endif
       <span class="portal-nav-section">Account</span>
       <a href="{{ route('notifications.index') }}" class="portal-nav-link {{ request()->routeIs('notifications.*')?'active':'' }}"><i class="fa-regular fa-bell" aria-hidden="true"></i><span class="sidebar-label">Notifications @if(auth()->user()->unreadNotifications()->exists())<strong>({{ auth()->user()->unreadNotifications()->count() }})</strong>@endif</span></a>
-      <a href="{{ route('account.password.form') }}" class="portal-nav-link {{ request()->routeIs('account.*')?'active':'' }}" @if(request()->routeIs('account.*')) aria-current="page" @endif><i class="fa-solid fa-shield-halved" aria-hidden="true"></i><span class="sidebar-label">Security Settings</span></a>
+      <a href="{{ route('account.profile') }}" class="portal-nav-link {{ request()->routeIs('account.profile*')?'active':'' }}" @if(request()->routeIs('account.profile*')) aria-current="page" @endif><i class="fa-solid fa-user-pen" aria-hidden="true"></i><span class="sidebar-label">My Profile</span></a>
+      <a href="{{ route('account.password.form') }}" class="portal-nav-link {{ request()->routeIs('account.password.*','two-factor.*')?'active':'' }}"><i class="fa-solid fa-shield-halved" aria-hidden="true"></i><span class="sidebar-label">Security Settings</span></a>
       <a href="{{ route('home') }}" class="portal-nav-link"><i class="fa-solid fa-arrow-up-right-from-square" aria-hidden="true"></i><span class="sidebar-label">Public Website</span></a>
     </nav>
     <div class="portal-sidebar-bottom">
-      <div class="sidebar-account"><span class="sidebar-avatar">{{ strtoupper(substr(auth()->user()->name,0,1)) }}</span><span class="sidebar-label"><strong>{{ auth()->user()->name }}</strong><small>{{ strtoupper(auth()->user()->role) }}</small></span></div>
+      <a href="{{ route('account.profile') }}" class="sidebar-account" title="Manage My Profile"><span class="sidebar-avatar">@if(auth()->user()->profile_photo_path)<img src="{{ route('account.profile.photo') }}?v={{ auth()->user()->updated_at?->timestamp??0 }}" alt="" width="35" height="35">@else{{ strtoupper(mb_substr(auth()->user()->name,0,1)) }}@endif</span><span class="sidebar-label"><strong>{{ auth()->user()->name }}</strong><small>{{ strtoupper(auth()->user()->role) }}</small></span></a>
       <form action="{{ route('logout') }}" method="POST" data-no-ajax data-logout-confirm>@csrf<button type="submit" class="sidebar-signout"><i class="fa-solid fa-right-from-bracket" aria-hidden="true"></i><span class="sidebar-label">Sign Out</span></button></form>
     </div>
   </aside>
@@ -72,7 +73,7 @@
       <div class="portal-topbar-actions">
         <a class="portal-header-action" href="{{ route('map.index') }}" title="GIS map"><i class="fa-solid fa-map-location-dot" aria-hidden="true"></i><span>GIS</span></a>
         @can('create', App\Models\CivicCase::class)<a class="portal-header-primary" href="{{ route('cases.create') }}"><i class="fa-solid fa-plus" aria-hidden="true"></i><span>New report</span></a>@endcan
-        <span class="portal-topbar-user" title="{{ auth()->user()->name }}">{{ strtoupper(substr(auth()->user()->name,0,1)) }}</span>
+        <a href="{{ route('account.profile') }}" class="portal-topbar-user" title="My Profile" aria-label="My Profile">@if(auth()->user()->profile_photo_path)<img src="{{ route('account.profile.photo') }}?v={{ auth()->user()->updated_at?->timestamp??0 }}" alt="" width="35" height="35">@else{{ strtoupper(mb_substr(auth()->user()->name,0,1)) }}@endif</a>
       </div>
     </header>
     <main class="app-main portal-main"><div class="container">
