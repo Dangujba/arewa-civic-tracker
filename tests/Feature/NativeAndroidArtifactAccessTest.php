@@ -35,4 +35,3 @@ class NativeAndroidArtifactAccessTest extends TestCase
     }
 }
 
-[executed on device: vmi3166522 (70daa77f-145f-4200-b39a-e3102b71f5e4)]
