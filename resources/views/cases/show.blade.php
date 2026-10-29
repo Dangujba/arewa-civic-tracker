@@ -4,6 +4,24 @@
 <p><a href="{{ route('cases.index') }}"><i class="fa-solid fa-arrow-left" aria-hidden="true"></i> Reports</a></p><div class="card"><p class="muted">{{ $case->reference }} · {{ $case->lga->name }} · {{ $case->community }}</p><h1>{{ $case->title }}</h1><div class="grid"><div><strong>Verification</strong><p>{{ \App\Models\WorkflowStatusLabel::label('verification',$case->verification_status) }}</p></div><div><strong>Progress</strong><p>{{ \App\Models\WorkflowStatusLabel::label('progress',$case->progress_status) }}</p></div><div><strong>Sector</strong><p>{{ $case->sector->name }}</p></div><div><strong>Observed</strong><p>{{ $case->observation_date->format('d M Y') }}</p></div></div>@if($case->category)<p><strong>Category:</strong> {{ $case->category->name }}</p>@endif
 <h3>Description</h3><p>{{ $case->description }}</p><h3>Observations</h3><p>{{ $case->observations ?: 'None recorded' }}</p><h3>Duty bearers</h3><p>{{ $case->duty_bearers ?: 'None recorded' }}</p></div>
 @if(auth()->user()->isAdmin())
+<section class="card">
+ <h2>Public transparency</h2>
+ <p><strong>{{ $case->published_at?'Published for public viewing':'Not public' }}</strong></p>
+ <p class="muted">Public pages display only approved report metadata. Exact GPS, descriptions, evidence, reporter identities, internal notes and follow-ups stay private. Review public title and community names for sensitive information before publishing.</p>
+ @if($case->published_at)
+ <p class="muted">Published {{ $case->published_at->format('d M Y H:i') }}</p>
+ <form method="POST" action="{{ route('admin.cases.publication',$case) }}" data-no-ajax>@csrf
+ <input type="hidden" name="action" value="unpublish">
+ <button type="submit" class="btn-outline">Unpublish this report</button></form>
+ @elseif($case->verification_status==='approved')
+ <form method="POST" action="{{ route('admin.cases.publication',$case) }}" data-no-ajax>@csrf
+ <input type="hidden" name="action" value="publish">
+ <p><label><input type="checkbox" name="confirm_public" value="1" required> I reviewed the public fields and approve their publication.</label></p>
+ <button type="submit">Publish on public dashboard</button></form>
+ @else
+ <p class="muted">Only approved reports may be published.</p>
+ @endif
+</section>
 <section class="card act-legal-hold-panel">
  <h2>Legal Hold</h2>
  <p><strong>{{ $case->legal_hold?'Protection Active':'No Legal Hold' }}</strong></p>

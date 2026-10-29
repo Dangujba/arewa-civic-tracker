@@ -19,10 +19,10 @@
 <header class="site-header"><div class="shell header-inner">
 <a class="wordmark" href="{{ route('home') }}" aria-label="Arewa Civic Tracker, home"><img src="{{ asset('icons/arewa-handdrawn-map.webp') }}" class="site-brand-icon" width="37" height="37" alt=""><strong>arewa.</strong><small>Civic Tracker</small></a>
 <nav class="main-nav" id="site-navigation" aria-label="Primary navigation">
- <a href="#about">About</a><a href="#capabilities">Features</a><a href="#how-it-works">How it works</a><a href="#yobe">Yobe in focus</a><a class="mobile-download-link" href="{{ route('downloads.android') }}" download>Download Android app</a>
+ <a href="#about">About</a><a href="{{ route('public.transparency') }}">Public transparency</a><a href="#capabilities">Features</a><a href="#how-it-works">How it works</a><a href="#yobe">Yobe in focus</a><a class="mobile-download-link" href="{{ route('downloads.android') }}" download>Download Android app</a>
 </nav>
 <button class="menu-button" type="button" aria-controls="site-navigation" aria-expanded="false" data-mobile-nav aria-label="Toggle menu"><i class="fa-solid fa-bars" aria-hidden="true"></i></button>
-<div class="header-actions"><a class="btn download-header" href="{{ route('downloads.android') }}" download><i class="fa-solid fa-download" aria-hidden="true"></i> Download app</a><a class="btn" href="{{ route('login') }}"><i class="fa-solid fa-right-to-bracket" aria-hidden="true"></i> Staff portal</a></div>
+<div class="header-actions"><a class="btn outline" href="{{ route('public.transparency') }}">Public view</a><a class="btn download-header" href="{{ route('downloads.android') }}" download><i class="fa-solid fa-download" aria-hidden="true"></i> Download app</a><a class="btn" href="{{ route('login') }}"><i class="fa-solid fa-right-to-bracket" aria-hidden="true"></i> Staff portal</a></div>
 </div></header>
 <main id="main-content">
 <section class="hero"><div class="shell hero-grid">
@@ -30,7 +30,7 @@
   <span class="eyebrow">Civic monitoring • Project accountability</span>
   <h1>Evidence for <span>better communities.</span></h1>
   <p>Every community observation matters. Arewa Civic Tracker brings together public project monitoring, geographic intelligence and verified civic reports in one secure platform designed for RAWYOD's VOICES TO VOTES initiative.</p>
-  <div class="hero-actions"><a class="btn" href="#about">Explore the platform <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a><a class="btn outline" href="{{ route('login') }}">Access reporting portal <i class="fa-solid fa-arrow-up-right-from-square" aria-hidden="true"></i></a><a class="btn" href="{{ route('downloads.android') }}" download><i class="fa-solid fa-download" aria-hidden="true"></i> Download Android app</a></div>
+  <div class="hero-actions"><a class="btn" href="{{ route('public.transparency') }}"><i class="fa-solid fa-map-location-dot" aria-hidden="true"></i> Explore public reports</a><a class="btn" href="#about">Explore the platform <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a><a class="btn outline" href="{{ route('login') }}">Access reporting portal <i class="fa-solid fa-arrow-up-right-from-square" aria-hidden="true"></i></a><a class="btn" href="{{ route('downloads.android') }}" download><i class="fa-solid fa-download" aria-hidden="true"></i> Download Android app</a></div>
   <p class="download-note"><i class="fa-brands fa-android" aria-hidden="true"></i> Android preview build for testing. Download without signing in; staff credentials are required to use the app.</p>
   <div class="hero-support"><img class="sicon" src="{{ asset('vendor/lucide/shield-check.svg') }}" alt="" aria-hidden="true"><p>Secure role-based workspaces for field focal persons, reviewers and administrators.</p></div>
  </div>

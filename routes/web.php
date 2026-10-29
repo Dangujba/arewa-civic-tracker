@@ -1,6 +1,7 @@
 <?php
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\AndroidDownloadController;
+use App\Http\Controllers\PublicTransparencyController;
 use App\Http\Controllers\CaseController;
 use App\Http\Controllers\EvidenceController;
 use App\Http\Controllers\MapController;
@@ -19,6 +20,10 @@ use App\Http\Controllers\TwoFactorController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Middleware\EnsurePasswordIsChanged;
 Route::view('/','welcome')->name('home');
+Route::get('/transparency',[PublicTransparencyController::class,'index'])
+    ->middleware('throttle:60,1')->name('public.transparency');
+Route::get('/transparency/map-data',[PublicTransparencyController::class,'mapData'])
+    ->middleware('throttle:60,1')->name('public.transparency.map');
 // The APK is a public installation artifact; app accounts remain authenticated.
 Route::get('/download/android',[AndroidDownloadController::class,'download'])
     ->middleware('throttle:30,1')->name('downloads.android');
@@ -79,6 +84,8 @@ Route::middleware(['auth',EnsurePasswordIsChanged::class])->group(function(){
         Route::post('/users',[UserController::class,'store'])->name('users.store');
         Route::put('/users/{user}',[UserController::class,'update'])->name('users.update');
         Route::delete('/users/{user}',[UserController::class,'destroy'])->name('users.destroy');
+        Route::post('/cases/{case}/public-visibility',[\App\Http\Controllers\Admin\PublicPublicationController::class,'update'])
+            ->whereNumber('case')->name('cases.publication');
         Route::get('/data-governance',[\App\Http\Controllers\Admin\DataGovernanceController::class,'index'])->name('governance.index');
         Route::post('/data-governance/policy',[\App\Http\Controllers\Admin\DataGovernanceController::class,'save'])->name('governance.save');
         Route::post('/data-governance/approve',[\App\Http\Controllers\Admin\DataGovernanceController::class,'approve'])->name('governance.approve');

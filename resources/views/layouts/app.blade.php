@@ -34,6 +34,7 @@
     <div class="sidebar-organization"><span class="portal-org-icon"><i class="fa-solid fa-building-columns" aria-hidden="true"></i></span><span class="sidebar-label"><strong>RAWYOD</strong><small>VOICES TO VOTES</small></span></div>
     <nav class="portal-nav" aria-label="Main application navigation">
       <span class="portal-nav-section">Workspace</span>
+      <a href="{{ route('public.transparency') }}" class="portal-nav-link" target="_blank" rel="noopener"><i class="fa-solid fa-globe" aria-hidden="true"></i><span class="sidebar-label">Public Transparency</span></a>
       <a href="{{ route('dashboard') }}" class="portal-nav-link {{ request()->routeIs('dashboard')?'active':'' }}" @if(request()->routeIs('dashboard')) aria-current="page" @endif><i class="fa-solid fa-gauge-high" aria-hidden="true"></i><span class="sidebar-label">Dashboard</span></a>
       <a href="{{ route('cases.index') }}" class="portal-nav-link {{ request()->routeIs('cases.index','cases.show')?'active':'' }}" @if(request()->routeIs('cases.index','cases.show')) aria-current="page" @endif><i class="fa-regular fa-file-lines" aria-hidden="true"></i><span class="sidebar-label">Monitoring Reports</span></a>
       @can('create', App\Models\CivicCase::class)
