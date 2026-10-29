@@ -6,6 +6,9 @@ use App\Models\CivicCase;
 use App\Models\Lga;
 use App\Models\OrganizationSetting;
 use App\Models\User;
+use App\Services\EvidenceStorageManager;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 class OperationsController extends Controller {
  private function guard(Request $r):void {abort_unless($r->user()?->isAdmin(),403);}
@@ -25,6 +28,34 @@ class OperationsController extends Controller {
    ->whereNotNull('review_due_at')->where('review_due_at','<',now())->orderBy('review_due_at')->limit(30)->get();
   $settings=OrganizationSetting::first();
   return view('admin.operations.index',compact('focals','reviewers','lgas','overdue','settings'));
+ }
+ public function storage(Request $r,EvidenceStorageManager $manager){
+  $this->guard($r);
+  return view('admin.operations.storage',[
+   'overview'=>$manager->overview(),
+  ]);
+ }
+ public function checkStorage(Request $r,EvidenceStorageManager $manager){
+  $this->guard($r);
+  if (!$manager->r2Configured()) {
+   return back()->withErrors(['storage'=>'Cloudflare R2 credentials and HTTPS endpoint must be configured on the server first.']);
+  }
+  $key='arewa-health-check/'.Str::random(40).'.txt';
+  $body='arewa:'.Str::random(32);
+  try {
+   $store=Storage::disk('r2');
+   try {
+    $store->put($key,$body,['visibility'=>'private']);
+    if ($store->get($key)!==$body)
+     throw new \RuntimeException('Private object verification failed');
+   } finally {
+    $store->delete($key);
+   }
+  } catch (\Throwable $error){
+   report($error);
+   return back()->withErrors(['storage'=>'R2 connection could not be verified. Check the server storage configuration and logs.']);
+  }
+  return back()->with('message','R2 private upload, readback, and cleanup succeeded.');
  }
  public function audit(Request $r){
   $this->guard($r);

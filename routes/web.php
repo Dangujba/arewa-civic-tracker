@@ -57,6 +57,8 @@ Route::middleware(['auth',EnsurePasswordIsChanged::class])->group(function(){
     Route::get('/map/data',[MapController::class,'data'])->name('map.data');
     Route::prefix('admin')->name('admin.')->group(function(){
         Route::get('/operations',[OperationsController::class,'index'])->name('operations.index');
+        Route::get('/operations/storage',[OperationsController::class,'storage'])->name('operations.storage');
+        Route::post('/operations/storage/check',[OperationsController::class,'checkStorage'])->middleware('throttle:4,1')->name('operations.storage.check');
         Route::get('/activity',[OperationsController::class,'audit'])->name('operations.audit');
         Route::post('/operations/settings',[OperationsController::class,'settings'])->name('operations.settings');
         Route::post('/cases/{case}/reviewer',[ReviewAssignmentController::class,'update'])->name('reviews.assign')->whereNumber('case');
