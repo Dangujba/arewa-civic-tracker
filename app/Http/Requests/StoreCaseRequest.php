@@ -31,7 +31,7 @@ class StoreCaseRequest extends FormRequest {
         'evidence'=>['sometimes','array','max:5'],
         'evidence.*'=>['file','mimes:jpg,jpeg,png,webp,pdf',
             function($attribute,$value,$fail) {
-                if (!$value instanceof \\Illuminate\\Http\\UploadedFile) return;
+                if (!$value instanceof \Illuminate\Http\UploadedFile) return;
                 $limit=$value->getMimeType()==='application/pdf'?5120:10240;
                 if($value->getSize()>$limit*1024)
                     $fail($value->getMimeType()==='application/pdf'

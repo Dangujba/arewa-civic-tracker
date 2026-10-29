@@ -13,7 +13,7 @@ class EvidenceController extends Controller {
         if(!($r->user()->can('review',$case) || ($case->reporter_id===$r->user()->id && in_array($case->verification_status,['submitted','clarification_requested'],true)))){abort(403);}
         $r->validate(['evidence'=>['required','file','mimes:jpg,jpeg,png,webp,pdf',
             function($attribute,$value,$fail) {
-                if (!$value instanceof \\Illuminate\\Http\\UploadedFile) return;
+                if (!$value instanceof \Illuminate\Http\UploadedFile) return;
                 $limit=$value->getMimeType()==='application/pdf'?5120:10240;
                 if($value->getSize()>$limit*1024) $fail('Evidence exceeds the photo (10 MB) or PDF (5 MB) limit.');
             }]]);
