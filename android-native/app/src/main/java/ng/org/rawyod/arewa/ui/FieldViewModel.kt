@@ -23,6 +23,8 @@ import androidx.compose.runtime.setValue
 import java.util.UUID
 
 data class Choice(val id: Int, val name: String)
+data class CategoryChoice(val id:Int,val name:String,val type:String)
+data class CommunityChoice(val id:Int,val name:String,val lgaId:Int)
 data class ReportRow(val id: Long, val reference: String, val title: String, val status: String)
 data class ReportDetails(val id: Long, val reference: String, val title: String,
                          val status: String, val description: String, val followups: List<String>)
@@ -43,6 +45,12 @@ class FieldViewModel(application: Application) : AndroidViewModel(application) {
     var lgas by mutableStateOf(emptyList<Choice>())
         private set
     var sectors by mutableStateOf(emptyList<Choice>())
+        private set
+    var categories by mutableStateOf(emptyList<CategoryChoice>())
+        private set
+    var communities by mutableStateOf(emptyList<CommunityChoice>())
+        private set
+    var similarMatches by mutableStateOf(emptyList<String>())
         private set
     var drafts by mutableStateOf(emptyList<Draft>())
         private set
@@ -72,6 +80,14 @@ class FieldViewModel(application: Application) : AndroidViewModel(application) {
             }
         }
         lgas=read("lgas");sectors=read("sectors")
+        val cat=json?.optJSONArray("categories")
+        categories=if(cat==null)emptyList() else (0 until cat.length()).map{ i->
+            cat.getJSONObject(i).let{CategoryChoice(it.optInt("id"),it.optString("name"),it.optString("type"))}
+        }
+        val com=json?.optJSONArray("communities")
+        communities=if(com==null)emptyList() else (0 until com.length()).map{ i->
+            com.getJSONObject(i).let{CommunityChoice(it.optInt("id"),it.optString("name"),it.optInt("lga_id"))}
+        }
     }
 
     private fun observe() {
@@ -79,6 +95,31 @@ class FieldViewModel(application: Application) : AndroidViewModel(application) {
         val owner=userId ?: run { drafts=emptyList(); return }
         observing=viewModelScope.launch {
             repo.pending(owner).collectLatest { drafts=it }
+        }
+    }
+
+    fun checkSimilar(title:String,lga:Int,community:String,sector:Int,type:String,date:String){
+        if(busy)return
+        if(title.trim().length<5 || lga<=0){
+            message="Choose an LGA and enter a report title.";return
+        }
+        val token=app.store.token() ?: run{beginReauthentication();return}
+        viewModelScope.launch {
+            busy=true;similarMatches=emptyList()
+            try{
+                val request=JSONObject().put("title",title.trim()).put("lga_id",lga)
+                    .put("community",community.trim()).put("sector_id",sector)
+                    .put("type",type).put("observation_date",date)
+                val list=app.api.similarReports(token,request).optJSONArray("matches")
+                similarMatches=if(list==null)emptyList() else (0 until list.length()).map{ i->
+                    list.getJSONObject(i).optString("title")
+                }
+                message=if(similarMatches.isEmpty())"No similar report detected."
+                  else "Possible matches found. You may still submit a distinct observation."
+            }catch(e:Exception){
+                if(e is ApiFailure && e.code==401)beginReauthentication()
+                else message="Similarity check unavailable. You can still save this report offline."
+            }finally{busy=false}
         }
     }
 
@@ -288,6 +329,7 @@ class FieldViewModel(application: Application) : AndroidViewModel(application) {
                 repo.queue(payload,attachments)
                 restoredDraft=null
                 attachments=emptyList()
+                similarMatches=emptyList()
                 message="Report encrypted on this device. Automatic synchronization queued."
                 onSaved()
             } catch(e: Exception){message=e.message ?: "Unable to save report"}

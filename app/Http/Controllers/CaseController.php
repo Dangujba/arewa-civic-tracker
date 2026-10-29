@@ -34,7 +34,10 @@ class CaseController extends Controller {
         if(!empty($data['status']))$query->where('verification_status',$data['status']);
         return view('cases.queue',['counts'=>$counts,'cases'=>$query->paginate(20)]);
     }
-    public function create(Request $r){$r->user()->can('create',CivicCase::class)||abort(403);$lgas=$r->user()->role==='focal' ? $r->user()->assignedLgas()->orderBy('lgas.name')->get() : Lga::orderBy('name')->get();return view('cases.create',['lgas'=>$lgas,'sectors'=>Sector::where('is_active',true)->orderBy('name')->get()]);}
+    public function create(Request $r){$r->user()->can('create',CivicCase::class)||abort(403);$lgas=$r->user()->role==='focal' ? $r->user()->assignedLgas()->orderBy('lgas.name')->get() : Lga::orderBy('name')->get();return view('cases.create',['lgas'=>$lgas,'sectors'=>Sector::where('is_active',true)->orderBy('name')->get(),
+        'categories'=>\App\Models\ReportCategory::where('is_active',true)->orderBy('name')->get(),
+        'communities'=>\App\Models\Community::where('is_active',true)
+            ->whereIn('lga_id',$lgas->pluck('id'))->orderBy('name')->get()]);}
     public function store(StoreCaseRequest $r,CaseSubmissionService $service){
         $data=$r->validated();
         unset($data['evidence']);
@@ -45,7 +48,7 @@ class CaseController extends Controller {
         if($r->expectsJson()){return response()->json(['id'=>$case->id,'reference'=>$case->reference,'verification_status'=>$case->verification_status,'message'=>'Report submitted successfully.','redirect'=>route('cases.show',$case)],201);}
         return redirect()->route('cases.show',$case)->with('message','Report submitted: '.$case->reference);
     }
-    public function show(Request $r,CivicCase $case){$r->user()->can('view',$case)||abort(403);return view('cases.show',['case'=>$case->load(['lga','sector','events.actor','revisions.actor','followups','evidence','reviewer']),'allowedTransitions'=>app(CaseReviewService::class)->allowedTransitions($r->user(),$case),'reviewers'=>$r->user()->isAdmin()?User::where('role','meal')->where('is_active',true)->orderBy('name')->get():collect()]);}
+    public function show(Request $r,CivicCase $case){$r->user()->can('view',$case)||abort(403);return view('cases.show',['case'=>$case->load(['lga','sector','category','events.actor','revisions.actor','followups','evidence','reviewer','closedBy']),'allowedTransitions'=>app(CaseReviewService::class)->allowedTransitions($r->user(),$case),'reviewers'=>$r->user()->isAdmin()?User::where('role','meal')->where('is_active',true)->orderBy('name')->get():collect()]);}
     public function review(Request $r,CivicCase $case,CaseReviewService $service){
         $r->user()->can('review',$case)||abort(403);
         $data=$r->validate(['status'=>['required','in:under_review,clarification_requested,verified,approved,rejected'],'comment'=>['nullable','string','max:5000']]);
@@ -56,6 +59,8 @@ class CaseController extends Controller {
         $r->user()->can('addFollowup',$case)||abort(403);
         $data=$r->validate(['note'=>['required','string','min:5','max:5000']]);
         DB::transaction(function()use($case,$r,$data){
+            $locked=CivicCase::whereKey($case->id)->lockForUpdate()->firstOrFail();
+            abort_if($locked->closure_status==='closed',403);
             CaseFollowup::create(['case_id'=>$case->id,'author_id'=>$r->user()->id,'note'=>$data['note']]);
             CaseEvent::create(['case_id'=>$case->id,'actor_id'=>$r->user()->id,'event_type'=>'followup_added','comment'=>$data['note']]);
         });

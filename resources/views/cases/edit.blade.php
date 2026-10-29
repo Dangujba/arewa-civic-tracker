@@ -9,8 +9,8 @@
  <div class="field"><label>Report Type</label><select name="type" required><option value="public_project" @selected(old('type',$case->type)==='public_project')>Public Project</option><option value="governance_issue" @selected(old('type',$case->type)==='governance_issue')>Governance Issue</option></select></div>
  <div class="field"><label>Observation Date</label><input type="date" max="{{ now()->toDateString() }}" name="observation_date" value="{{ old('observation_date',$case->observation_date->format('Y-m-d')) }}" required></div>
  <div class="field"><label>LGA</label><select name="lga_id" required>@foreach($lgas as $l)<option value="{{ $l->id }}" @selected(old('lga_id',$case->lga_id)==$l->id)>{{ $l->name }}</option>@endforeach</select></div>
- <div class="field"><label>Community</label><input name="community" maxlength="150" value="{{ old('community',$case->community) }}" required></div>
- <div class="field"><label>Sector</label><select name="sector_id" required>@foreach($sectors as $s)<option value="{{ $s->id }}" @selected(old('sector_id',$case->sector_id)==$s->id)>{{ $s->name }}</option>@endforeach</select></div>
+ <div class="field"><label>Community</label><input list="community-suggestions" name="community" maxlength="150" value="{{ old('community',$case->community) }}" required></div>
+ <div class="field"><label>Report Category (Optional)</label><select name="report_category_id"><option value="">No category</option>@foreach($categories as $c)<option value="{{ $c->id }}" data-type="{{ $c->type }}" @selected(old('report_category_id',isset($case)?$case->report_category_id:null)==$c->id)>{{ $c->name }}</option>@endforeach</select></div><datalist id="community-suggestions">@foreach($communities as $place)<option value="{{ $place->name }}" data-lga="{{ $place->lga_id }}"></option>@endforeach</datalist><div class="field"><label>Sector</label><select name="sector_id" required>@foreach($sectors as $s)<option value="{{ $s->id }}" @selected(old('sector_id',$case->sector_id)==$s->id)>{{ $s->name }}</option>@endforeach</select></div>
  </div>
  <div class="field"><label>Report Title</label><input name="title" required maxlength="200" minlength="5" value="{{ old('title',$case->title) }}"></div>
  <div class="field"><label>Description</label><textarea name="description" required minlength="15" maxlength="10000">{{ old('description',$case->description) }}</textarea></div>
@@ -21,3 +21,5 @@
  <div class="act-user-actions"><a class="btn-outline" href="{{ route('cases.show',$case) }}">Cancel</a><button type="submit" class="btn"><i class="fa-solid fa-check" aria-hidden="true"></i> Save Revision</button></div>
 </form>
 @endsection
+
+@push('scripts')<script defer src="{{ asset('js/act-reference-forms.js') }}?v=20261029-master1"></script>@endpush

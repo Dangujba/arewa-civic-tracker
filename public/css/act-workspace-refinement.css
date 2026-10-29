@@ -122,3 +122,22 @@
  .portal-main .act-ops-panel-head{padding:14px 15px;align-items:flex-start;flex-wrap:wrap;gap:9px}
  .portal-main .act-ops-policy-form{padding:16px!important}
 }
+
+/* Inline, non-blocking similarity suggestions */
+.portal-main .act-similar-panel{margin:16px 0;padding:14px 16px;border:1px solid #e7d5ae;background:#fffcf5;border-radius:0}
+.portal-main .act-similar-panel[hidden]{display:none!important}
+.act-similar-heading{display:flex;align-items:center;gap:8px;color:#765526;font-size:13px}
+.portal-main .act-similar-panel p{font-size:12px;color:#765e3d;margin:8px 0 12px;line-height:1.5}
+.act-similar-item{padding:10px 0;border-top:1px solid #efe4cf;display:grid;gap:4px;font-size:12px}
+.act-similar-item a,.act-similar-item strong{color:#285e43;font-weight:800}
+.act-similar-item small{color:#786f5e;font-size:11px}
+/* Flat reference data editor with consistent compact tables */
+.portal-main .act-reference-form{padding:16px 18px;display:grid;grid-template-columns:minmax(160px,1fr) minmax(180px,1.5fr) auto;align-items:end;gap:12px;border-bottom:1px solid #e5ece5}
+.portal-main .act-reference-form .field{margin:0}
+.portal-main .act-reference-form label{display:block;font-weight:800;font-size:11px;color:#45654f;margin-bottom:7px}
+.portal-main .act-reference-form input,.portal-main .act-reference-form select,.portal-main .act-reference-editor input,.portal-main .act-reference-editor select{border-radius:0;height:39px;min-height:39px;font-size:12px}
+.portal-main .act-reference-form button{height:39px;padding:9px 13px;font-size:12px}
+.portal-main .act-reference-editor{display:flex;align-items:center;gap:7px}
+.portal-main .act-reference-editor input{max-width:220px;min-width:120px}
+.portal-main .act-reference-editor select{max-width:120px}
+@media(max-width:650px){.portal-main .act-reference-form{grid-template-columns:1fr}.portal-main .act-reference-editor{min-width:330px}}

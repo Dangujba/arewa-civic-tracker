@@ -15,6 +15,7 @@ class ReviewAssignmentController extends Controller {
    'review_due_at'=>['nullable','date','after:today']]);
   DB::transaction(function() use($r,$case,$data){
    $locked=CivicCase::whereKey($case->id)->lockForUpdate()->firstOrFail();
+   abort_if($locked->closure_status==='closed',403,'Closed cases cannot be reassigned.');
    $previous=$locked->reviewer_id;
    $locked->reviewer_id=$data['reviewer_id']??null;
    $locked->review_due_at=($data['reviewer_id']??null)

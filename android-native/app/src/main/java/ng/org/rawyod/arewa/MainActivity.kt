@@ -184,6 +184,7 @@ private fun FormScreen(vm:FieldViewModel) {
     var type by remember { mutableStateOf("public_project") }
     var lga by remember { mutableIntStateOf(0) }
     var sector by remember { mutableIntStateOf(0) }
+    var category by remember { mutableIntStateOf(0) }
     var title by remember { mutableStateOf("") }
     var description by remember { mutableStateOf("") }
     var community by remember { mutableStateOf("") }
@@ -199,6 +200,7 @@ private fun FormScreen(vm:FieldViewModel) {
         type=data.optString("type","public_project")
         lga=data.optInt("lga_id")
         sector=data.optInt("sector_id")
+        category=data.optInt("report_category_id")
         title=data.optString("title")
         description=data.optString("description")
         community=data.optString("community")
@@ -247,6 +249,15 @@ private fun FormScreen(vm:FieldViewModel) {
         }
         ChoiceField("Assigned LGA",vm.lgas,lga){lga=it}
         ChoiceField("Sector",vm.sectors,sector){sector=it}
+        val availableCategories=vm.categories.filter{it.type==type}
+        if(availableCategories.isNotEmpty())ChoiceField("Report Category",
+           listOf(Choice(0,"No category"))+availableCategories.map{Choice(it.id,it.name)},
+           if(availableCategories.any{it.id==category})category else 0){category=it}
+        val knownCommunities=vm.communities.filter{it.lgaId==lga}
+        if(knownCommunities.isNotEmpty())ChoiceField("Known Community (Optional)",
+           listOf(Choice(0,"Enter Manually"))+knownCommunities.map{Choice(it.id,it.name)},0){id->
+           if(id!=0)community=knownCommunities.first{it.id==id}.name
+        }
         OutlinedTextField(community,{community=it},label={Text("Community *")},modifier=Modifier.fillMaxWidth())
         OutlinedTextField(title,{title=it},label={Text("Report title *")},modifier=Modifier.fillMaxWidth())
         OutlinedTextField(description,{description=it},label={Text("Description *")},modifier=Modifier.fillMaxWidth(),
@@ -306,6 +317,14 @@ private fun FormScreen(vm:FieldViewModel) {
                 TextButton(onClick={vm.removeEvidence(index)}){Text("Remove")}
             }
         }
+        OutlinedButton(shape=RectangleShape,onClick={
+            vm.checkSimilar(title,lga,community,sector,type,date)
+        },enabled=!vm.busy && title.trim().length>=5 && lga>0,
+            modifier=Modifier.fillMaxWidth()){Text("Check Similar Reports")}
+        vm.similarMatches.forEach{ match->
+            Text("Possible match: "+match,style=MaterialTheme.typography.bodySmall,
+                color=Color(0xFF795B2C))
+        }
         Button(shape=RectangleShape,modifier=Modifier.fillMaxWidth(),enabled=!vm.busy && vm.lgas.isNotEmpty(),
             onClick={
                 try {
@@ -313,6 +332,9 @@ private fun FormScreen(vm:FieldViewModel) {
                         .put("type",type).put("title",title.trim())
                         .put("description",description.trim()).put("community",community.trim())
                         .put("lga_id",lga).put("sector_id",sector)
+                        .put("report_category_id",
+                          if(category>0 && vm.categories.any{it.id==category && it.type==type})
+                              category else JSONObject.NULL)
                         .put("observation_date",date).put("progress_status",progress)
                         .put("observations",observation).put("duty_bearers",dutyBearers)
                     if(latitude.isNotBlank() && longitude.isNotBlank()){

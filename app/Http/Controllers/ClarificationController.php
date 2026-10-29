@@ -12,6 +12,7 @@ class ClarificationController extends Controller {
         $data=$r->validate(['response'=>['required','string','min:5','max:5000']]);
         DB::transaction(function()use($r,$case,$data){
             $locked=CivicCase::whereKey($case->id)->lockForUpdate()->firstOrFail();
+            abort_if($locked->closure_status==='closed',403,'Closed cases cannot be updated.');
             if($locked->verification_status!=='clarification_requested')throw ValidationException::withMessages(['response'=>'There is no active clarification request for this report.']);
             CaseFollowup::create(['case_id'=>$locked->id,'author_id'=>$r->user()->id,'note'=>$data['response']]);
             $locked->verification_status='under_review';$locked->save();

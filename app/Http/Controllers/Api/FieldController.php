@@ -92,6 +92,10 @@ class FieldController extends Controller {
   return response()->json(['user'=>['id'=>$u->id,'name'=>$u->name,'role'=>$u->role],
    'lgas'=>$u->assignedLgas()->orderBy('lgas.name')->get(['lgas.id','lgas.name']),
    'sectors'=>Sector::where('is_active',true)->orderBy('name')->get(['id','name']),
+   'categories'=>\App\Models\ReportCategory::where('is_active',true)->get(['id','type','name']),
+   'communities'=>\App\Models\Community::where('is_active',true)
+     ->whereIn('lga_id',$u->assignedLgas()->pluck('lgas.id'))->get(['id','lga_id','name']),
+   'status_labels'=>\App\Models\WorkflowStatusLabel::get(['kind','code','label']),
    'max_evidence_files'=>5,'max_evidence_bytes'=>5242880,'server_time'=>now()->toIso8601String()])
    ->header('Cache-Control','private, no-store');
  }
@@ -120,12 +124,27 @@ class FieldController extends Controller {
    'verification_status'=>$case->verification_status],201)
    ->header('Cache-Control','private, no-store');
  }
+ public function similar(Request $r,\App\Services\SimilarReportService $service){
+  $user=$this->guard($r);
+  $data=$r->validate([
+   'title'=>['required','string','min:5','max:200'],
+   'lga_id'=>['required','integer','exists:lgas,id'],
+   'community'=>['nullable','string','max:150'],
+   'sector_id'=>['nullable','integer','exists:sectors,id'],
+   'type'=>['nullable','in:public_project,governance_issue'],
+   'observation_date'=>['nullable','date','before_or_equal:today'],
+  ]);
+  abort_unless($user->assignedLgas()->where('lgas.id',$data['lga_id'])->exists(),403);
+  return response()->json(['matches'=>$service->find($user,$data)])
+    ->header('Cache-Control','private, no-store');
+ }
  public function clarification(Request $r,CivicCase $case){
   $u=$this->guard($r);
   abort_unless((int)$case->reporter_id===(int)$u->id,403);
   $data=$r->validate(['response'=>['required','string','min:5','max:5000']]);
   DB::transaction(function()use($r,$case,$data){
    $locked=CivicCase::whereKey($case->id)->lockForUpdate()->firstOrFail();
+   abort_if($locked->closure_status==='closed',403,'Closed case.');
    if($locked->verification_status!=='clarification_requested')
     throw ValidationException::withMessages(['response'=>'No clarification request is open.']);
    CaseFollowup::create(['case_id'=>$locked->id,'author_id'=>$r->user()->id,'note'=>$data['response']]);

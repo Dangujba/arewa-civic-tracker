@@ -15,12 +15,14 @@ class CaseReviewService {
     ];
     public function allowedTransitions(User $actor,CivicCase $case):array {
         if (!$actor->canReview() || ($actor->role==='meal' && $case->reviewer_id && (int)$case->reviewer_id !== (int)$actor->id))return [];
+        if($case->closure_status==='closed')return [];
         $allowed=self::TRANSITIONS[$case->verification_status]??[];
         return $actor->isAdmin() ? $allowed : array_values(array_diff($allowed,['approved']));
     }
     public function transition(User $actor,CivicCase $case,string $to,?string $comment):CivicCase {
         return DB::transaction(function() use($actor,$case,$to,$comment){
             $locked=CivicCase::whereKey($case->id)->lockForUpdate()->firstOrFail();
+            abort_if($locked->closure_status==='closed',403,'Closed cases cannot be reviewed.');
             $from=$locked->verification_status;
             if(!$actor->canReview() || ($actor->role==='meal' && $locked->reviewer_id && (int)$locked->reviewer_id !== (int)$actor->id))abort(403,'Report assigned to another reviewer.');
             if(!in_array($to,self::TRANSITIONS[$from]??[],true)){

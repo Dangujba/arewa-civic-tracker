@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Storage;
 class EvidenceController extends Controller {
     public function store(Request $r,CivicCase $case){
         $r->user()->can('view',$case)||abort(403);
+        abort_if($case->closure_status==='closed',403,'Closed cases cannot accept new evidence.');
         if(!($r->user()->can('review',$case) || ($case->reporter_id===$r->user()->id && in_array($case->verification_status,['submitted','clarification_requested'],true)))){abort(403);}
         $r->validate(['evidence'=>['required','file','mimes:jpg,jpeg,png,webp,pdf','max:5120']]);
         app(\App\Services\CaseEvidenceService::class)->attach($case,$r->user(),[$r->file('evidence')]);

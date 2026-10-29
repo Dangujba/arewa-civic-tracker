@@ -20,7 +20,7 @@
  <div class="dash-table-wrap"><table class="act-compact-table"><thead><tr><th>Reference</th><th>Report</th><th>LGA</th><th>Sector</th><th>Verification</th><th>Action</th></tr></thead><tbody>
  @forelse($cases as $case)<tr>
   <td><strong>{{ $case->reference }}</strong></td><td>{{ $case->title }}</td><td>{{ $case->lga?->name }}</td><td>{{ $case->sector?->name }}</td>
-  <td><span class="act-state-chip">{{ ucwords(str_replace('_',' ',$case->verification_status)) }}</span></td>
+  <td><span class="act-state-chip">{{ \App\Models\WorkflowStatusLabel::label('verification',$case->verification_status) }}</span></td>
   <td><a class="act-table-icon-link" href="{{ route('cases.show',$case) }}" aria-label="View {{ $case->reference }}" title="View report"><i class="fa-solid fa-arrow-up-right-from-square" aria-hidden="true"></i></a></td>
  </tr>@empty<tr><td colspan="6" class="act-table-empty">No reports match your filters.</td></tr>@endforelse
  </tbody></table></div>

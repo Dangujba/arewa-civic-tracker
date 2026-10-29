@@ -41,3 +41,9 @@ For the approved staging API hostname, Android DNS is tried first. A fallback to
 - Flat, square native action controls.
 
 The debug APK is for controlled testing, not production distribution. It uses Android debug signing and the staging API. RAWYOD must sign and verify a separate release artifact for production.
+
+## v0.3.0 online similarity and reference data
+- Report form includes an optional online check for potentially related field reports. It never blocks offline submission.
+- Enrolled officers can select published categories and communities for their assigned LGAs while retaining manual community entry.
+- Category IDs are transmitted only when a valid category for the selected report type has been chosen.
+- The administrator-only debug APK endpoint now serves v0.3.0. This is not production-signed.

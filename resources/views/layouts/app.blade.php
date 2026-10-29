@@ -13,7 +13,7 @@
 <link rel="stylesheet" href="{{ asset('vendor/ui/tom-select.css') }}">
 <link rel="stylesheet" href="{{ asset('vendor/ui/sweetalert2.css') }}">
 <link rel="stylesheet" href="{{ asset('css/act-form-polish.css') }}?v=20261029-ring1">
-<link rel="stylesheet" href="{{ asset('css/act-workspace-refinement.css') }}?v=20261029-profile1">
+<link rel="stylesheet" href="{{ asset('css/act-workspace-refinement.css') }}?v=20261029-master1">
 <title>@yield('title','Arewa Civic Tracker')</title>@stack('head')
 <script defer src="{{ asset('vendor/ui/tom-select.js') }}"></script>
 <script defer src="{{ asset('vendor/ui/sweetalert2.js') }}"></script>
@@ -52,6 +52,7 @@
       <a href="{{ route('admin.native.android-debug') }}" class="portal-nav-link"><i class="fa-solid fa-mobile-screen-button" aria-hidden="true"></i><span class="sidebar-label">Android App</span></a>
       <a href="{{ route('admin.operations.storage') }}" class="portal-nav-link {{ request()->routeIs('admin.operations.storage*')?'active':'' }}" @if(request()->routeIs('admin.operations.storage*')) aria-current="page" @endif><i class="fa-solid fa-database" aria-hidden="true"></i><span class="sidebar-label">Evidence Storage</span></a>
       <a href="{{ route('admin.operations.audit') }}" class="portal-nav-link {{ request()->routeIs('admin.operations.audit')?'active':'' }}"><i class="fa-solid fa-list-check" aria-hidden="true"></i><span class="sidebar-label">Activity Audit</span></a>
+      <a href="{{ route('admin.reference.index') }}" class="portal-nav-link {{ request()->routeIs('admin.reference.*')?'active':'' }}"><i class="fa-solid fa-list-check" aria-hidden="true"></i><span class="sidebar-label">Reference Data</span></a>
       <a href="{{ route('admin.sectors.index') }}" class="portal-nav-link {{ request()->routeIs('admin.sectors.*')?'active':'' }}" @if(request()->routeIs('admin.sectors.*')) aria-current="page" @endif><i class="fa-solid fa-layer-group" aria-hidden="true"></i><span class="sidebar-label">Monitoring Sectors</span></a>
       @endif
       <span class="portal-nav-section">Account</span>

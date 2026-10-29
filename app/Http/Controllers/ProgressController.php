@@ -12,6 +12,7 @@ class ProgressController extends Controller {
         DB::transaction(function()use($case,$r,$data){
             $locked=CivicCase::whereKey($case->id)->lockForUpdate()->firstOrFail();
             abort_unless($r->user()->can('review',$locked),403);
+            abort_if($locked->closure_status==='closed',403,'Closed reports cannot change progress.');
             $previous=$locked->progress_status;
             $locked->progress_status=$data['progress_status'];$locked->save();
             CaseEvent::create(['case_id'=>$locked->id,'actor_id'=>$r->user()->id,'event_type'=>'progress_status_updated','from_status'=>$previous,'to_status'=>$data['progress_status'],'comment'=>$data['note']]);

@@ -11,11 +11,13 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 class CaseRevisionController extends Controller {
- private const FIELDS=['type','title','description','lga_id','community','sector_id','observation_date','observations','duty_bearers','latitude','longitude'];
+ private const FIELDS=['type','title','description','lga_id','community','sector_id','report_category_id','observation_date','observations','duty_bearers','latitude','longitude'];
  public function edit(Request $r,CivicCase $case){
   $r->user()->can('update',$case)||abort(403);
   $lgas=$r->user()->role==='focal'?$r->user()->assignedLgas()->orderBy('lgas.name')->get():Lga::orderBy('name')->get();
-  return view('cases.edit',['case'=>$case,'lgas'=>$lgas,'sectors'=>Sector::where('is_active',true)->orWhere('id',$case->sector_id)->orderBy('name')->get()]);
+  return view('cases.edit',['case'=>$case,'lgas'=>$lgas,'sectors'=>Sector::where('is_active',true)->orWhere('id',$case->sector_id)->orderBy('name')->get(),
+     'categories'=>\App\Models\ReportCategory::where('is_active',true)->orWhere('id',$case->report_category_id)->orderBy('name')->get(),
+     'communities'=>\App\Models\Community::whereIn('lga_id',$lgas->pluck('id'))->where('is_active',true)->orderBy('name')->get()]);
  }
  public function update(Request $r,CivicCase $case){
   $r->user()->can('update',$case)||abort(403);
@@ -31,6 +33,8 @@ class CaseRevisionController extends Controller {
    }],
    'community'=>['required','string','max:150'],
    'sector_id'=>['required','integer','exists:sectors,id'],
+   'report_category_id'=>['nullable','integer',\Illuminate\Validation\Rule::exists('report_categories','id')
+      ->where('is_active',true)->where('type',$r->input('type'))],
    'observation_date'=>['required','date','before_or_equal:today'],
    'observations'=>['nullable','string','max:10000'],
    'duty_bearers'=>['nullable','string','max:5000'],
@@ -39,7 +43,7 @@ class CaseRevisionController extends Controller {
   ]);
   DB::transaction(function()use($r,$case,$data){
    $locked=CivicCase::whereKey($case->id)->lockForUpdate()->firstOrFail();
-   if(!$r->user()->can('update',$locked))abort(403,'Report is locked for editing.');
+   if(!$r->user()->can('update',$locked)||$locked->closure_status==='closed')abort(403,'Report is locked for editing.');
    $current=CaseRevision::where('case_id',$locked->id)->max('version')??0;
    if((int)$data['version']!==(int)$current)
      throw ValidationException::withMessages(['version'=>'This report changed since you opened it. Reload before editing.']);
@@ -48,6 +52,7 @@ class CaseRevisionController extends Controller {
     $old=$locked->getRawOriginal($field);
     $new=$data[$field]??null;
     if(in_array($field,['lga_id','sector_id'],true))$new=(int)$new;
+    if($field==='report_category_id'&&$new!==null)$new=(int)$new;
     if($field==='observation_date')$new=date('Y-m-d',strtotime($new));
     if(in_array($field,['latitude','longitude'],true)&&$new!==null)$new=number_format((float)$new,7,'.','');
     if($old!==null&&in_array($field,['latitude','longitude'],true))$old=number_format((float)$old,7,'.','');

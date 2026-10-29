@@ -20,6 +20,8 @@ class StoreCaseRequest extends FormRequest {
         }],
         'community'=>['required','string','max:150'],
         'sector_id'=>['required','integer',Rule::exists('sectors','id')->where('is_active',true)],
+        'report_category_id'=>['nullable','integer',
+          Rule::exists('report_categories','id')->where('is_active',true)->where('type',$this->input('type'))],
         'observation_date'=>['required','date','before_or_equal:today'],
         'observations'=>['nullable','string','max:10000'],
         'duty_bearers'=>['nullable','string','max:5000'],

@@ -8,15 +8,16 @@ class CivicCasePolicy {
           ($u->is_active && $u->role==='meal' && (!$c->reviewer_id || (int)$c->reviewer_id === (int)$u->id)) ||
           ($u->is_active && (int)$c->reporter_id === (int)$u->id);}
     public function update(User $u,CivicCase $c):bool{
-      if(!$u->is_active || !in_array($c->verification_status,['submitted','clarification_requested'],true))return false;
+      if(!$u->is_active || !in_array($c->verification_status,['submitted','clarification_requested'],true) || $c->closure_status==='closed')return false;
       if($u->isAdmin())return true;
       return $u->role==='focal' && (int)$u->id===(int)$c->reporter_id;
     }
     public function create(User $u):bool{return $u->is_active && in_array($u->role,['focal','admin'],true);}
     public function review(User $u,CivicCase $c):bool{
+        if($c->closure_status==='closed')return false;
         return $u->isAdmin() ||
          ($u->canReview() && (!$c->reviewer_id || (int)$c->reviewer_id === (int)$u->id));
     }
     public function approve(User $u,CivicCase $c):bool{return $u->isAdmin();}
-    public function addFollowup(User $u,CivicCase $c):bool{return $this->view($u,$c);}
+    public function addFollowup(User $u,CivicCase $c):bool{return $c->closure_status!=='closed' && $this->view($u,$c);}
 }

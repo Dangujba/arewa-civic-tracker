@@ -97,6 +97,12 @@ class FieldApi(private val vault: CryptoVault) {
             call("reports/$id","GET",token)
         }
 
+    suspend fun similarReports(token: String, request: JSONObject): JSONObject =
+        kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
+            call("reports/similar","POST",token,
+                request.toString().toRequestBody("application/json".toMediaType()))
+        }
+
     suspend fun clarification(token: String, id: Long, response: String) =
         kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
             call("reports/$id/clarification","POST",token,
@@ -108,9 +114,10 @@ class FieldApi(private val vault: CryptoVault) {
         kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
             val multipart = MultipartBody.Builder().setType(MultipartBody.FORM)
             val names = listOf("client_submission_id","type","title","description","lga_id",
-                "community","sector_id","observation_date","observations","duty_bearers",
+                "community","sector_id","report_category_id","observation_date","observations","duty_bearers",
                 "progress_status","latitude","longitude")
             for (field in names) {
+                if(field=="report_category_id" && payload.optInt(field,0)<=0) continue
                 val text = payload.optString(field)
                 if(text.isNotBlank()) multipart.addFormDataPart(field,text)
             }

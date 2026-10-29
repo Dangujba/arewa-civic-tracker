@@ -10,6 +10,7 @@ Route::prefix('v1')->group(function(){
   Route::get('/reports',[FieldController::class,'index']);
   Route::get('/reports/{case}',[FieldController::class,'show'])->whereNumber('case');
   Route::post('/reports',[FieldController::class,'store'])->middleware('throttle:20,1');
+  Route::post('/reports/similar',[FieldController::class,'similar'])->middleware('throttle:30,1');
   Route::post('/reports/{case}/clarification',[FieldController::class,'clarification'])->whereNumber('case');
   Route::get('/evidence/{evidence}',[FieldController::class,'evidence'])->whereNumber('evidence');
  });

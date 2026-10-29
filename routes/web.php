@@ -45,11 +45,15 @@ Route::middleware(['auth',EnsurePasswordIsChanged::class])->group(function(){
     Route::get('/cases',[CaseController::class,'index'])->name('cases.index');
     Route::get('/cases/new',[CaseController::class,'create'])->name('cases.create');
     Route::post('/cases',[CaseController::class,'store'])->name('cases.store');
+    Route::post('/cases/similar',[\App\Http\Controllers\SimilarReportController::class,'check'])
+        ->middleware('throttle:30,1')->name('cases.similar');
     Route::get('/cases/export.csv',[ExportController::class,'csv'])->name('cases.export');
     Route::get('/cases/{case}/edit',[\App\Http\Controllers\CaseRevisionController::class,'edit'])->name('cases.edit')->whereNumber('case');
     Route::put('/cases/{case}',[\App\Http\Controllers\CaseRevisionController::class,'update'])->name('cases.update')->whereNumber('case');
     Route::get('/cases/{case}',[CaseController::class,'show'])->name('cases.show')->whereNumber('case');
     Route::post('/cases/{case}/review',[CaseController::class,'review'])->name('cases.review')->whereNumber('case');
+    Route::post('/cases/{case}/closure',[\App\Http\Controllers\CaseClosureController::class,'update'])
+        ->name('cases.closure')->whereNumber('case');
     Route::post('/cases/{case}/followups',[CaseController::class,'followup'])->name('cases.followups')->whereNumber('case');
     Route::post('/cases/{case}/clarification',[ClarificationController::class,'respond'])->name('cases.clarification')->whereNumber('case');
     Route::post('/cases/{case}/progress',[ProgressController::class,'update'])->name('cases.progress')->whereNumber('case');
@@ -70,6 +74,12 @@ Route::middleware(['auth',EnsurePasswordIsChanged::class])->group(function(){
         Route::post('/users',[UserController::class,'store'])->name('users.store');
         Route::put('/users/{user}',[UserController::class,'update'])->name('users.update');
         Route::delete('/users/{user}',[UserController::class,'destroy'])->name('users.destroy');
+        Route::get('/reference-data',[\App\Http\Controllers\Admin\ReferenceDataController::class,'index'])->name('reference.index');
+        Route::post('/reference-data/communities',[\App\Http\Controllers\Admin\ReferenceDataController::class,'addCommunity'])->name('reference.communities.create');
+        Route::put('/reference-data/communities/{community}',[\App\Http\Controllers\Admin\ReferenceDataController::class,'updateCommunity'])->name('reference.communities.update');
+        Route::post('/reference-data/categories',[\App\Http\Controllers\Admin\ReferenceDataController::class,'addCategory'])->name('reference.categories.create');
+        Route::put('/reference-data/categories/{category}',[\App\Http\Controllers\Admin\ReferenceDataController::class,'updateCategory'])->name('reference.categories.update');
+        Route::put('/reference-data/statuses/{status}',[\App\Http\Controllers\Admin\ReferenceDataController::class,'updateStatus'])->name('reference.statuses.update');
         Route::get('/sectors',[SectorController::class,'index'])->name('sectors.index');
         Route::post('/sectors',[SectorController::class,'store'])->name('sectors.store');
         Route::put('/sectors/{sector}',[SectorController::class,'update'])->name('sectors.update');
