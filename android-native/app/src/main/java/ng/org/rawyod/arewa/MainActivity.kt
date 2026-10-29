@@ -22,6 +22,7 @@ import androidx.compose.foundation.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.saveable.rememberSaveableStateHolder
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -93,7 +94,7 @@ class MainActivity:FragmentActivity() {
     }
     override fun onStop() {
         super.onStop()
-        fieldVm.lockOnBackground()
+        if(!fieldVm.externalPickerActive)fieldVm.lockOnBackground()
     }
     override fun onCreate(savedInstanceState:Bundle?){
         super.onCreate(savedInstanceState)
@@ -121,6 +122,7 @@ private fun FieldApplication(
     val user=vm.userId
     var tab by remember { mutableIntStateOf(0) }
     var guestPublic by remember { mutableStateOf(false) }
+    val formState=rememberSaveableStateHolder()
     val notifications=remember { SnackbarHostState() }
     LaunchedEffect(vm.message) {
         val msg=vm.message
@@ -172,7 +174,7 @@ private fun FieldApplication(
                     onUnlock={authenticate("Unlock Arewa Civic Tracker",vm::unlockWithFingerprint)},
                     onPassword=vm::beginReauthentication,vm=vm
                 )
-                tab==0 -> FormScreen(vm)
+                tab==0 -> formState.SaveableStateProvider("form-${user}") { FormScreen(vm) }
                 tab==1 -> OutboxScreen(vm,onEdit={tab=0})
                 tab==2 -> ReportsScreen(vm)
                 tab==3 -> ProfileScreen(vm)
@@ -365,19 +367,19 @@ internal fun ChoiceField(label:String,items:List<Choice>,value:Int,onChoose:(Int
 private fun FormScreen(vm:FieldViewModel) {
     val context=LocalContext.current
     val editing=vm.restoredDraft
-    var type by remember { mutableStateOf("public_project") }
-    var lga by remember { mutableIntStateOf(0) }
-    var sector by remember { mutableIntStateOf(0) }
-    var category by remember { mutableIntStateOf(0) }
-    var title by remember { mutableStateOf("") }
-    var description by remember { mutableStateOf("") }
-    var community by remember { mutableStateOf("") }
-    var observation by remember { mutableStateOf("") }
-    var dutyBearers by remember { mutableStateOf("") }
-    var date by remember { mutableStateOf(LocalDate.now().toString()) }
-    var progress by remember { mutableStateOf("ongoing") }
-    var latitude by remember { mutableStateOf("") }
-    var longitude by remember { mutableStateOf("") }
+    var type by rememberSaveable { mutableStateOf("public_project") }
+    var lga by rememberSaveable { mutableIntStateOf(0) }
+    var sector by rememberSaveable { mutableIntStateOf(0) }
+    var category by rememberSaveable { mutableIntStateOf(0) }
+    var title by rememberSaveable { mutableStateOf("") }
+    var description by rememberSaveable { mutableStateOf("") }
+    var community by rememberSaveable { mutableStateOf("") }
+    var observation by rememberSaveable { mutableStateOf("") }
+    var dutyBearers by rememberSaveable { mutableStateOf("") }
+    var date by rememberSaveable { mutableStateOf(LocalDate.now().toString()) }
+    var progress by rememberSaveable { mutableStateOf("ongoing") }
+    var latitude by rememberSaveable { mutableStateOf("") }
+    var longitude by rememberSaveable { mutableStateOf("") }
     var cameraPath by rememberSaveable { mutableStateOf("") }
     LaunchedEffect(editing?.id){
         val data=editing?.payload ?: return@LaunchedEffect
@@ -397,6 +399,7 @@ private fun FormScreen(vm:FieldViewModel) {
     }
 
     val camera=rememberLauncherForActivityResult(ActivityResultContracts.TakePicture()) { ok->
+        vm.endExternalPicker()
         val file=cameraPath.takeIf{it.isNotBlank()}?.let(::File)
         if(ok && file?.isFile==true) {
             vm.captureEvidence(Uri.fromFile(file),file.name,"image/jpeg"){file.delete()}
@@ -404,11 +407,13 @@ private fun FormScreen(vm:FieldViewModel) {
         cameraPath=""
     }
     val picker=rememberLauncherForActivityResult(ActivityResultContracts.OpenMultipleDocuments()){uris->
+        vm.endExternalPicker()
         vm.captureMany(uris)
     }
     val gpsPermission=rememberLauncherForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
     ){results->
+        vm.endExternalPicker()
         if(results.values.any{it}) LocationOnce.capture(context){location->
             if(location!=null){
                 latitude=location.latitude.toString()
@@ -472,9 +477,10 @@ private fun FormScreen(vm:FieldViewModel) {
         HorizontalDivider()
         Text("GPS and supporting evidence",fontWeight=FontWeight.Bold)
         OutlinedButton(shape=RectangleShape,onClick={
+            vm.beginExternalPicker()
             runCatching { gpsPermission.launch(arrayOf(Manifest.permission.ACCESS_FINE_LOCATION,
                 Manifest.permission.ACCESS_COARSE_LOCATION)) }
-                .onFailure{vm.display("Location service unavailable. You may enter coordinates manually.")}
+                .onFailure{vm.endExternalPicker();vm.display("Location service unavailable. You may enter coordinates manually.")}
         },modifier=Modifier.fillMaxWidth()){
             Icon(Icons.Filled.MyLocation,contentDescription=null);Spacer(Modifier.width(6.dp))
             Text("Capture current GPS location")
@@ -494,16 +500,18 @@ private fun FormScreen(vm:FieldViewModel) {
                     cameraPath=file.absolutePath
                     val uri=FileProvider.getUriForFile(context,
                         context.packageName+".fileprovider",file)
+                    vm.beginExternalPicker()
                     camera.launch(uri)
-                }.onFailure {vm.display("Unable to open camera: check camera app and permissions.")}
+                }.onFailure {vm.endExternalPicker();vm.display("Unable to open camera: check camera app and permissions.")}
             },enabled=vm.attachments.size<5 && !vm.busy,modifier=Modifier.weight(1f)){
                 Icon(Icons.Filled.CameraAlt,contentDescription=null)
                 Spacer(Modifier.width(6.dp));Text("Camera")
             }
             OutlinedButton(shape=RectangleShape,onClick={
+                vm.beginExternalPicker()
                 runCatching{picker.launch(arrayOf(
                     "image/jpeg","image/png","image/webp","application/pdf"
-                ))}.onFailure {vm.display("Cannot open file picker on this device.")}
+                ))}.onFailure {vm.endExternalPicker();vm.display("Cannot open file picker on this device.")}
             },enabled=vm.attachments.size<5 && !vm.busy,modifier=Modifier.weight(1f)){
                 Icon(Icons.Filled.AttachFile,contentDescription=null)
                 Spacer(Modifier.width(6.dp));Text("Add evidence")

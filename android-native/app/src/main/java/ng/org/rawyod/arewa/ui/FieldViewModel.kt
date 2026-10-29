@@ -38,6 +38,10 @@ class FieldViewModel(application: Application) : AndroidViewModel(application) {
     var userId by mutableStateOf(app.store.userId())
         private set
     var message by mutableStateOf("")
+    var externalPickerActive by mutableStateOf(false)
+        private set
+    fun beginExternalPicker(){externalPickerActive=true}
+    fun endExternalPicker(){externalPickerActive=false}
     var refreshingReports by mutableStateOf(false)
         private set
     var refreshingCatalog by mutableStateOf(false)
