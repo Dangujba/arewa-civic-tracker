@@ -24,3 +24,9 @@ User-scoped draft ownership blocks a different account from seeing previous repo
 
 ## Release acceptance
 Real-device acceptance still needs airplane-mode reporting and multi-day storage tests, GPS permission refusal, photographing, PDF selection, phone restart, network flapping, 5MB limits, session expiry, app upgrades, backup/restore policies and the final signed APK. The API origin in `app/build.gradle.kts` is staging and must be changed to an approved domain for distribution.
+
+## Login and DNS recovery
+
+The native app authenticates email and password first. Only a verified account with enabled 2FA receives a short-lived challenge and then sees the authenticator screen. Tokens are issued only after verification. All other accounts sign in directly. Native input fields and buttons use square corners.
+
+For the approved staging API hostname, Android DNS is tried first. A fallback to the verified IPv4 address is attempted only if that hostname cannot be resolved. HTTPS certificate validation and SNI remain active. This fallback must be updated if the API hosting IP changes. Internet access is still required to sign in.

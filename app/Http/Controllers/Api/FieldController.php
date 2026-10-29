@@ -14,6 +14,8 @@ use App\Services\CaseSubmissionService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
 use PragmaRX\Google2FA\Google2FA;
@@ -24,24 +26,61 @@ class FieldController extends Controller {
    !$u->must_change_password && $u->tokenCan('field:report'),403);
   return $u;
  }
+ private function tokenResponse(User $user,string $deviceName):\Illuminate\Http\JsonResponse {
+  $expires=now()->addDays(30);
+  $token=$user->createToken('field-'.substr($deviceName,0,40),['field:report'],$expires);
+  return response()->json(['token'=>$token->plainTextToken,'expires_at'=>$expires->toIso8601String(),
+   'user'=>['id'=>$user->id,'name'=>$user->name,'role'=>$user->role]])
+   ->header('Cache-Control','private, no-store');
+ }
+ private function fieldEligible(User $user):bool {
+  return (bool)$user->is_active && $user->role==='focal' && !$user->must_change_password;
+ }
  public function login(Request $r){
   $data=$r->validate(['email'=>['required','email'],'password'=>['required','string'],
-   'otp'=>['nullable','digits:6'],'device_name'=>['nullable','string','max:80']]);
+   'device_name'=>['nullable','string','max:80']]);
   $user=User::where('email',$data['email'])->first();
   if(!$user || !Hash::check($data['password'],$user->password) ||
    !$user->is_active || $user->role!=='focal')
    throw ValidationException::withMessages(['email'=>'Invalid credentials or ineligible field account.']);
   if($user->must_change_password)
-   return response()->json(['message'=>'Change your initial password in the secure web portal before using the Android app.'],403);
+   return response()->json(['message'=>'Change your initial password in the web portal before using the Android app.'],403)
+    ->header('Cache-Control','private, no-store');
   if($user->two_factor_confirmed_at && $user->two_factor_secret){
-   if(!isset($data['otp']) || !(new Google2FA())->verifyKey($user->two_factor_secret,$data['otp'],1))
-    throw ValidationException::withMessages(['otp'=>'Valid authenticator code required.']);
+   $challenge=Str::random(64);
+   $cacheKey='field-login-challenge:'.hash('sha256',$challenge);
+   Cache::put($cacheKey,['user_id'=>$user->id,'attempts'=>0,
+    'expires_at'=>now()->addMinutes(5)->timestamp,
+    'device_name'=>$data['device_name']??'android'],now()->addMinutes(5));
+   return response()->json(['two_factor_required'=>true,'challenge'=>$challenge,
+    'expires_in'=>300],202)->header('Cache-Control','private, no-store');
   }
-  // Access tokens expire and are stored only as SHA-256 hashes server-side.
-  $token=$user->createToken('field-'.substr($data['device_name']??'android',0,40),['field:report'],now()->addDays(30));
-  return response()->json(['token'=>$token->plainTextToken,'expires_at'=>now()->addDays(30)->toIso8601String(),
-   'user'=>['id'=>$user->id,'name'=>$user->name,'role'=>$user->role]])
-   ->header('Cache-Control','private, no-store');
+  return $this->tokenResponse($user,$data['device_name']??'android');
+ }
+ public function verifyTwoFactor(Request $r){
+  $data=$r->validate(['challenge'=>['required','string','size:64'],
+   'otp'=>['required','digits:6']]);
+  $hash=hash('sha256',$data['challenge']);
+  $cacheKey='field-login-challenge:'.$hash;
+  return Cache::lock('field-login-lock:'.$hash,5)->block(2,function()use($cacheKey,$data){
+   $state=Cache::get($cacheKey);
+   if(!is_array($state) || ($state['expires_at']??0)<=time())
+    throw ValidationException::withMessages(['otp'=>'Verification expired. Sign in again.']);
+   $user=User::find($state['user_id']??0);
+   if(!$user || !$this->fieldEligible($user) || !$user->two_factor_confirmed_at || !$user->two_factor_secret){
+    Cache::forget($cacheKey);
+    throw ValidationException::withMessages(['otp'=>'Verification unavailable. Sign in again.']);
+   }
+   if(!(new Google2FA())->verifyKey($user->two_factor_secret,$data['otp'],1)){
+    $state['attempts']=($state['attempts']??0)+1;
+    if($state['attempts']>=5)Cache::forget($cacheKey);
+    else Cache::put($cacheKey,$state,now()->addSeconds(max(1,$state['expires_at']-time())));
+    throw ValidationException::withMessages(['otp'=>$state['attempts']>=5?
+     'Too many attempts. Sign in again.':'Invalid authenticator code.']);
+   }
+   Cache::forget($cacheKey);
+   return $this->tokenResponse($user,$state['device_name']??'android');
+  });
  }
  public function logout(Request $r){
   $this->guard($r);

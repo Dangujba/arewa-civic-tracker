@@ -8,6 +8,9 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+import java.net.UnknownHostException
+import java.net.SocketTimeoutException
+import ng.org.rawyod.arewa.network.ApiFailure
 import ng.org.rawyod.arewa.ArewaApp
 import ng.org.rawyod.arewa.data.Draft
 import ng.org.rawyod.arewa.data.StagedEvidence
@@ -33,6 +36,8 @@ class FieldViewModel(application: Application) : AndroidViewModel(application) {
     var message by mutableStateOf("")
         private set
     var busy by mutableStateOf(false)
+        private set
+    var loginChallenge by mutableStateOf<String?>(null)
         private set
     var lgas by mutableStateOf(emptyList<Choice>())
         private set
@@ -75,27 +80,69 @@ class FieldViewModel(application: Application) : AndroidViewModel(application) {
     fun display(text: String) { message=text }
     fun clearMessage() { message="" }
 
-    fun login(email: String, password: String, otp: String) {
+    fun resetLogin() {
+        loginChallenge=null
+        message=""
+    }
+
+    private fun networkError(error: Exception): String = when(error) {
+        is UnknownHostException ->
+            "Cannot reach the Arewa server. Check mobile data, Wi-Fi or Private DNS settings."
+        is SocketTimeoutException -> "Connection timed out. Check your internet and retry."
+        else -> error.message ?: "Unable to sign in."
+    }
+
+    fun login(email: String, password: String) {
         if(busy) return
         viewModelScope.launch {
             busy=true
+            message=""
             try {
-                val result=app.api.login(email.trim(),password,otp.trim())
-                val token=result.getString("token")
-                val user=result.getJSONObject("user")
-                app.store.storeSession(token,user)
-                userName=user.optString("name");userId=user.optLong("id")
-                observe()
-                try {
-                    val catalog=app.api.bootstrap(token)
-                    app.store.cacheCatalog(catalog);parseCatalog(catalog)
-                } catch (e: Exception) {
-                    message="Signed in. LGA/sector data will refresh when connected: ${e.message}"
-                }
-                SyncScheduler.enqueue(app)
-            } catch (e: Exception) { message=e.message ?: "Unable to sign in" }
-            finally { busy=false }
+                val result=app.api.login(email.trim(),password)
+                if(result.optBoolean("two_factor_required")) {
+                    val challenge=result.getString("challenge")
+                    require(challenge.length==64) { "Invalid verification response" }
+                    loginChallenge=challenge
+                } else completeLogin(result)
+            } catch(e:Exception) {message=networkError(e)}
+            finally {busy=false}
         }
+    }
+
+    fun verifyOtp(otp: String) {
+        if(busy) return
+        val challenge=loginChallenge ?: return
+        if(otp.length!=6 || !otp.all(Char::isDigit)) {
+            message="Enter the 6-digit authenticator code."
+            return
+        }
+        viewModelScope.launch {
+            busy=true
+            message=""
+            try {
+                completeLogin(app.api.verifyOtp(challenge,otp))
+            } catch(e:Exception) {
+                message=networkError(e)
+                if(e is ApiFailure && (e.message?.contains("again",true)==true ||
+                    e.message?.contains("expired",true)==true)) loginChallenge=null
+            } finally {busy=false}
+        }
+    }
+
+    private suspend fun completeLogin(result:JSONObject) {
+        val token=result.getString("token")
+        val user=result.getJSONObject("user")
+        app.store.storeSession(token,user)
+        loginChallenge=null
+        userName=user.optString("name");userId=user.optLong("id")
+        observe()
+        try {
+            val catalog=app.api.bootstrap(token)
+            app.store.cacheCatalog(catalog);parseCatalog(catalog)
+        } catch(e:Exception) {
+            message="Signed in. Assigned areas will refresh when connected."
+        }
+        SyncScheduler.enqueue(app)
     }
 
     fun refreshCatalog() {

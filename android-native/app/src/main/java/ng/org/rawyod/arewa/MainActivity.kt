@@ -12,6 +12,7 @@ import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -44,8 +45,8 @@ class MainActivity:ComponentActivity() {
             MaterialTheme(
                 colorScheme=lightColorScheme(primary=green,onPrimary=Color.White,
                     secondary=gold,background=paper,surface=Color.White,onSurface=ink),
-                shapes=Shapes(small=RoundedCornerShape(2.dp),medium=RoundedCornerShape(2.dp),
-                    large=RoundedCornerShape(2.dp))
+                shapes=Shapes(small=RoundedCornerShape(0.dp),medium=RoundedCornerShape(0.dp),
+                    large=RoundedCornerShape(0.dp))
             ) { FieldApplication() }
         }
     }
@@ -114,19 +115,42 @@ private fun LoginScreen(vm:FieldViewModel) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var otp by remember { mutableStateOf("") }
-    Content("Field officer sign in",
-        "Use your RAWYOD field account. An initial password must first be changed on the web portal.") {
-        OutlinedTextField(email,{email=it},label={Text("Email")},singleLine=true,
-            keyboardOptions=KeyboardOptions(keyboardType=KeyboardType.Email),modifier=Modifier.fillMaxWidth())
-        OutlinedTextField(password,{password=it},label={Text("Password")},singleLine=true,
-            visualTransformation=PasswordVisualTransformation(),modifier=Modifier.fillMaxWidth())
-        OutlinedTextField(otp,{otp=it},label={Text("Authenticator code, if enabled")},singleLine=true,
-            modifier=Modifier.fillMaxWidth(),
-            keyboardOptions=KeyboardOptions(keyboardType=KeyboardType.Number))
-        Button(onClick={vm.login(email,password,otp)},enabled=!vm.busy,
-            modifier=Modifier.fillMaxWidth()){Text(if(vm.busy)"Signing in..." else "Sign in securely")}
-        Text("Field reports can be collected offline after your first authenticated sign-in.",
-            style=MaterialTheme.typography.bodySmall)
+    val challenge=vm.loginChallenge
+    Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState())
+        .padding(horizontal=16.dp,vertical=22.dp),
+        verticalArrangement=Arrangement.spacedBy(14.dp)) {
+        Text(if(challenge==null)"Sign in" else "Verify your account",
+            style=MaterialTheme.typography.headlineSmall,fontWeight=FontWeight.Bold)
+        if(challenge==null) {
+            OutlinedTextField(email,{email=it},label={Text("Email")},singleLine=true,
+                shape=RectangleShape,
+                keyboardOptions=KeyboardOptions(keyboardType=KeyboardType.Email),
+                modifier=Modifier.fillMaxWidth())
+            OutlinedTextField(password,{password=it},label={Text("Password")},singleLine=true,
+                shape=RectangleShape,visualTransformation=PasswordVisualTransformation(),
+                modifier=Modifier.fillMaxWidth())
+            Button(onClick={vm.login(email,password)},shape=RectangleShape,
+                enabled=!vm.busy && email.isNotBlank() && password.isNotBlank(),
+                modifier=Modifier.fillMaxWidth()) {
+                if(vm.busy) CircularProgressIndicator(Modifier.size(18.dp),
+                    strokeWidth=2.dp,color=Color.White)
+                else Text("Sign in")
+            }
+        } else {
+            Text("Enter the 6-digit code from your authenticator.",
+                style=MaterialTheme.typography.bodyMedium)
+            OutlinedTextField(otp,{otp=it.filter(Char::isDigit).take(6)},
+                label={Text("Authenticator code")},singleLine=true,shape=RectangleShape,
+                keyboardOptions=KeyboardOptions(keyboardType=KeyboardType.NumberPassword),
+                modifier=Modifier.fillMaxWidth())
+            Button(onClick={vm.verifyOtp(otp)},shape=RectangleShape,
+                enabled=!vm.busy && otp.length==6,modifier=Modifier.fillMaxWidth()){
+                if(vm.busy) CircularProgressIndicator(Modifier.size(18.dp),
+                    strokeWidth=2.dp,color=Color.White)
+                else Text("Verify and sign in")
+            }
+            TextButton(onClick={vm::resetLogin},enabled=!vm.busy) { Text("Back to sign in") }
+        }
     }
 }
 
