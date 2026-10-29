@@ -12,7 +12,10 @@ This is the **native Kotlin / Jetpack Compose** Android application for RAWYOD. 
 
 ## v0.3.2 branded launcher and fingerprint setting
 
-- The launcher now uses Arewa's map-and-pin identity rather than the generic Android icon; an adaptive icon scales across launchers.
+**Build status:** The source has been updated, but a verified v0.3.2 APK has not yet been produced or published. The existing public download still serves the older v0.3.1 debug build. The connected staging build machine is currently offline. Do not tell end users that the fingerprint feature is already available in that older APK.
+
+
+- The launcher uses the same approved hand-drawn Arewa map-and-pin WebP mark as the website, reused from the repository's original asset blob. The adaptive icon scales across launchers.
 - The native **Settings** tab provides an opt-in **fingerprint lock** for a previously authenticated focal person's active session.
 - Android's BiometricPrompt requires an enrolled **strong biometric** to enable, disable and unlock the local app. It is not a substitute for the server login or TOTP.
 - After backgrounding the app, field screens remain hidden until fingerprint verification. Users can explicitly choose account-password sign-in instead; doing so requires internet but preserves queued drafts.
