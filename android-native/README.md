@@ -46,7 +46,7 @@ The debug APK is for controlled testing, not production distribution. It uses An
 - Report form includes an optional online check for potentially related field reports. It never blocks offline submission.
 - Enrolled officers can select published categories and communities for their assigned LGAs while retaining manual community entry.
 - Category IDs are transmitted only when a valid category for the selected report type has been chosen.
-- The administrator-only debug APK endpoint now serves v0.3.0. This is not production-signed.
+- The staging v0.3.1 debug APK is available to all visitors at https://arewa.kasua.ng/download/android without signing in to the web portal. Staff authentication inside the app remains required to access monitoring data. This is not production-signed.
 
 ## v0.3.1 submitted report amendments
 

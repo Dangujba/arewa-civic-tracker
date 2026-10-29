@@ -15,7 +15,7 @@ Civic monitoring, public project reporting and evidence verification for **Roadm
 - Evidence-aware mobile report form with image/PDF attachments, permission-based editable GPS coordinates, local image compression and offline evidence outbox
 - Optional authenticator-app two-factor sign-in with secure QR setup, one-time recovery codes and account security controls
 
-**Development status:** Active. Features not yet accepted are tracked in [Production Readiness Checklist](docs/PRODUCTION_CHECKLIST.md). The Android APK, end-to-end field-device offline acceptance, mobile APK delivery and final deployment to RAWYOD hosting require further integration and testing.
+**Development status:** Active. Features not yet accepted are tracked in [Production Readiness Checklist](docs/PRODUCTION_CHECKLIST.md). The staging Android v0.3.1 debug APK is publicly downloadable at https://arewa.kasua.ng/download/android without website login. Native app access still requires authorized staff credentials. Production signing, physical-device offline acceptance and final deployment to RAWYOD hosting remain separate work.
 
 ## Technology
 
