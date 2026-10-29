@@ -30,7 +30,7 @@ class FieldController extends Controller {
   $expires=now()->addDays(30);
   $token=$user->createToken('field-'.substr($deviceName,0,40),['field:report'],$expires);
   return response()->json(['token'=>$token->plainTextToken,'expires_at'=>$expires->toIso8601String(),
-   'user'=>['id'=>$user->id,'name'=>$user->name,'role'=>$user->role]])
+   'user'=>['id'=>$user->id,'name'=>$user->name,'email'=>$user->email,'role'=>$user->role]])
    ->header('Cache-Control','private, no-store');
  }
  private function fieldEligible(User $user):bool {
@@ -89,7 +89,7 @@ class FieldController extends Controller {
  }
  public function bootstrap(Request $r){
   $u=$this->guard($r);
-  return response()->json(['user'=>['id'=>$u->id,'name'=>$u->name,'role'=>$u->role],
+  return response()->json(['user'=>['id'=>$u->id,'name'=>$u->name,'email'=>$u->email,'role'=>$u->role,'two_factor_enabled'=>(bool)$u->two_factor_confirmed_at],
    'lgas'=>$u->assignedLgas()->orderBy('lgas.name')->get(['lgas.id','lgas.name']),
    'sectors'=>Sector::where('is_active',true)->orderBy('name')->get(['id','name']),
    'categories'=>\App\Models\ReportCategory::where('is_active',true)->get(['id','type','name']),
