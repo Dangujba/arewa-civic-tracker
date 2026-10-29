@@ -70,12 +70,29 @@ The following status table supersedes the earlier pre-implementation list. **R2 
 ## C. Remaining actionable software work, excluding R2 and later delivery phases
 
 1. **Native Android parity:** completed for submitted-report revisions in v0.3.1. Remaining device-specific behavior belongs to formal UAT and release signing.
-2. **Recovery operations:** private, isolated restore extraction has been implemented and tested. Obtain an approved **off-server** backup destination and test complete restoration on a separate authorized recovery host before claiming disaster recovery readiness.
-3. **Privacy controls:** finalize RAWYOD-approved record retention/erasure rules; any deletion must be permission-gated, auditable and reversible where lawful.
-4. **UI consistency/accessibility:** finish remaining responsive navigation, searchable controls, error states and keyboard/touch accessibility. Formal user/device testing remains a later phase.
+2. **Recovery operations:** private, isolated restore extraction has been implemented and tested. An independent mounted-copy command is implemented. Obtain an approved **off-server** backup destination, activate its configuration, and test complete restoration on a separate authorized recovery host before claiming disaster recovery readiness.
+3. **Privacy controls:** draft and approval workflow, non-destructive retention counts, and case legal holds are implemented. RAWYOD's approved policy is still needed before any destructive erasure feature could be enabled.
+4. **UI consistency/accessibility:** implemented skip links, keyboard sidebar controls, focus visibility, mobile touch targets and reduced-motion behavior. Formal device/UX verification remains in the later acceptance phase.
 5. **Technical design baselines:** complete URS, architecture/API/offline designs and UI/UX baseline as design-stage outputs, not runtime bugs.
 
 The web core, similar warnings, closure and reference administration are no longer missing software modules. **Do not include R2 activation, formal UAT, production signing, manuals, training, hosting handover or support in unfinished development counts.**
+
+## Final development batch: 29 October 2026
+
+The **Data Governance & Backups** administrator module is live at `/admin/data-governance`, alongside responsive and accessible interface refinements.
+
+- Administrator can save policy drafts for minimum retention of reports, evidence and audit events, preview aging records, and record a genuine RAWYOD approval reference.
+- No period has been invented or approved in the live system. Policy approval never deletes records automatically. Audit logs record policy edits/approval and case-specific legal holds, including the stated reason for application or release.
+- Staff without the Administrator role cannot manage governance policy or legal holds.
+- The application includes an opt-in `act:copy-backup-offsite` command. It only copies **encrypted** snapshots to an independently mounted configured destination, verifies SHA-256 checksums, refuses local/unmounted destinations and overwrite conflicts, and cannot run without `ACT_OFFSITE_BACKUP_DIR`. A conditional scheduled copy is ready for 02:55 WAT **only when authorized configuration is supplied**. No destination has been activated.
+- Keyboard accessibility refinements include skip navigation, focused sidebar traversal, Escape-to-close, visible focus rings, mobile tap targets and reduced-motion styles, retaining the existing flat RAWYOD design.
+- Automated isolated Laravel suite: **103 tests passed, 755 assertions**.
+- Migration `2026_10_29_000011_add_data_governance` ran on staging, the live site returned HTTP 200 at login and unauthorized visitors were redirected from the governance route.
+- A fresh pre-migration encrypted backup, `arewa-20261029-183522-1aromb.tar.gpg`, was created and integrity-verified on the VPS.
+- The live database check reported **0 reports, 0 evidence files, 0 approved/draft governance policy rows**. No substantive field records were deleted or migrated.
+- GitHub development commit: `00f95b4c1f31408f4a0ffbf8bcb189d87ceba014`. The R2 provider remains excluded.
+
+**Remaining prerequisites are external decisions, not tasks that can be safely completed by guessing:** RAWYOD's formally authorized retention/erasure policy, an independently hosted backup destination and credentials, production Android signing assets, formal device/UAT acceptance, staff training and contractual handover. These must not be represented as activated.
 
 ## E. Later phases: deliberately excluded from incomplete software counts
 
