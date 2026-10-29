@@ -21,17 +21,7 @@ return new class extends Migration {
             $table->string('ward',150)->nullable()->after('lga_id');
             $table->index(['lga_id','ward']);
         });
-        $source=json_decode(file_get_contents(database_path('data/yobe_wards.json')),true,512,JSON_THROW_ON_ERROR);
-        $lgas=DB::table('lgas')->get(['id','name'])->keyBy(fn($lga)=>Str::slug($lga->name));
-        $rows=[];
-        foreach($source['lgas'] as $entry){
-            $lga=$lgas->get($entry['lga']);
-            if(!$lga)continue;
-            foreach($entry['wards'] as $ward) {
-                $rows[]=['lga_id'=>$lga->id,'name'=>$ward['name'],'source_slug'=>$ward['slug'],'is_active'=>true];
-            }
-        }
-        foreach(array_chunk($rows,100) as $part)DB::table('wards')->insert($part);
+
     }
     public function down():void {
         Schema::table('civic_cases',function(Blueprint $table){
