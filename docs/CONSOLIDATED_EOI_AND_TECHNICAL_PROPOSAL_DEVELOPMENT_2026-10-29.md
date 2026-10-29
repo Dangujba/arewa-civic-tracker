@@ -14,6 +14,16 @@
 - **Do not equate an automated developer test with stakeholder acceptance.** Testing during development is routine; formal QA/UAT is a separate stage.
 - **Status terminology:** Implemented = core software exists; Partial = meaningful implementation exists but named functional requirements remain; Missing = no verified implementation of the specifically promised feature.
 
+## Preliminary design outputs (tracked separately from feature completion)
+
+The EOI also names three design-stage outputs. These are not extra runtime modules and are **not included in the 22 feature-group counts**:
+
+| Required output | Status | Remaining work |
+|---|---|---|
+| User Requirement Specification (URS) | Partial | Consolidate confirmed fields, roles, acceptance rules and mobile workflow into a reviewable document. RAWYOD approval is a later decision gate. |
+| System architecture / technical design | Partial | Consolidate component, database, API, authorization, native offline synchronization and storage diagrams. |
+| Final UI/UX design baseline | Partial | Consolidate completed screens and remaining mobile flows into a coherent, reviewable design. Stakeholder approval is tracked separately. |
+
 ## A. Implemented software features
 
 | ID | Unified requirement (EOI + proposal) | Current implementation evidence | Remaining before formal acceptance |
