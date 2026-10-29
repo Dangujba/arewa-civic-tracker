@@ -26,9 +26,9 @@ class SidebarNavigationTest extends TestCase
         $this->actingAs($this->staff('admin'))->get('/dashboard')
             ->assertOk()
             ->assertSee('id="portal-sidebar"', false)
-            ->assertSee('Users & roles', false)
-            ->assertSee('Verification queue')
-            ->assertSee('Interactive GIS map')
+            ->assertSee('Users & Roles', false)
+            ->assertSee('Verification Queue')
+            ->assertSee('Interactive GIS Map')
             ->assertSee('act-sidebar.js');
     }
 
@@ -36,19 +36,19 @@ class SidebarNavigationTest extends TestCase
     {
         $this->actingAs($this->staff('focal'))->get('/dashboard')
             ->assertOk()
-            ->assertSee('New field report')
-            ->assertSee('Interactive GIS map')
-            ->assertDontSee('Users & roles', false)
-            ->assertDontSee('Verification queue');
+            ->assertSee('New Field Report')
+            ->assertSee('Interactive GIS Map')
+            ->assertDontSee('Users & Roles', false)
+            ->assertDontSee('Verification Queue');
     }
 
     public function test_meal_reviewers_have_queue_but_not_user_management(): void
     {
         $this->actingAs($this->staff('meal'))->get('/dashboard')
             ->assertOk()
-            ->assertSee('Verification queue')
-            ->assertDontSee('Users & roles', false)
-            ->assertDontSee('New field report');
+            ->assertSee('Verification Queue')
+            ->assertDontSee('Users & Roles', false)
+            ->assertDontSee('New Field Report');
     }
 
     public function test_public_login_does_not_display_private_sidebar(): void

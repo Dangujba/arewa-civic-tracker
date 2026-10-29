@@ -13,7 +13,7 @@
 <link rel="stylesheet" href="{{ asset('vendor/ui/tom-select.css') }}">
 <link rel="stylesheet" href="{{ asset('vendor/ui/sweetalert2.css') }}">
 <link rel="stylesheet" href="{{ asset('css/act-form-polish.css') }}?v=20261029-login1">
-<link rel="stylesheet" href="{{ asset('css/act-workspace-refinement.css') }}?v=20261029-workspace1">
+<link rel="stylesheet" href="{{ asset('css/act-workspace-refinement.css') }}?v=20261029-operations2">
 <title>@yield('title','Arewa Civic Tracker')</title>@stack('head')
 <script defer src="{{ asset('vendor/ui/tom-select.js') }}"></script>
 <script defer src="{{ asset('vendor/ui/sweetalert2.js') }}"></script>
@@ -33,33 +33,33 @@
     <nav class="portal-nav" aria-label="Main application navigation">
       <span class="portal-nav-section">Workspace</span>
       <a href="{{ route('dashboard') }}" class="portal-nav-link {{ request()->routeIs('dashboard')?'active':'' }}" @if(request()->routeIs('dashboard')) aria-current="page" @endif><i class="fa-solid fa-gauge-high" aria-hidden="true"></i><span class="sidebar-label">Dashboard</span></a>
-      <a href="{{ route('cases.index') }}" class="portal-nav-link {{ request()->routeIs('cases.index','cases.show')?'active':'' }}" @if(request()->routeIs('cases.index','cases.show')) aria-current="page" @endif><i class="fa-regular fa-file-lines" aria-hidden="true"></i><span class="sidebar-label">Monitoring reports</span></a>
+      <a href="{{ route('cases.index') }}" class="portal-nav-link {{ request()->routeIs('cases.index','cases.show')?'active':'' }}" @if(request()->routeIs('cases.index','cases.show')) aria-current="page" @endif><i class="fa-regular fa-file-lines" aria-hidden="true"></i><span class="sidebar-label">Monitoring Reports</span></a>
       @can('create', App\Models\CivicCase::class)
-      <a href="{{ route('cases.create') }}" class="portal-nav-link {{ request()->routeIs('cases.create')?'active':'' }}" @if(request()->routeIs('cases.create')) aria-current="page" @endif><i class="fa-solid fa-square-plus" aria-hidden="true"></i><span class="sidebar-label">New field report</span></a>
+      <a href="{{ route('cases.create') }}" class="portal-nav-link {{ request()->routeIs('cases.create')?'active':'' }}" @if(request()->routeIs('cases.create')) aria-current="page" @endif><i class="fa-solid fa-square-plus" aria-hidden="true"></i><span class="sidebar-label">New Field Report</span></a>
       @endcan
       @if(auth()->user()->canReview())
-      <a href="{{ route('cases.queue') }}" class="portal-nav-link {{ request()->routeIs('cases.queue')?'active':'' }}" @if(request()->routeIs('cases.queue')) aria-current="page" @endif><i class="fa-solid fa-clipboard-check" aria-hidden="true"></i><span class="sidebar-label">Verification queue</span></a>
+      <a href="{{ route('cases.queue') }}" class="portal-nav-link {{ request()->routeIs('cases.queue')?'active':'' }}" @if(request()->routeIs('cases.queue')) aria-current="page" @endif><i class="fa-solid fa-clipboard-check" aria-hidden="true"></i><span class="sidebar-label">Verification Queue</span></a>
       @endif
       @if(auth()->user()->canReview())
       <a href="{{ route('reports.index') }}" class="portal-nav-link {{ request()->routeIs('reports.*')?'active':'' }}" @if(request()->routeIs('reports.*'))aria-current="page"@endif><i class="fa-solid fa-chart-column" aria-hidden="true"></i><span class="sidebar-label">Reports & Analytics</span></a>
       @endif
-      <span class="portal-nav-section">Geographic intelligence</span>
-      <a href="{{ route('map.index') }}" class="portal-nav-link {{ request()->routeIs('map.index')?'active':'' }}" @if(request()->routeIs('map.index')) aria-current="page" @endif><i class="fa-solid fa-map-location-dot" aria-hidden="true"></i><span class="sidebar-label">Interactive GIS map</span></a>
+      <span class="portal-nav-section">Geographic Intelligence</span>
+      <a href="{{ route('map.index') }}" class="portal-nav-link {{ request()->routeIs('map.index')?'active':'' }}" @if(request()->routeIs('map.index')) aria-current="page" @endif><i class="fa-solid fa-map-location-dot" aria-hidden="true"></i><span class="sidebar-label">Interactive GIS Map</span></a>
       @if(auth()->user()->isAdmin())
       <span class="portal-nav-section">Administration</span>
-      <a href="{{ route('admin.users.index') }}" class="portal-nav-link {{ request()->routeIs('admin.users.*')?'active':'' }}" @if(request()->routeIs('admin.users.*')) aria-current="page" @endif><i class="fa-solid fa-users-gear" aria-hidden="true"></i><span class="sidebar-label">Users & roles</span></a>
-      <a href="{{ route('admin.operations.index') }}" class="portal-nav-link {{ request()->routeIs('admin.operations.index')?'active':'' }}"><i class="fa-solid fa-clipboard-list" aria-hidden="true"></i><span class="sidebar-label">Field operations</span></a>
-      <a href="{{ route('admin.operations.audit') }}" class="portal-nav-link {{ request()->routeIs('admin.operations.audit')?'active':'' }}"><i class="fa-solid fa-list-check" aria-hidden="true"></i><span class="sidebar-label">Activity audit</span></a>
-      <a href="{{ route('admin.sectors.index') }}" class="portal-nav-link {{ request()->routeIs('admin.sectors.*')?'active':'' }}" @if(request()->routeIs('admin.sectors.*')) aria-current="page" @endif><i class="fa-solid fa-layer-group" aria-hidden="true"></i><span class="sidebar-label">Monitoring sectors</span></a>
+      <a href="{{ route('admin.users.index') }}" class="portal-nav-link {{ request()->routeIs('admin.users.*')?'active':'' }}" @if(request()->routeIs('admin.users.*')) aria-current="page" @endif><i class="fa-solid fa-users-gear" aria-hidden="true"></i><span class="sidebar-label">Users & Roles</span></a>
+      <a href="{{ route('admin.operations.index') }}" class="portal-nav-link {{ request()->routeIs('admin.operations.index')?'active':'' }}"><i class="fa-solid fa-clipboard-list" aria-hidden="true"></i><span class="sidebar-label">Field Operations</span></a>
+      <a href="{{ route('admin.operations.audit') }}" class="portal-nav-link {{ request()->routeIs('admin.operations.audit')?'active':'' }}"><i class="fa-solid fa-list-check" aria-hidden="true"></i><span class="sidebar-label">Activity Audit</span></a>
+      <a href="{{ route('admin.sectors.index') }}" class="portal-nav-link {{ request()->routeIs('admin.sectors.*')?'active':'' }}" @if(request()->routeIs('admin.sectors.*')) aria-current="page" @endif><i class="fa-solid fa-layer-group" aria-hidden="true"></i><span class="sidebar-label">Monitoring Sectors</span></a>
       @endif
       <span class="portal-nav-section">Account</span>
       <a href="{{ route('notifications.index') }}" class="portal-nav-link {{ request()->routeIs('notifications.*')?'active':'' }}"><i class="fa-regular fa-bell" aria-hidden="true"></i><span class="sidebar-label">Notifications @if(auth()->user()->unreadNotifications()->exists())<strong>({{ auth()->user()->unreadNotifications()->count() }})</strong>@endif</span></a>
-      <a href="{{ route('account.password.form') }}" class="portal-nav-link {{ request()->routeIs('account.*')?'active':'' }}" @if(request()->routeIs('account.*')) aria-current="page" @endif><i class="fa-solid fa-shield-halved" aria-hidden="true"></i><span class="sidebar-label">Security settings</span></a>
-      <a href="{{ route('home') }}" class="portal-nav-link"><i class="fa-solid fa-arrow-up-right-from-square" aria-hidden="true"></i><span class="sidebar-label">Public website</span></a>
+      <a href="{{ route('account.password.form') }}" class="portal-nav-link {{ request()->routeIs('account.*')?'active':'' }}" @if(request()->routeIs('account.*')) aria-current="page" @endif><i class="fa-solid fa-shield-halved" aria-hidden="true"></i><span class="sidebar-label">Security Settings</span></a>
+      <a href="{{ route('home') }}" class="portal-nav-link"><i class="fa-solid fa-arrow-up-right-from-square" aria-hidden="true"></i><span class="sidebar-label">Public Website</span></a>
     </nav>
     <div class="portal-sidebar-bottom">
       <div class="sidebar-account"><span class="sidebar-avatar">{{ strtoupper(substr(auth()->user()->name,0,1)) }}</span><span class="sidebar-label"><strong>{{ auth()->user()->name }}</strong><small>{{ strtoupper(auth()->user()->role) }}</small></span></div>
-      <form action="{{ route('logout') }}" method="POST" data-no-ajax data-logout-confirm>@csrf<button type="submit" class="sidebar-signout"><i class="fa-solid fa-right-from-bracket" aria-hidden="true"></i><span class="sidebar-label">Sign out</span></button></form>
+      <form action="{{ route('logout') }}" method="POST" data-no-ajax data-logout-confirm>@csrf<button type="submit" class="sidebar-signout"><i class="fa-solid fa-right-from-bracket" aria-hidden="true"></i><span class="sidebar-label">Sign Out</span></button></form>
     </div>
   </aside>
   <button class="portal-sidebar-backdrop" id="sidebar-backdrop" type="button" tabindex="-1" aria-label="Close sidebar" hidden></button>

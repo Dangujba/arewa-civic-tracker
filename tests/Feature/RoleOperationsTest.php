@@ -28,7 +28,7 @@ class RoleOperationsTest extends TestCase {
  public function test_each_staff_role_gets_its_own_dashboard_and_restricted_admin_operations():void {
   $admin=$this->staff('admin');$meal=$this->staff('meal');$focal=$this->staff('focal');
   $this->actingAs($admin)->get('/dashboard')->assertOk()->assertSee('Administrator dashboard')->assertSee('Field coverage');
-  $this->get('/admin/operations')->assertOk()->assertSee('Focal person performance')->assertSee('MEAL reviewer workload');
+  $this->get('/admin/operations')->assertOk()->assertSee('Focal Person Performance')->assertSee('MEAL Reviewer Workload');
   $this->actingAs($meal)->get('/dashboard')->assertOk()->assertSee('MEAL review dashboard')->assertDontSee('Administrator dashboard');
   $this->get('/admin/operations')->assertForbidden();
   $this->actingAs($focal)->get('/dashboard')->assertOk()->assertSee('My field dashboard')->assertDontSee('MEAL review dashboard');
