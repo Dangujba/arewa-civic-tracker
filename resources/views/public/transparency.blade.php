@@ -39,6 +39,7 @@
  <form method="GET" action="{{ route('public.transparency') }}" id="public-filters">
   <label class="search-field">Search title, reference or community<input name="q" value="{{ request('q') }}" maxlength="100" placeholder="Search public projects or places..."></label>
   <label>LGA<select name="lga_id"><option value="">All LGAs</option>@foreach($lgas as $lga)<option value="{{ $lga->id }}" @selected(request('lga_id')==(string)$lga->id)>{{ $lga->name }}</option>@endforeach</select></label>
+  <label>Ward<input type="search" name="ward" maxlength="150" value="{{ request('ward') }}" placeholder="Filter by ward"></label>
   <label>Sector<select name="sector_id"><option value="">All sectors</option>@foreach($sectors as $sector)<option value="{{ $sector->id }}" @selected(request('sector_id')==(string)$sector->id)>{{ $sector->name }}</option>@endforeach</select></label>
   <label>Type<select name="type"><option value="">All types</option><option value="public_project" @selected(request('type')==='public_project')>Public projects</option><option value="governance_issue" @selected(request('type')==='governance_issue')>Governance issues</option></select></label>
   <label>Progress<select name="progress_status"><option value="">All progress states</option>@foreach($progressLabels as $code=>$label)<option value="{{ $code }}" @selected(request('progress_status')===$code)>{{ $label }}</option>@endforeach</select></label>

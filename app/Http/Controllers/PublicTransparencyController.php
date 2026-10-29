@@ -19,6 +19,7 @@ class PublicTransparencyController extends Controller
         $f = $request->validate([
             'lga_id' => ['nullable','integer','exists:lgas,id'],
             'sector_id' => ['nullable','integer','exists:sectors,id'],
+            'ward' => ['nullable','string','max:150'],
             'type' => ['nullable','in:public_project,governance_issue'],
             'progress_status' => ['nullable','in:observed,not_started,ongoing,stalled,completed,resolved,other'],
             'q' => ['nullable','string','max:100'],
@@ -29,6 +30,7 @@ class PublicTransparencyController extends Controller
         foreach(['lga_id','sector_id','type','progress_status'] as $key) {
             if(isset($f[$key])) $query->where($key,$f[$key]);
         }
+        if(!empty($f['ward'])) $query->whereRaw('LOWER(TRIM(ward)) = ?', [mb_strtolower(trim($f['ward']))]);
         if(!empty($f['q'])) {
             $q=addcslashes(trim($f['q']), '%_\\');
             $query->where(function($builder)use($q) {

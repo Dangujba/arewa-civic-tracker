@@ -124,19 +124,20 @@ No records match the selected criteria. All figures are shown as empty rather th
 <h1 style="font-size:18px;margin:5px 0">Underlying monitoring records</h1>
 <p class="section-note">Showing {{ number_format($rows->count()) }} of {{ number_format($total) }} matching reports, maximum 150 in this PDF. Use the filtered Excel export for a larger detailed register.</p>
 <table class="register"><thead><tr>
-<th style="width:13%">Reference</th><th style="width:24%">Observation title</th><th style="width:13%">LGA</th><th style="width:15%">Sector</th><th style="width:12%">Type</th><th style="width:13%">Review status</th><th style="width:10%">Observed</th>
+<th style="width:12%">Reference</th><th style="width:22%">Observation title</th><th style="width:11%">LGA</th><th style="width:13%">Ward</th><th style="width:12%">Sector</th><th style="width:10%">Type</th><th style="width:12%">Review status</th><th style="width:8%">Observed</th>
 </tr></thead><tbody>
 @forelse($rows as $case)
 <tr>
 <td class="ref">{{ $case->reference }}</td>
 <td>{{ \Illuminate\Support\Str::limit($case->title, 82) }}</td>
 <td>{{ $case->lga?->name ?? 'Unassigned' }}</td>
+<td>{{ $case->ward ?: '—' }}</td>
 <td>{{ $case->sector?->name ?? 'Other' }}</td>
 <td>{{ ucwords(str_replace('_',' ', $case->type)) }}</td>
 <td>{{ $verificationLabels[$case->verification_status] ?? ucwords(str_replace('_',' ', $case->verification_status)) }}</td>
 <td>{{ $case->observation_date?->format('d M Y') }}</td>
 </tr>
-@empty<tr><td colspan="7" class="muted">There are no matching monitoring reports for this selection.</td></tr>@endforelse
+@empty<tr><td colspan="8" class="muted">There are no matching monitoring reports for this selection.</td></tr>@endforelse
 </tbody></table>
 <p class="footnote">Confidential RAWYOD management document. Evidence attachments and personally sensitive content are not reproduced in this export. Record details remain available to authorized users in Arewa Civic Tracker.</p>
 </body></html>
