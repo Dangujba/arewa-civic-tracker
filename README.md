@@ -12,10 +12,10 @@ Civic monitoring, public project reporting and evidence verification for **Roadm
 - Verification, clarification, approval and auditable activity history
 - Interactive Leaflet map with official-reference administrative polygons for all 17 Yobe LGAs
 - Monitoring dashboard, interactive GIS, administrative Reports & Analytics including filtered CSV, native Excel (XLSX) and PDF management exports
-- Evidence-aware mobile report form with image/PDF attachments, permission-based editable GPS coordinates, local image compression and offline evidence outbox
+- Evidence-aware mobile report form with image/PDF attachments, permission-based editable GPS coordinates, unchanged original evidence, private optimized previews, and offline evidence outbox
 - Optional authenticator-app two-factor sign-in with secure QR setup, one-time recovery codes and account security controls
 
-**Development status (29 October 2026):** The EOI and technical-proposal development baseline is implemented, including the final six closing items. The isolated Laravel suite passed **110 tests, 799 assertions**. This is not RAWYOD acceptance. The staging Android v0.3.3 debug APK is publicly downloadable at https://arewa.kasua.ng/download/android without website login. Native app access still requires authorized staff credentials. Production signing, physical-device offline acceptance and final deployment remain separate work.
+**Development status (29 October 2026):** The EOI and technical-proposal development baseline is implemented, including the final six closing items. The isolated Laravel suite passed **116 tests, 859 assertions**. This is not RAWYOD acceptance. The staging Android v0.3.4 debug APK is publicly downloadable at https://arewa.kasua.ng/download/android without website login. Native app access still requires authorized staff credentials. Production signing, physical-device offline acceptance and final deployment remain separate work.
 
 ## Development deliverables
 
@@ -66,3 +66,7 @@ RAWYOD acceptance, ownership and handover requirements are governed by the signe
 ### Public transparency view
 
 The read-only `/transparency` page is open to everyone, with no registration. Staff administrators explicitly publish approved report metadata using the case-detail publication control. Unpublished and unapproved reports stay private, while edits to public fields withdraw visibility until republished. The map uses approximate coordinates, with private evidence and staff identities excluded. The Android v0.3.3 login screen offers **Browse public reports** for anonymous use of the same view.
+
+### Original-quality photographic evidence (Android v0.3.4)
+
+Uploaded JPEG/PNG/WebP photos are retained byte-for-byte in private evidence storage, with a SHA-256 checksum. The server separately generates a metadata-stripped, high-quality WebP preview for authorized staff. The preview is displayed within the restricted case detail screen, while **Download original** serves the unmodified file. A preview-generation failure does not change the original. The current cap is 10 MB/photo, 5 MB/PDF, five files per submission. Web reporting also uploads originals instead of lossy precompressed copies; the Android offline outbox encrypts its staged originals. This feature does not publish private evidence in the public transparency view. RAWYOD production signing and device UAT remain separate.

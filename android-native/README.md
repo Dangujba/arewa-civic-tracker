@@ -71,3 +71,11 @@ Field officers can open their submitted reports and edit eligible records online
 - WebView browsing is restricted to HTTPS Arewa transparency pages; file access, content access, third-party cookies and mixed content are disabled.
 - Public data remains on the same server publication allowlist, with approximate map coordinates and no private evidence.
 - v0.3.3 requires a fresh successful APK build, and device-level tests of the embedded map remain part of release QA.
+
+## v0.3.4 original-quality photographic evidence
+
+- Android no longer downsamples, converts or recompresses photos before offline encryption and upload.
+- Exact original JPEG, PNG and WebP bytes are encrypted locally and transmitted as received. Photo limit 10 MB; PDF limit 5 MB; five attachments per report. Oversized originals are rejected with an explanation rather than heavily degraded.
+- The server archives the original with SHA-256 and generates a separate private high-quality WebP preview at up to 1800 pixels on the longest edge (quality 85); the preview strips EXIF location. Staff can view the preview and retrieve the unchanged original after authorization.
+- Original EXIF metadata is retained only with the private original. No evidence is exposed on public transparency pages.
+- v0.3.4 Android testDebugUnitTest and assembleDebug passed on the Arewa VPS. It uses the same debug signing certificate as v0.3.3, allowing in-place staging updates. Physical-device acceptance and production signing remain outstanding.
