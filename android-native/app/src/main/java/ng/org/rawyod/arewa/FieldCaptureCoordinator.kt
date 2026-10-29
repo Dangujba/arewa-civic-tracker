@@ -1,6 +1,8 @@
 package ng.org.rawyod.arewa
 
 import android.Manifest
+import android.content.ClipData
+import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
@@ -28,8 +30,20 @@ internal class FieldCaptureCoordinator(
 ) {
     private var pendingCameraPath: String? = state?.getString(CAMERA_PATH)
 
+    // Some OEM camera apps require a ClipData grant in addition to EXTRA_OUTPUT.
+    // Without it, the camera may close silently or return a zero-byte file.
+    private val pictureContract=object:ActivityResultContracts.TakePicture() {
+        override fun createIntent(context:Context,input:Uri):Intent {
+            return super.createIntent(context,input).apply {
+                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION or
+                    Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
+                clipData=ClipData.newUri(context.contentResolver,"Field evidence",input)
+            }
+        }
+    }
+
     private val takePicture=activity.registerForActivityResult(
-        ActivityResultContracts.TakePicture()
+        pictureContract
     ) { saved ->
         vm.endExternalPicker()
         val photo=pendingCameraPath?.let(::File)
