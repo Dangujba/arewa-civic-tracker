@@ -11,33 +11,48 @@ import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.os.CancellationSignal
+import android.os.SystemClock
 import androidx.core.content.ContextCompat
+import java.util.concurrent.atomic.AtomicBoolean
 
 object LocationOnce {
+    /** Uses device GPS without mobile data. Never throws into a Compose launcher callback. */
     @SuppressLint("MissingPermission")
-    fun capture(context: Context, done: (Location?) -> Unit) {
-        val fine=ContextCompat.checkSelfPermission(context,Manifest.permission.ACCESS_FINE_LOCATION) ==
+    fun capture(context:Context, done:(Location?)->Unit) {
+        val called=AtomicBoolean(false)
+        val finish:(Location?)->Unit={found->if(called.compareAndSet(false,true))done(found)}
+        try {
+            val fine=ContextCompat.checkSelfPermission(context,Manifest.permission.ACCESS_FINE_LOCATION) ==
                 PackageManager.PERMISSION_GRANTED
-        val coarse=ContextCompat.checkSelfPermission(context,Manifest.permission.ACCESS_COARSE_LOCATION) ==
+            val coarse=ContextCompat.checkSelfPermission(context,Manifest.permission.ACCESS_COARSE_LOCATION) ==
                 PackageManager.PERMISSION_GRANTED
-        if(!fine && !coarse) {done(null);return}
-        val manager=context.getSystemService(Context.LOCATION_SERVICE) as LocationManager
-        val provider=when {
-            fine && manager.isProviderEnabled(LocationManager.GPS_PROVIDER) -> LocationManager.GPS_PROVIDER
-            manager.isProviderEnabled(LocationManager.NETWORK_PROVIDER) -> LocationManager.NETWORK_PROVIDER
-            else -> {done(null);return}
-        }
-        if(Build.VERSION.SDK_INT>=Build.VERSION_CODES.R) {
-            manager.getCurrentLocation(provider,null,ContextCompat.getMainExecutor(context)) { done(it) }
-        } else {
-            val listener=object:LocationListener {
-                override fun onLocationChanged(location: Location) { done(location) }
-                override fun onStatusChanged(p:String?, status:Int, extras:Bundle?) {}
-                override fun onProviderEnabled(provider:String) {}
-                override fun onProviderDisabled(provider:String) {done(null)}
+            if(!fine && !coarse) {finish(null);return}
+            val manager=context.getSystemService(Context.LOCATION_SERVICE) as? LocationManager
+                ?: run{finish(null);return}
+            val provider=when {
+                fine && manager.isProviderEnabled(LocationManager.GPS_PROVIDER)->LocationManager.GPS_PROVIDER
+                manager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)->LocationManager.NETWORK_PROVIDER
+                else->{finish(null);return}
             }
-            manager.requestSingleUpdate(provider,listener,Looper.getMainLooper())
-            Handler(Looper.getMainLooper()).postDelayed({manager.removeUpdates(listener)},18000)
-        }
+            val handler=Handler(Looper.getMainLooper())
+            if(Build.VERSION.SDK_INT>=Build.VERSION_CODES.R){
+                val cancellation=CancellationSignal()
+                handler.postDelayed({cancellation.cancel();finish(null)},17000)
+                manager.getCurrentLocation(provider,cancellation,
+                    ContextCompat.getMainExecutor(context)){location->finish(location)}
+            } else {
+                val listener=object:LocationListener {
+                    override fun onLocationChanged(location:Location){finish(location)}
+                    override fun onStatusChanged(p:String?, status:Int, extras:Bundle?) {}
+                    override fun onProviderEnabled(provider:String) {}
+                    override fun onProviderDisabled(provider:String){finish(null)}
+                }
+                manager.requestSingleUpdate(provider,listener,Looper.getMainLooper())
+                handler.postDelayed({manager.removeUpdates(listener);finish(null)},17000)
+            }
+        } catch(_:SecurityException){finish(null)}
+          catch(_:IllegalArgumentException){finish(null)}
+          catch(_:Exception){finish(null)}
     }
 }

@@ -100,8 +100,10 @@ class MainActivity:FragmentActivity() {
         window.statusBarColor=android.graphics.Color.rgb(23,84,59)
         setContent {
             MaterialTheme(
-                colorScheme=lightColorScheme(primary=green,onPrimary=Color.White,
-                    secondary=gold,background=paper,surface=Color.White,onSurface=ink),
+                colorScheme=lightColorScheme(
+                    primary=green,onPrimary=Color.White,primaryContainer=Color(0xFFDBEBDE),
+                    onPrimaryContainer=green,secondary=gold,secondaryContainer=Color(0xFFF1E7D1),
+                    background=paper,surface=Color.White,onSurface=ink),
                 shapes=Shapes(small=RoundedCornerShape(0.dp),medium=RoundedCornerShape(0.dp),
                     large=RoundedCornerShape(0.dp))
             ) { FieldApplication(fieldVm,fingerprintAvailable,biometricNotice,::authenticateFingerprint) }
@@ -376,7 +378,7 @@ private fun FormScreen(vm:FieldViewModel) {
     var progress by remember { mutableStateOf("ongoing") }
     var latitude by remember { mutableStateOf("") }
     var longitude by remember { mutableStateOf("") }
-    var cameraFile by remember { mutableStateOf<File?>(null) }
+    var cameraPath by rememberSaveable { mutableStateOf("") }
     LaunchedEffect(editing?.id){
         val data=editing?.payload ?: return@LaunchedEffect
         type=data.optString("type","public_project")
@@ -395,10 +397,11 @@ private fun FormScreen(vm:FieldViewModel) {
     }
 
     val camera=rememberLauncherForActivityResult(ActivityResultContracts.TakePicture()) { ok->
-        val file=cameraFile
-        if(ok && file!=null)vm.captureEvidence(Uri.fromFile(file),file.name,"image/jpeg"){
-            file.delete()
+        val file=cameraPath.takeIf{it.isNotBlank()}?.let(::File)
+        if(ok && file?.isFile==true) {
+            vm.captureEvidence(Uri.fromFile(file),file.name,"image/jpeg"){file.delete()}
         } else file?.delete()
+        cameraPath=""
     }
     val picker=rememberLauncherForActivityResult(ActivityResultContracts.OpenMultipleDocuments()){uris->
         vm.captureMany(uris)
@@ -488,7 +491,7 @@ private fun FormScreen(vm:FieldViewModel) {
                     val target=File(context.cacheDir,"camera").also{check(it.isDirectory || it.mkdirs())}
                     val file=File(target,"field-${UUID.randomUUID()}.jpg")
                     check(file.createNewFile()){"Camera file could not be created"}
-                    cameraFile=file
+                    cameraPath=file.absolutePath
                     val uri=FileProvider.getUriForFile(context,
                         context.packageName+".fileprovider",file)
                     camera.launch(uri)
