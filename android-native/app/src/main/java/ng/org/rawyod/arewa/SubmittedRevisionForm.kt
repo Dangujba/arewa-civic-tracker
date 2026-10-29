@@ -24,6 +24,7 @@ internal fun SubmittedRevisionForm(
     var title by remember(detail.id,detail.version){mutableStateOf(data.optString("title"))}
     var description by remember(detail.id,detail.version){mutableStateOf(data.optString("description"))}
     var community by remember(detail.id,detail.version){mutableStateOf(data.optString("community"))}
+    var ward by remember(detail.id,detail.version){mutableStateOf(data.optString("ward"))}
     var date by remember(detail.id,detail.version){mutableStateOf(data.optString("observation_date"))}
     var observations by remember(detail.id,detail.version){mutableStateOf(data.optString("observations",""))}
     var dutyBearers by remember(detail.id,detail.version){mutableStateOf(data.optString("duty_bearers",""))}
@@ -39,7 +40,8 @@ internal fun SubmittedRevisionForm(
             FilterChip(selected=type=="governance_issue",onClick={type="governance_issue"},
                 shape=RectangleShape,label={Text("Governance Issue")})
         }
-        ChoiceField("Assigned LGA",vm.lgas,lga){lga=it}
+        ChoiceField("Assigned LGA",vm.lgas,lga){lga=it;ward=""}
+        WardInput(vm,lga,ward){ward=it}
         ChoiceField("Sector",vm.sectors,sector){sector=it}
         val categories=vm.categories.filter{it.type==type}
         if(categories.isNotEmpty())ChoiceField("Report Category",
@@ -62,7 +64,7 @@ internal fun SubmittedRevisionForm(
                     val payload=JSONObject()
                         .put("type",type).put("title",title.trim())
                         .put("description",description.trim()).put("lga_id",lga)
-                        .put("community",community.trim()).put("sector_id",sector)
+                        .put("community",community.trim()).put("ward",ward.trim()).put("sector_id",sector)
                         .put("report_category_id",if(category>0&&vm.categories.any{it.id==category&&it.type==type})category else JSONObject.NULL)
                         .put("observation_date",date.trim()).put("observations",observations)
                         .put("duty_bearers",dutyBearers)

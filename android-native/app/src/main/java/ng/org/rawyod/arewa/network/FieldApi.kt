@@ -128,7 +128,7 @@ class FieldApi(private val vault: CryptoVault) {
         kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
             val multipart = MultipartBody.Builder().setType(MultipartBody.FORM)
             val names = listOf("client_submission_id","type","title","description","lga_id",
-                "community","sector_id","report_category_id","observation_date","observations","duty_bearers",
+                "community","ward","sector_id","report_category_id","observation_date","observations","duty_bearers",
                 "progress_status","latitude","longitude")
             for (field in names) {
                 if(field=="report_category_id" && payload.optInt(field,0)<=0) continue

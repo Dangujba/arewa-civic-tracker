@@ -25,6 +25,7 @@ import java.util.UUID
 data class Choice(val id: Int, val name: String)
 data class CategoryChoice(val id:Int,val name:String,val type:String)
 data class CommunityChoice(val id:Int,val name:String,val lgaId:Int)
+data class WardChoice(val name:String,val lgaId:Int)
 data class ReportRow(val id: Long, val reference: String, val title: String, val status: String)
 data class ReportDetails(val id: Long, val reference: String, val title: String,
                          val status: String, val description: String, val followups: List<String>,
@@ -65,6 +66,8 @@ class FieldViewModel(application: Application) : AndroidViewModel(application) {
     var sectors by mutableStateOf(emptyList<Choice>())
         private set
     var categories by mutableStateOf(emptyList<CategoryChoice>())
+        private set
+    var wards by mutableStateOf(emptyList<WardChoice>())
         private set
     var communities by mutableStateOf(emptyList<CommunityChoice>())
         private set
@@ -165,6 +168,10 @@ class FieldViewModel(application: Application) : AndroidViewModel(application) {
         val cat=json?.optJSONArray("categories")
         categories=if(cat==null)emptyList() else (0 until cat.length()).map{ i->
             cat.getJSONObject(i).let{CategoryChoice(it.optInt("id"),it.optString("name"),it.optString("type"))}
+        }
+        val ws=json?.optJSONArray("wards")
+        wards=if(ws==null)emptyList() else (0 until ws.length()).map{i->
+            ws.getJSONObject(i).let {WardChoice(it.optString("name"),it.optInt("lga_id"))}
         }
         val com=json?.optJSONArray("communities")
         communities=if(com==null)emptyList() else (0 until com.length()).map{ i->

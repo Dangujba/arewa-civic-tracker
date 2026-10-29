@@ -374,6 +374,36 @@ internal fun ChoiceField(label:String,items:List<Choice>,value:Int,onChoose:(Int
 }
 
 @Composable
+internal fun WardInput(vm:FieldViewModel,lga:Int,ward:String,onWardChange:(String)->Unit) {
+    val available=vm.wards.filter{it.lgaId==lga}.map{it.name}
+    var manual by rememberSaveable(lga) { mutableStateOf(ward.isNotBlank() && ward !in available) }
+    var search by rememberSaveable(lga) { mutableStateOf("") }
+    Column(verticalArrangement=Arrangement.spacedBy(6.dp)) {
+        Text("Ward",style=MaterialTheme.typography.labelMedium,fontWeight=FontWeight.Medium)
+        if(manual || available.isEmpty()) {
+            OutlinedTextField(ward,onWardChange,label={Text("Enter ward name")},
+                shape=RectangleShape,singleLine=true,modifier=Modifier.fillMaxWidth())
+        } else {
+            OutlinedTextField(search,{search=it},label={Text("Search wards")},
+                singleLine=true,shape=RectangleShape,modifier=Modifier.fillMaxWidth())
+            val filtered=available.filter{it.contains(search,ignoreCase=true)}
+            val selected=available.indexOf(ward)+1
+            ChoiceField("Select ward",
+                listOf(Choice(0,"Choose ward"))+
+                    filtered.mapIndexed{idx,name->Choice(idx+1,name)},
+                filtered.indexOf(ward)+1
+            ){id-> if(id>0)onWardChange(filtered[id-1])}
+        }
+        TextButton(onClick={
+            manual=!manual
+            if(!manual)onWardChange("")
+        }) {
+            Text(if(manual)"Choose from listed wards" else "Ward not listed? Type ward")
+        }
+    }
+}
+
+@Composable
 private fun FormScreen(vm:FieldViewModel) {
     val context=LocalContext.current
     val editing=vm.restoredDraft
@@ -384,6 +414,7 @@ private fun FormScreen(vm:FieldViewModel) {
     var title by rememberSaveable { mutableStateOf("") }
     var description by rememberSaveable { mutableStateOf("") }
     var community by rememberSaveable { mutableStateOf("") }
+    var ward by rememberSaveable { mutableStateOf("") }
     var observation by rememberSaveable { mutableStateOf("") }
     var dutyBearers by rememberSaveable { mutableStateOf("") }
     var date by rememberSaveable { mutableStateOf(LocalDate.now().toString()) }
@@ -400,6 +431,7 @@ private fun FormScreen(vm:FieldViewModel) {
         title=data.optString("title")
         description=data.optString("description")
         community=data.optString("community")
+        ward=data.optString("ward")
         observation=data.optString("observations")
         dutyBearers=data.optString("duty_bearers")
         date=data.optString("observation_date",LocalDate.now().toString())
@@ -447,7 +479,8 @@ private fun FormScreen(vm:FieldViewModel) {
             FilterChip(shape=RectangleShape,selected=type=="governance_issue",onClick={type="governance_issue"},
                 label={Text("Governance issue")})
         }
-        ChoiceField("Assigned LGA",vm.lgas,lga){lga=it}
+        ChoiceField("Assigned LGA",vm.lgas,lga){lga=it;ward=""}
+        WardInput(vm,lga,ward){ward=it}
         ChoiceField("Sector",vm.sectors,sector){sector=it}
         val availableCategories=vm.categories.filter{it.type==type}
         if(availableCategories.isNotEmpty())ChoiceField("Report Category",
@@ -551,6 +584,7 @@ private fun FormScreen(vm:FieldViewModel) {
                     val json=JSONObject()
                         .put("type",type).put("title",title.trim())
                         .put("description",description.trim()).put("community",community.trim())
+                         .put("ward",ward.trim())
                         .put("lga_id",lga).put("sector_id",sector)
                         .put("report_category_id",
                           if(category>0 && vm.categories.any{it.id==category && it.type==type})
