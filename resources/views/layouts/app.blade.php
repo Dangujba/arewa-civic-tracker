@@ -9,7 +9,7 @@
 <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('icons/apple-touch-icon.png') }}?v=4">
 <link rel="stylesheet" href="{{ asset('vendor/fontawesome/all.min.css') }}">
 <link rel="stylesheet" href="{{ asset('css/act-design.css') }}">
-<link rel="stylesheet" href="{{ asset('css/act-portal.css') }}">
+<link rel="stylesheet" href="{{ asset('css/act-portal.css') }}?v=20261029-art1">
 <link rel="stylesheet" href="{{ asset('vendor/ui/tom-select.css') }}">
 <link rel="stylesheet" href="{{ asset('vendor/ui/sweetalert2.css') }}">
 <link rel="stylesheet" href="{{ asset('css/act-form-polish.css') }}?v=20261029-login1">

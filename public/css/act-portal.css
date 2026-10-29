@@ -36,3 +36,8 @@ body{background:#f6f8f5;color:var(--ink)}
 @media(max-width:900px){.reports-charts{grid-template-columns:1fr}.reports-chart-area,.reports-chart-status{height:240px}}
 
 .portal-logo-image{width:38px;height:38px;object-fit:contain;flex-shrink:0}.guest-portal .brand .portal-logo-image{width:34px;height:34px;margin-right:8px}
+
+/* Purpose-designed civic fieldwork artwork on the guest sign-in page. */
+.guest-main .auth-wrap .auth-art.auth-art-image{position:relative;display:block!important;min-height:530px;padding:0!important;overflow:hidden;background:#124b37!important}
+.guest-main .auth-art-image img{display:block;position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center center}
+@media(max-width:700px){.guest-main .auth-wrap .auth-art.auth-art-image{height:260px;min-height:260px}}

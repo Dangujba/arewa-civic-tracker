@@ -12,6 +12,9 @@ class LoginFeedbackLayoutTest extends TestCase
         $html = $response->getContent();
 
         $this->assertStringContainsString('id="login-feedback"', $html);
+        $this->assertStringContainsString('arewa-fieldwork-hero.webp', $html);
+        $this->assertStringNotContainsString('Evidence. Trust.', $html);
+        $this->assertStringContainsString('auth-art auth-art-image', $html);
         $this->assertStringContainsString('role="alert"', $html);
         $this->assertStringNotContainsString('Secure sign in', $html);
         $this->assertStringNotContainsString('data-form-status', $html);
