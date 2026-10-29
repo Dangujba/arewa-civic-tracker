@@ -52,7 +52,7 @@ The following status table supersedes the earlier pre-implementation list. **R2 
 | P03 | Configurable reference data | **Implemented and staging-deployed** | Admin-managed sectors, LGA-scoped communities, project/issue categories, and display labels for status codes. Approval state transitions remain fixed for safety. |
 | P04 | Comprehensive activity/change audit | Substantially implemented | Versioned report edits show field changes; review, closure, reference management and key admin operations recorded. Broader consistency audit and log-retention policy remain for final review. |
 | P05 | Cloudflare R2 | **Deferred, excluded from active development scope** | Existing private local evidence storage continues. Do not activate or migrate until instructed. |
-| P06 | Encrypted backup/recovery | Backup automation implemented; restoration operations partial | AES-256 GPG snapshot command, database + private evidence archive, independent hash validation, scheduled 02:15 WAT, verified first live snapshot. An automated isolated restore procedure and **off-server copies** are not in place. Same-VPS backups cannot protect against total VPS loss. |
+| P06 | Encrypted backup/recovery | Backup automation and isolated recovery verification implemented | AES-256 GPG snapshot command, database + private evidence archive, independent hash validation, scheduled 02:15 WAT, verified first live snapshot. An isolated restore-sandbox command has been implemented and verified using a real encrypted live snapshot, without modifying production data. **Off-server copies** and independently managed recovery credentials are still required for VPS-loss resilience. Same-VPS backups cannot protect against total VPS loss. |
 | P07 | Data-protection lifecycle | Conservative controls implemented; policy-dependent features pending | Expired device tokens and web sessions older than 30 days are scheduled for cleanup. Reports, evidence, users and audit records are **never auto-deleted**. RAWYOD-approved retention periods and erasure authorizations must precede destructive features. |
 | P08 | UI/UX | Substantially implemented | Responsive web and flat admin tables, managed reference lists, revision history and native field interface. Cross-device accessibility and field-persona acceptance remain in QA. |
 | M01 | Authorized post-submission report editing with version history | **Implemented on the web** | Versioned, permission-restricted changes, reasons, old/new values and conflict protection. Native post-submission editing would be an additional parity improvement. |
@@ -70,7 +70,7 @@ The following status table supersedes the earlier pre-implementation list. **R2 
 ## C. Remaining actionable software work, excluding R2 and later delivery phases
 
 1. **Native Android parity:** completed for submitted-report revisions in v0.3.1. Remaining device-specific behavior belongs to formal UAT and release signing.
-2. **Recovery operations:** implement a strictly isolated restoration flow and validate it using independent recovery storage. Obtain an approved off-server backup destination to protect against VPS loss.
+2. **Recovery operations:** private, isolated restore extraction has been implemented and tested. Obtain an approved **off-server** backup destination and test complete restoration on a separate authorized recovery host before claiming disaster recovery readiness.
 3. **Privacy controls:** finalize RAWYOD-approved record retention/erasure rules; any deletion must be permission-gated, auditable and reversible where lawful.
 4. **UI consistency/accessibility:** finish remaining responsive navigation, searchable controls, error states and keyboard/touch accessibility. Formal user/device testing remains a later phase.
 5. **Technical design baselines:** complete URS, architecture/API/offline designs and UI/UX baseline as design-stage outputs, not runtime bugs.
@@ -98,4 +98,13 @@ The web core, similar warnings, closure and reference administration are no long
 - **Proposal pp. 11–13:** encrypted backup/restore, controlled evidence, privacy-by-design, low-bandwidth and responsive interface → P01, P05–P08.
 - **Proposal pp. 14–17:** formal QA/UAT and later deployment, training, 60-day support and handover → later phases, not development gaps.
 
-**Decision (updated):** Core web features, versioned web report editing, similarity warnings, case closure, reference administration and native Android v0.3.0 are implemented in staging. Remaining software work concerns robust recovery tooling, policy-dependent privacy controls and final interface refinements. Native report revisions are available in v0.3.1. Cloudflare R2 activation and later contractual delivery phases are excluded.
+**Decision (updated):** Core web features, versioned web report editing, similarity warnings, case closure, reference administration and native Android v0.3.0 are implemented in staging. Backup/recovery software and the native editing workflow have been implemented. Remaining work involves an independent off-server backup destination, policy-dependent privacy controls, and final UI/device acceptance. Native report revisions are available in v0.3.1. Cloudflare R2 activation and later contractual delivery phases are excluded.
+
+
+## Recovery implementation follow-up
+
+- Secure command: `php artisan act:backup-restore-sandbox <backup-filename.tar.gpg> <unique-sandbox-name> --confirm-isolated`.
+- Requires `ACT_RECOVERY_DIR` outside the application, a private encryption key, and a matching snapshot in the configured backup directory. Never overwrites an existing directory or restores directly into a live database.
+- **29 October 2026**: actual encrypted snapshot `arewa-20261029-174331-i2tqfe.tar.gpg` successfully decrypted and hash-verified in `/var/backups/arewa-recovery/verification-20261029`. The extracted 29,482-byte database SQL and the private evidence directory were checked. The decrypted test folder was removed afterwards.
+- Live Laravel scheduler verified with backup daily 02:15 WAT and expired-token/session cleanup daily 03:15 WAT.
+- Latest source commit: `70dc7cfcc2f799dadcb595d891052e15ccc85c9a`. Automated Laravel checks **98 passed, 724 assertions**. R2 remains inactive.
