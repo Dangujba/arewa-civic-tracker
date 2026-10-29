@@ -67,7 +67,7 @@
     <h3>{{ $report->title }}</h3>
     <dl><div><dt>Reference</dt><dd>{{ $report->reference }}</dd></div>
         <div><dt>LGA</dt><dd>{{ $report->lga?->name }}</dd></div>
-        <div><dt>Community</dt><dd>{{ $report->community }}</dd></div>
+        <div><dt>Ward</dt><dd>{{ $report->ward ?: 'Not specified' }}</dd></div><div><dt>Community</dt><dd>{{ $report->community }}</dd></div>
         <div><dt>Sector</dt><dd>{{ $report->sector?->name }}</dd></div>
         <div><dt>Progress</dt><dd>{{ $progressLabels[$report->progress_status]??ucwords(str_replace('_',' ',$report->progress_status)) }}</dd></div>
         <div><dt>Observed</dt><dd>{{ $report->observation_date?->format('d M Y') }}</dd></div></dl>

@@ -96,23 +96,23 @@ class ReportsController extends Controller
         $progressLabels=WorkflowStatusLabel::labels('progress');
         try {
             $sheet=$workbook->getActiveSheet()->setTitle('Field Reports');
-            $headings=['Reference','Type','Title','LGA','Community','Sector','Observed Date','Verification','Progress','Description','Latitude','Longitude'];
+            $headings=['Reference','Type','Title','LGA','Ward','Community','Sector','Observed Date','Verification','Progress','Description','Latitude','Longitude'];
             foreach($headings as $col=>$value)$sheet->setCellValueExplicit([$col+1,1],$value,DataType::TYPE_STRING);
             $row=2;
             foreach($query->cursor() as $case) {
                 $values=[
-                    $case->reference,$case->type,$case->title,$case->lga?->name,$case->community,$case->sector?->name,
+                    $case->reference,$case->type,$case->title,$case->lga?->name,$case->ward,$case->community,$case->sector?->name,
                     $case->observation_date?->format('Y-m-d'),$verificationLabels[$case->verification_status]??$case->verification_status,$progressLabels[$case->progress_status]??$case->progress_status,
                     $case->description,$case->latitude,$case->longitude
                 ];
                 foreach($values as $col=>$value)$sheet->setCellValueExplicit([$col+1,$row],(string)($value??''),DataType::TYPE_STRING);
                 if(++$row>10001)break;
             }
-            $sheet->getStyle('A1:L1')->getFont()->setBold(true)->getColor()->setRGB('FFFFFF');
+            $sheet->getStyle('A1:M1')->getFont()->setBold(true)->getColor()->setRGB('FFFFFF');
             $sheet->getStyle('A1:L1')->getFill()->setFillType('solid')->getStartColor()->setRGB('15563C');
             $sheet->freezePane('A2');
-            $sheet->setAutoFilter('A1:L'.max(1,$row-1));
-            foreach(range('A','L') as $c)$sheet->getColumnDimension($c)->setWidth(in_array($c,['C','J'])?45:19);
+            $sheet->setAutoFilter('A1:M'.max(1,$row-1));
+            foreach(range('A','M') as $c)$sheet->getColumnDimension($c)->setWidth(in_array($c,['C','J'])?45:19);
             (new Xlsx($workbook))->save($sheetFile);
         }catch(\Throwable $e){@unlink($sheetFile);throw $e;}
         finally{$workbook->disconnectWorksheets();}
@@ -197,6 +197,7 @@ class ReportsController extends Controller
             'Search' => $request->filled('q') ? trim((string)$request->input('q')) : null,
             'LGA' => $request->filled('lga_id') ? Lga::find($request->integer('lga_id'))?->name : null,
             'Sector' => $request->filled('sector_id') ? Sector::find($request->integer('sector_id'))?->name : null,
+            'Ward' => $request->filled('ward') ? trim((string)$request->input('ward')) : null,
             'Community' => $request->filled('community') ? trim((string)$request->input('community')) : null,
             'Status' => $request->filled('verification_status')
                 ? ($statusNames[$request->input('verification_status')] ?? null) : null,

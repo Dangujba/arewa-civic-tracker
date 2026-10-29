@@ -15,6 +15,7 @@
   <div class="field"><label>Search reports</label><input type="search" name="q" maxlength="150" value="{{ request('q') }}" placeholder="Reference, title, community"></div>
   <div class="field"><label>Local government</label><select name="lga_id"><option value="">All LGAs</option>@foreach($lgas as $lga)<option value="{{ $lga->id }}" @selected(request('lga_id')==$lga->id)>{{ $lga->name }}</option>@endforeach</select></div>
   <div class="field"><label>Sector</label><select name="sector_id"><option value="">All sectors</option>@foreach($sectors as $sector)<option value="{{ $sector->id }}" @selected(request('sector_id')==$sector->id)>{{ $sector->name }}</option>@endforeach</select></div>
+  <div class="field"><label for="report-ward">Ward</label><input id="report-ward" type="search" name="ward" maxlength="150" value="{{ request('ward') }}" placeholder="Exact ward name"></div>
   <div class="field"><label for="report-community">Community</label><input id="report-community" type="search" name="community" maxlength="150" value="{{ request('community') }}" placeholder="Exact community name"></div>
   <div class="field"><label>Status</label><select name="verification_status"><option value="">All statuses</option>@foreach(['submitted','under_review','clarification_requested','verified','approved','rejected'] as $status)<option value="{{ $status }}" @selected(request('verification_status')===$status)>{{ $verificationLabels[$status] ?? ucwords(str_replace('_',' ',$status)) }}</option>@endforeach</select></div>
   <div class="field"><label>Report type</label><select name="type"><option value="">All types</option><option value="public_project" @selected(request('type')==='public_project')>Public project</option><option value="governance_issue" @selected(request('type')==='governance_issue')>Governance issue</option></select></div>
@@ -73,9 +74,9 @@
 </section>
 <section class="dash-panel dash-recent">
  <div class="dash-panel-heading"><h2>Report register</h2><small class="muted">Includes only records accessible to your account</small></div>
- <div class="dash-table-wrap"><table><thead><tr><th>Reference</th><th>Report</th><th>LGA</th><th>Sector</th><th>Status</th><th>Observed</th></tr></thead><tbody>
- @forelse($recent as $case)<tr><td><a href="{{ route('cases.show',$case) }}">{{ $case->reference }}</a></td><td>{{ $case->title }}</td><td>{{ $case->lga?->name }}</td><td>{{ $case->sector?->name }}</td><td>{{ $verificationLabels[$case->verification_status] ?? ucwords(str_replace('_',' ',$case->verification_status)) }}</td><td>{{ $case->observation_date?->format('d M Y') }}</td></tr>
- @empty<tr><td colspan="6">No reports match the selected filters.</td></tr>@endforelse
+ <div class="dash-table-wrap"><table><thead><tr><th>Reference</th><th>Report</th><th>LGA</th><th>Ward</th><th>Sector</th><th>Status</th><th>Observed</th></tr></thead><tbody>
+ @forelse($recent as $case)<tr><td><a href="{{ route('cases.show',$case) }}">{{ $case->reference }}</a></td><td>{{ $case->title }}</td><td>{{ $case->lga?->name }}</td><td>{{ $case->ward ?: '—' }}</td><td>{{ $case->sector?->name }}</td><td>{{ $verificationLabels[$case->verification_status] ?? ucwords(str_replace('_',' ',$case->verification_status)) }}</td><td>{{ $case->observation_date?->format('d M Y') }}</td></tr>
+ @empty<tr><td colspan="7">No reports match the selected filters.</td></tr>@endforelse
  </tbody></table></div><div class="act-panel-pagination act-pagination-bar"><span>Showing {{ $recent->firstItem()??0 }}–{{ $recent->lastItem()??0 }} of {{ number_format($recent->total()) }} reports</span>@if($recent->hasPages()){{ $recent->withQueryString()->links() }}@endif</div>
 </section>
 @endsection
