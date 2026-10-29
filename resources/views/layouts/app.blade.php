@@ -12,12 +12,12 @@
 <link rel="stylesheet" href="{{ asset('css/act-portal.css') }}">
 <link rel="stylesheet" href="{{ asset('vendor/ui/tom-select.css') }}">
 <link rel="stylesheet" href="{{ asset('vendor/ui/sweetalert2.css') }}">
-<link rel="stylesheet" href="{{ asset('css/act-form-polish.css') }}?v=20261029">
+<link rel="stylesheet" href="{{ asset('css/act-form-polish.css') }}?v=20261029-login1">
 <title>@yield('title','Arewa Civic Tracker')</title>@stack('head')
 <script defer src="{{ asset('vendor/ui/tom-select.js') }}"></script>
 <script defer src="{{ asset('vendor/ui/sweetalert2.js') }}"></script>
 <script defer src="{{ asset('js/act-select-dialogs.js') }}?v=20261029"></script>
-<script defer src="{{ asset('js/act-interactions.js') }}?v=20261029"></script>
+<script defer src="{{ asset('js/act-interactions.js') }}?v=20261029-login1"></script>
 <script defer src="{{ asset('js/act-sidebar.js') }}"></script>
 </head>
 <body class="@auth has-portal-sidebar @else guest-portal @endauth">

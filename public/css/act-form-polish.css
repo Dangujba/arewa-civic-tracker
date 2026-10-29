@@ -56,3 +56,7 @@
 @keyframes act-dot-pulse{0%,65%,100%{opacity:.25;transform:scale(.72)}33%{opacity:1;transform:scale(1.12)}}
 @media(prefers-reduced-motion:reduce){.spin:before,.spin:after{animation:none!important;opacity:1!important;transform:none!important}}
 .is-exporting{cursor:progress!important;opacity:.8;pointer-events:none}
+
+/* Login feedback is displayed above the inputs, never as inline field text. */
+.auth-login-feedback{margin:0 0 16px;padding:11px 13px;border:1px solid #e5b4ad;border-left:3px solid #ac3430;background:#fff5f1;color:#883127;font-size:12px;line-height:1.6;border-radius:0;box-shadow:none}
+.auth-login-feedback[hidden]{display:none!important}
