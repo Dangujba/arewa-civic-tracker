@@ -22,13 +22,21 @@ class CaseEvidenceService
             $path=$file->store('cases/'.$case->uuid,$disk);
             $previewPath=null;
             try {
-                // A failed preview must never destroy valid original evidence.
-                $preview=app(PrivateEvidencePreview::class)->create($file);
-                if ($preview!==null) {
-                    $candidate='cases/'.$case->uuid.'/previews/'.\Illuminate\Support\Str::uuid().'.webp';
-                    if (Storage::disk($disk)->put($candidate,$preview,['visibility'=>'private'])) {
-                        $previewPath=$candidate;
+                // Preview generation is optional. Keep the original even if a
+                // device photo is too complex for safe preview generation.
+                $preview=null;
+                try {
+                    $preview=app(PrivateEvidencePreview::class)->create($file);
+                    if ($preview!==null) {
+                        $candidate='cases/'.$case->uuid.'/previews/'.\Illuminate\Support\Str::uuid().'.webp';
+                        if (Storage::disk($disk)->put($candidate,$preview,['visibility'=>'private'])) {
+                            $previewPath=$candidate;
+                        }
                     }
+                } catch (\Throwable $previewError) {
+                    \Illuminate\Support\Facades\Log::warning('Evidence preview unavailable',[
+                        'case_id'=>$case->id,'error_class'=>get_class($previewError),
+                    ]);
                 }
                 DB::transaction(function () use ($file,$path,$disk,$case,$actor,$checksum,$previewPath,$preview) {
                     CaseEvidence::create([
