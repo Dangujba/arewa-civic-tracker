@@ -38,7 +38,12 @@ class FieldRepository(
             val cr = context.contentResolver
             var declared = -1L
             var display = filename ?: "field-evidence"
-            cr.query(uri, arrayOf(OpenableColumns.DISPLAY_NAME, OpenableColumns.SIZE), null, null, null)?.use {
+            if(uri.scheme=="file") {
+                val selected=File(uri.path ?: error("Camera file is unavailable"))
+                require(selected.isFile){"The camera photograph is missing."}
+                declared=selected.length()
+                if(filename==null)display=selected.name
+            } else cr.query(uri, arrayOf(OpenableColumns.DISPLAY_NAME, OpenableColumns.SIZE), null, null, null)?.use {
                 if (it.moveToFirst()) {
                     val n = it.getColumnIndex(OpenableColumns.DISPLAY_NAME)
                     val s = it.getColumnIndex(OpenableColumns.SIZE)
@@ -54,7 +59,9 @@ class FieldRepository(
             }
             // Upload the original bytes exactly, without downscaling, re-encoding or
             // stripping EXIF. The backend creates a sanitized, high-quality preview.
-            val bytes = cr.openInputStream(uri)?.use { input ->
+            val input=if(uri.scheme=="file") File(uri.path ?: error("Camera file missing")).inputStream()
+                else cr.openInputStream(uri)
+            val bytes = input?.use { input ->
                 val buffer=java.io.ByteArrayOutputStream()
                 val chunk=ByteArray(8192)
                 while(buffer.size().toLong()<=maxBytes){

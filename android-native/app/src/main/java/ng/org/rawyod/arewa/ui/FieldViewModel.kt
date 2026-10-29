@@ -41,8 +41,29 @@ class FieldViewModel(application: Application) : AndroidViewModel(application) {
     var message by mutableStateOf("")
     var externalPickerActive by mutableStateOf(false)
         private set
-    fun beginExternalPicker(){externalPickerActive=true}
+    var captureStatus by mutableStateOf("")
+        private set
+    var locationCoordinates by mutableStateOf<Pair<Double,Double>?>(null)
+        private set
+    var locating by mutableStateOf(false)
+        private set
+    fun captureFeedback(status:String){captureStatus=status}
+    fun beginExternalPicker(status:String="Opening device app…"){
+        externalPickerActive=true
+        captureStatus=status
+    }
     fun endExternalPicker(){externalPickerActive=false}
+    fun startLocation(){
+        locating=true
+        captureStatus="Searching for your current GPS location…"
+    }
+    fun completeLocation(latitude:Double?,longitude:Double?){
+        locating=false
+        if(latitude!=null && longitude!=null){
+            locationCoordinates=latitude to longitude
+            captureStatus="GPS captured. Review the coordinates below."
+        }else captureStatus="No GPS fix available. Enable Location and try outdoors, or enter coordinates."
+    }
     var refreshingReports by mutableStateOf(false)
         private set
     var refreshingCatalog by mutableStateOf(false)
@@ -418,17 +439,20 @@ class FieldViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun captureMany(uris: List<Uri>) {
-        if(busy) return
+        if(uris.isEmpty()){captureStatus="No evidence selected.";return}
+        if(busy) {captureStatus="Another action is in progress.";return}
         viewModelScope.launch {
             busy=true
+            captureStatus="Encrypting selected evidence…"
             try {
                 val space=(5-attachments.size).coerceAtLeast(0)
                 for(uri in uris.take(space)) {
                     val mime=app.contentResolver.getType(uri) ?: "application/octet-stream"
                     attachments=attachments + repo.prepareEvidence(uri,null,mime)
                 }
-                if(uris.size>space) message="Only five supporting files can be attached."
-            } catch(e:Exception){message=e.message ?: "Could not attach file"}
+                captureStatus=if(uris.size>space)"Attachment limit reached. Saved ${space} file(s)."
+                    else "Evidence saved securely: ${uris.size} file(s)."
+            } catch(e:Exception){captureStatus=e.message ?: "Could not attach file"}
             finally {busy=false}
         }
     }
