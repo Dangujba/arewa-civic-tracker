@@ -3,6 +3,11 @@ package ng.org.rawyod.arewa
 import android.Manifest
 import android.content.Context
 import android.net.Uri
+import android.webkit.WebView
+import android.webkit.WebViewClient
+import android.webkit.WebResourceRequest
+import android.webkit.CookieManager
+import android.webkit.WebSettings
 import android.os.Bundle
 import androidx.fragment.app.FragmentActivity
 import androidx.activity.viewModels
@@ -24,6 +29,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -107,6 +113,7 @@ private fun FieldApplication(
 ) {
     val user=vm.userId
     var tab by remember { mutableIntStateOf(0) }
+    var guestPublic by remember { mutableStateOf(false) }
     LaunchedEffect(user,vm.drafts){ vm.checkAuthentication() }
     Scaffold(
         topBar={
@@ -141,7 +148,10 @@ private fun FieldApplication(
                 }
             }
             when {
-                user==null || vm.requiresAuthentication -> LoginScreen(vm)
+                (user==null || vm.requiresAuthentication) && guestPublic ->
+                    PublicGuestScreen(onBack={guestPublic=false})
+                user==null || vm.requiresAuthentication ->
+                    LoginScreen(vm,onPublicView={guestPublic=true})
                 vm.isBiometricLocked -> FingerprintLockScreen(
                     biometricNotice,
                     onUnlock={authenticate("Unlock Arewa Civic Tracker",vm::unlockWithFingerprint)},
@@ -238,7 +248,48 @@ private fun Content(title:String,subtitle:String,body:@Composable ColumnScope.()
 }
 
 @Composable
-private fun LoginScreen(vm:FieldViewModel) {
+private fun PublicGuestScreen(onBack:()->Unit) {
+    var webView by remember { mutableStateOf<WebView?>(null) }
+    DisposableEffect(Unit) {
+        onDispose { webView?.destroy(); webView=null }
+    }
+    Column(Modifier.fillMaxSize()) {
+        Row(
+            Modifier.fillMaxWidth().background(Color.White).padding(horizontal=16.dp,vertical=9.dp),
+            verticalAlignment=Alignment.CenterVertically,
+            horizontalArrangement=Arrangement.SpaceBetween
+        ) {
+            Text("Public transparency",fontWeight=FontWeight.Bold)
+            TextButton(onClick=onBack) {Text("Back to sign-in")}
+        }
+        AndroidView(
+            modifier=Modifier.fillMaxSize(),
+            factory={context->
+                WebView(context).apply {
+                    settings.javaScriptEnabled=true // Required by the read-only Leaflet map.
+                    settings.domStorageEnabled=false
+                    settings.allowFileAccess=false
+                    settings.allowContentAccess=false
+                    settings.javaScriptCanOpenWindowsAutomatically=false
+                    settings.mixedContentMode=WebSettings.MIXED_CONTENT_NEVER_ALLOW
+                    CookieManager.getInstance().setAcceptThirdPartyCookies(this,false)
+                    webViewClient=object:WebViewClient(){
+                        override fun shouldOverrideUrlLoading(view:WebView, request:WebResourceRequest):Boolean {
+                            val uri=request.url
+                            return uri.scheme!="https" || uri.host!="arewa.kasua.ng" ||
+                                !uri.path.orEmpty().startsWith("/transparency")
+                        }
+                    }
+                    loadUrl("https://arewa.kasua.ng/transparency")
+                    webView=this
+                }
+            }
+        )
+    }
+}
+
+@Composable
+private fun LoginScreen(vm:FieldViewModel,onPublicView:()->Unit) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var otp by remember { mutableStateOf("") }
@@ -249,6 +300,18 @@ private fun LoginScreen(vm:FieldViewModel) {
         Text(if(challenge==null)"Sign in" else "Verify your account",
             style=MaterialTheme.typography.headlineSmall,fontWeight=FontWeight.Bold)
         if(challenge==null) {
+            Surface(color=Color(0xFFF0F6EF),modifier=Modifier.fillMaxWidth()) {
+                Column(Modifier.padding(14.dp),verticalArrangement=Arrangement.spacedBy(7.dp)) {
+                    Text("Visiting without an account?",fontWeight=FontWeight.Bold)
+                    Text("Explore RAWYOD-approved public project and community reports. No registration or sign-in required.",
+                        style=MaterialTheme.typography.bodySmall)
+                    OutlinedButton(onClick=onPublicView,shape=RectangleShape,modifier=Modifier.fillMaxWidth()) {
+                        Text("Browse public reports")
+                    }
+                }
+            }
+            HorizontalDivider()
+            Text("RAWYOD staff sign-in",style=MaterialTheme.typography.titleMedium)
             OutlinedTextField(email,{email=it},label={Text("Email")},singleLine=true,
                 shape=RectangleShape,
                 keyboardOptions=KeyboardOptions(keyboardType=KeyboardType.Email),

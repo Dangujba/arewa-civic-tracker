@@ -63,3 +63,11 @@ The debug APK is for controlled testing, not production distribution. It uses An
 ## v0.3.1 submitted report amendments
 
 Field officers can open their submitted reports and edit eligible records online. The application fetches the latest server-side version, supports correction of report details with a mandatory reason, and preserves the shared web/API version history. Approved, rejected or closed reports are locked. Offline draft editing remains available separately. This build remains debug-signed for development verification.
+
+## v0.3.3 anonymous public viewing in Android
+
+- The first-run and reauthentication sign-in screens offer **Browse public reports**, which opens the same read-only transparency view inside the native app.
+- Public users do not create accounts, provide passwords, or upload reports. RAWYOD staff continue using existing authenticated workflows.
+- WebView browsing is restricted to HTTPS Arewa transparency pages; file access, content access, third-party cookies and mixed content are disabled.
+- Public data remains on the same server publication allowlist, with approximate map coordinates and no private evidence.
+- v0.3.3 requires a fresh successful APK build, and device-level tests of the embedded map remain part of release QA.
