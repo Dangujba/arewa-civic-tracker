@@ -14,15 +14,20 @@
 - **Do not equate an automated developer test with stakeholder acceptance.** Testing during development is routine; formal QA/UAT is a separate stage.
 - **Status terminology:** Implemented = core software exists; Partial = meaningful implementation exists but named functional requirements remain; Missing = no verified implementation of the specifically promised feature.
 
-## Preliminary design outputs (tracked separately from feature completion)
+## Final development baseline: all six closing items implemented
 
-The EOI also names three design-stage outputs. These are not extra runtime modules and are **not included in the 22 feature-group counts**:
+**The latest closing batch supersedes earlier partial-status snapshots below.** All three final coding enhancements and the three EOI design-stage deliverables are complete as a developer baseline. This is not RAWYOD acceptance or the start of final deployment.
 
-| Required output | Status | Remaining work |
+| Closing item | Final development result | Evidence |
 |---|---|---|
-| User Requirement Specification (URS) | Partial | Consolidate confirmed fields, roles, acceptance rules and mobile workflow into a reviewable document. RAWYOD approval is a later decision gate. |
-| System architecture / technical design | Partial | Consolidate component, database, API, authorization, native offline synchronization and storage diagrams. |
-| Final UI/UX design baseline | Partial | Consolidate completed screens and remaining mobile flows into a coherent, reviewable design. Stakeholder approval is tracked separately. |
+| Community analytics | Implemented | Community and LGA-aware counts, exact community filter, drill-down, PDF ranking chart |
+| LGA administrator | Implemented | Admin-only create/update, uniqueness validation, stable IDs, audit history |
+| Status display labels | Implemented | Configured values across dashboards, filters, chart legends and CSV/XLSX/PDF exports |
+| URS | Complete baseline | [URS v1.0](URS_AREWA_CIVIC_TRACKER_V1.md) |
+| Technical architecture | Complete baseline | [Architecture and Technical Design v1.0](ARCHITECTURE_AND_TECHNICAL_DESIGN_V1.md) |
+| UI/UX design baseline | Complete baseline | [UI/UX Screen Baseline v1.0](UI_UX_DESIGN_BASELINE_V1.md) |
+
+**Developer verification:** 110 passing Laravel/PHPUnit tests, 799 assertions, 29 October 2026. The staging deployment, formal QA/UAT, signing, governance approvals, off-server backup activation, final hosting and later support remain separately tracked. R2 activation remains deferred.
 
 ## A. Implemented software features
 
@@ -67,7 +72,7 @@ The following status table supersedes the earlier pre-implementation list. **R2 
 - First AES-256 encrypted private backup generated and verified successfully on 29 October 2026. Live cron invokes the Laravel scheduler every minute.
 - No production signing, physical-device acceptance, external backup redundancy, RAWYOD training or formal handover is being claimed.
 
-## C. Remaining actionable software work, excluding R2 and later delivery phases
+## C. Development closure and remaining external dependencies (historical notes retained)
 
 1. **Native Android parity:** completed for submitted-report revisions in v0.3.1. Remaining device-specific behavior belongs to formal UAT and release signing.
 2. **Recovery operations:** private, isolated restore extraction has been implemented and tested. An independent mounted-copy command is implemented. Obtain an approved **off-server** backup destination, activate its configuration, and test complete restoration on a separate authorized recovery host before claiming disaster recovery readiness.

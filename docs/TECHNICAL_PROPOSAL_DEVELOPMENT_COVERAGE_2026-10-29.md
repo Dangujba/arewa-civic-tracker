@@ -1,5 +1,8 @@
 # Arewa Civic Tracker: Technical Proposal Development Coverage
 
+> **Historical assessment only, superseded by the 29 October 2026 development closing batch.** The subsequent code completed report revisions, native Android v0.3.1, similarity warnings, closure, reference data, community analytics, LGA administration, status labels, data-governance and backup utilities. See [Final Development Closure](DEVELOPMENT_CLOSURE_2026-10-29.md) and the three current URS/architecture/UI-UX baselines. Outdated "missing" or "partial" rows below record the earlier inspection date; they are not live backlog items. Formal acceptance and later contractual phases are separate.
+
+
 **Review date:** 29 October 2026  
 **Source:** InnoBytes Lab LTD, *Technical Proposal: Development of the Arewa Civic Tracker – Digital Civic Monitoring and Governance Reporting Platform*, prepared September 2026, 19 pages, ref. RAWYOD/NYFF/VOICES-TO-VOTES/2026/001.  
 **Implementation examined:** Laravel/PHP on `arewa.kasua.ng`, current database migrations and routes, web frontend, evidence-storage module and native Kotlin Android source.

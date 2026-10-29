@@ -1,5 +1,8 @@
 # Arewa Civic Tracker - Requirements Coverage and Release Gates
 
+> **Historical assessment only, superseded by the 29 October 2026 development closing batch.** The subsequent code completed report revisions, native Android v0.3.1, similarity warnings, closure, reference data, community analytics, LGA administration, status labels, data-governance and backup utilities. See [Final Development Closure](DEVELOPMENT_CLOSURE_2026-10-29.md) and the three current URS/architecture/UI-UX baselines. Outdated "missing" or "partial" rows below record the earlier inspection date; they are not live backlog items. Formal acceptance and later contractual phases are separate.
+
+
 **Review:** 28 October 2026. Grounding: RAWYOD's *Call for Expression of Interest* dated 7 September 2026; InnoBytes' submitted *Arewa Civic Tracker Technical Proposal*; and the subsequent signed implementation agreement effective 29 October 2026.
 
 **Definition of completion:** code present is not the same as field-tested and accepted. Production completion requires end-to-end role testing, data security checks, performance evaluation, documented handover, and RAWYOD's written acceptance.

@@ -1,4 +1,7 @@
 # Arewa Civic Tracker: EOI Coverage and Development Status
+
+> **Historical assessment only, superseded by the 29 October 2026 development closing batch.** The subsequent code completed report revisions, native Android v0.3.1, similarity warnings, closure, reference data, community analytics, LGA administration, status labels, data-governance and backup utilities. See [Final Development Closure](DEVELOPMENT_CLOSURE_2026-10-29.md) and the three current URS/architecture/UI-UX baselines. Outdated "missing" or "partial" rows below record the earlier inspection date; they are not live backlog items. Formal acceptance and later contractual phases are separate.
+
 **Assessment date:** 29 October 2026  
 **Source:** RAWYOD, *Call for Expression of Interest – Development of the Arewa Civic Tracker – Digital Civic Monitoring and Governance Reporting Platform*, 7 September 2026, reference RAWYOD/NYFF/VOICES-TO-VOTES/2026/001 (12 pages).  
 **Implementation:** InnoBytes Lab LTD, Laravel web platform at https://arewa.kasua.ng and native Android Kotlin/Jetpack Compose source under `android-native/`.
