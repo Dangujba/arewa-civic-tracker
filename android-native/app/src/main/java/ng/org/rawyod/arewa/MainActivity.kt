@@ -118,7 +118,7 @@ private fun FieldApplication(
             }
         },
         bottomBar={
-            if(user!=null) NavigationBar(containerColor=Color.White){
+            if(user!=null && !vm.isBiometricLocked && !vm.requiresAuthentication) NavigationBar(containerColor=Color.White){
                 listOf("New report","Outbox","My reports","Settings").forEachIndexed{index,label->
                     NavigationBarItem(selected=tab==index,onClick={
                         tab=index
@@ -194,6 +194,14 @@ private fun SecuritySettingsScreen(
         if(!available) {
             Text("A compatible enrolled fingerprint is not available on this device. Add a fingerprint in Android Settings first.",
                 color=MaterialTheme.colorScheme.error)
+            if(vm.fingerprintEnabled) {
+                Text("After signing in with your account password, you may remove this unavailable device lock.",
+                    style=MaterialTheme.typography.bodySmall)
+                OutlinedButton(shape=RectangleShape,modifier=Modifier.fillMaxWidth(),
+                    onClick={vm.changeFingerprintSetting(false)}) {
+                    Text("Remove fingerprint lock after password sign-in")
+                }
+            }
         } else {
             Button(shape=RectangleShape,modifier=Modifier.fillMaxWidth(),
                 onClick={
