@@ -58,16 +58,7 @@ Route::middleware(['auth',EnsurePasswordIsChanged::class])->group(function(){
     Route::get('/map',[MapController::class,'page'])->name('map.index');
     Route::get('/map/data',[MapController::class,'data'])->name('map.data');
     Route::prefix('admin')->name('admin.')->group(function(){
-        Route::get('/native/android-debug',function(\Illuminate\Http\Request $r){
-            abort_unless($r->user()?->isAdmin(),403);
-            $file=storage_path('app/private/native-release/arewa-civic-tracker-v0.2.0-debug.apk');
-            abort_unless(is_file($file),404);
-            return response()->download($file,'arewa-civic-tracker-v0.2.0-debug.apk',[
-                'Content-Type'=>'application/vnd.android.package-archive',
-                'Cache-Control'=>'private, no-store',
-                'X-Content-Type-Options'=>'nosniff'
-            ]);
-        })->name('native.android-debug');
+        Route::get('/native/android-debug',[\App\Http\Controllers\Admin\NativeReleaseController::class,'download'])->name('native.android-debug');
         Route::get('/operations',[OperationsController::class,'index'])->name('operations.index');
         Route::get('/operations/storage',[OperationsController::class,'storage'])->name('operations.storage');
         Route::post('/operations/storage/check',[OperationsController::class,'checkStorage'])->middleware('throttle:4,1')->name('operations.storage.check');
