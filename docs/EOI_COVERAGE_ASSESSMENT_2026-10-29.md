@@ -3,10 +3,14 @@
 **Source:** RAWYOD, *Call for Expression of Interest – Development of the Arewa Civic Tracker – Digital Civic Monitoring and Governance Reporting Platform*, 7 September 2026, reference RAWYOD/NYFF/VOICES-TO-VOTES/2026/001 (12 pages).  
 **Implementation:** InnoBytes Lab LTD, Laravel web platform at https://arewa.kasua.ng and native Android Kotlin/Jetpack Compose source under `android-native/`.
 
-## Status definitions
-- **Implemented:** feature exists in the deployed web application or reviewed code, but does not alone imply RAWYOD acceptance.
-- **Partial:** some meaningful work exists; an EOI requirement is not fully satisfied or signed off.
-- **Not delivered:** no verified completed deliverable at the date of assessment.
+## How this assessment separates project phases
+The EOI lists **20 expected contractual deliverables**, but those are **not 20 software development tasks**. For project tracking we use separate phases:
+
+- **Pre-development/design and software development:** EOI deliverables 1–13. Assess the functional features and technical implementation here.
+- **Formal testing and acceptance:** Deliverable 14. Developer unit tests may run throughout implementation, but formal UAT and release acceptance follow functional completion.
+- **Post-development delivery and operations:** Deliverables 15–20, including final deployment, hosting handover, manuals, training, support and complete source-code handover. These remain obligations under RAWYOD's EOI, but must **not** be counted as unfinished software development.
+
+Statuses **Implemented**, **Partial**, and **Not Implemented** apply to software/design scope. Later-stage activities are labelled **Post-Development** rather than described as incomplete coding.
 
 ## EOI functional requirements (pages 2–5)
 | EOI clause | Status | Current evidence and outstanding work |
@@ -20,29 +24,44 @@
 | G. Geographic mapping | Implemented with acceptance pending | Location data and 17-LGA GIS boundaries, map filters/markers and geographic overlays. Field accuracy, large data and privacy evaluation remain open. |
 | H. Mobile access and low bandwidth | Partial | Responsive web interface, offline browser queue, encrypted offline native outbox and API. A verified installable native Android APK, physical-device offline testing and performance acceptance are not delivered. |
 
-## EOI Expected Deliverables: 20-point checklist (pages 5–6)
-| # | Expected deliverable | Status | Notes |
+## Software development and design deliverables (EOI items 1–13; pages 5–6)
+
+**Development-only breakdown: 7 implemented and 6 partial.** This tracks source and UI completion, not external deployment, training or formal acceptance.
+
+| # | Required development or design output | Development status | Remaining software/design work |
 |---|---|---|---|
-| 1 | User Requirement Specification (URS) | Partial | Requirements coverage matrix exists; no evidence of formal RAWYOD-approved URS. |
-| 2 | System architecture and technical design | Partial | Technical code, source documentation, hosting design and storage procedures exist; final approved architecture package is pending. |
-| 3 | UI/UX design and approved prototype | Partial | Functional web UI/prototype deployed; no formal RAWYOD design approval confirmed. |
-| 4 | Fully functional Arewa Civic Tracker | Partial | Core web features exist; editing, native release and final field-readiness gaps remain. |
-| 5 | Web administration and dashboard | Implemented | Admin, focal, MEAL dashboards and administrative management. |
-| 6 | Mobile-responsive field interface or suitable mobile solution | Partial | Responsive web works; native Kotlin source exists but no verified APK/field trial. |
-| 7 | User roles and access management | Implemented | Three user types, activation/deactivation, initial password rotation and restricted routes. |
-| 8 | Civic issue and public project reporting | Implemented | Structured form and API; later full record editing still partial. |
-| 9 | Review, verification and case management | Implemented | Reviewer assignment, status progression, clarification and audit events. |
-| 10 | Dashboard and data visualisation | Implemented | KPI panels and charts; RAWYOD data accuracy sign-off pending. |
-| 11 | Search, filtering and reporting | Implemented | Advanced filters and analytics. |
-| 12 | Data export | Implemented | CSV, XLSX, PDF with embedded charts. |
-| 13 | Database and data-security architecture | Partial | Private evidence, HTTPS, permissions, CSRF, TOTP and audit features; scheduled backup/restore drill, privacy and penetration review pending. R2 dashboard and verified migration tooling deployed, credentials absent. |
-| 14 | System testing and bug fixing | Partial | 73 Laravel tests and 613 assertions passed in an isolated checkout on 29 Oct; final browser, device, load, security and UAT not performed. |
-| 15 | Deployment and configuration | Partial | Web staging is live at arewa.kasua.ng; native release and RAWYOD final production destination/handover remain open. |
-| 16 | Hosting setup and technical documentation | Partial | Staging hosting and server docs exist; finalized hosting configuration/support plan not signed off. |
-| 17 | Administrator and user manuals | Not delivered | Dedicated complete illustrated manuals not verified. |
-| 18 | Staff training/orientation | Not delivered | No evidence of completed RAWYOD training, attendance or participant sign-off. |
-| 19 | Initial post-deployment support and maintenance | Not delivered | Contractual support period cannot start until acceptance/handover. |
-| 20 | Full source-code and technical handover | Not delivered | Source in GitHub; RAWYOD-administered ownership, signed handover, documentation and secure credentials transfer pending. |
+| 1 | User Requirement Specification (URS) | Partial | Consolidate the approved functional scope into a coherent URS; RAWYOD sign-off is a separate approval gate. |
+| 2 | System architecture and technical design | Partial | Consolidate architecture, API, data design, mobile/offline flow and security diagrams. |
+| 3 | UI/UX design and prototype | Partial | Finalize the interface and a reviewable design baseline. Formal stakeholder approval is separate. |
+| 4 | Fully functional Arewa Civic Tracker | Partial | Complete full report editing/version history and outstanding mobile functional flows. |
+| 5 | Web administration/dashboard interface | Implemented | Features exist; final acceptance is tracked later. |
+| 6 | Mobile-responsive field interface or appropriate mobile solution | Partial | Responsive web is implemented. Finish native Kotlin Android release features and verify installable build. |
+| 7 | User roles and access management | Implemented | Administrator, Focal Person and MEAL access control implemented. |
+| 8 | Civic issue and public project reporting | Implemented | Reporting module exists; full post-submission editing remains an identified cross-module gap. |
+| 9 | Data review, verification and management | Implemented | Review, clarification, approval and audit events implemented. |
+| 10 | Dashboard and data visualisation | Implemented | Database-driven KPI and charts implemented. |
+| 11 | Search, filtering and reporting | Implemented | Combined filters, search and reporting screens implemented. |
+| 12 | Data export | Implemented | CSV, XLSX and PDF reporting exports implemented. |
+| 13 | Database and data-security architecture | Partial | Private data architecture exists; finish security controls, recovery automation and relevant integrations. |
+
+## Separate quality-assurance stage (EOI item 14)
+
+| # | Deliverable | Phase | Status |
+|---|---|---|---|
+| 14 | System testing and bug fixing | Formal testing and acceptance | Developer automated tests are running throughout construction; the complete release-wide, device, performance, security and RAWYOD acceptance phase remains ahead. |
+
+## After development: deployment, handover and support (EOI items 15–20)
+
+These are still required by the EOI, but they are **not indicators of whether the application features have been developed**. The staging environment exists for development and review; it is not equivalent to formal production deployment and handover.
+
+| # | Deliverable | Project phase |
+|---|---|---|
+| 15 | Deployment and configuration | Final deployment after development and approval |
+| 16 | Hosting setup and technical documentation | Production setup and delivery documentation; engineering notes can be prepared earlier |
+| 17 | Administrator and user manuals | Delivery preparation and user onboarding after features stabilize |
+| 18 | Training/orientation | Post-development rollout |
+| 19 | Initial post-deployment technical support and maintenance | Post-launch support |
+| 20 | Full source-code and system handover | Final contractual handover |
 
 ## Verified current live state
 - Website HTTPS responds, and protected pages redirect unauthenticated requests.
@@ -53,16 +72,16 @@
 - Most recent isolated Laravel test suite: **73 passed, 613 assertions**.
 - Native Android source code exists but has not been verified as a signed, installable APK or field-tested on a physical Android device.
 
-## Priority order before formal acceptance
-1. Finish genuine editing/revision workflow for previously submitted reports with complete audit history and role checks.
-2. Finalize native Kotlin Android application, produce the APK, and complete camera, GPS, permission, airplane-mode, resume, syncing, token-expiration and retry tests.
-3. Finalize privacy/security requirements, complete authenticated evidence controls and R2 activation when authorized credentials are available.
-4. Finish RAWYOD website integration and approved production hosting URL without touching unrelated RAWYOD pages.
-5. Prepare approved URS/architecture diagrams, administrator and focal-person guides, maintenance/runbook and automated backup/restore procedures.
-6. Complete role-by-role UAT, security review, data reconciliation and realistic 34-field-person load tests.
-7. Orient/train RAWYOD administrators, MEAL reviewers and 34 focal persons, then formally hand over source, hosting credentials, data, designs and manuals with RAWYOD sign-off.
+## Next: complete development before formal testing
+
+1. Complete authorized editing of previously submitted report details, with revision history and an immutable audit trail.
+2. Finish native Android functional flows, offline report/evidence handling, sync retries and an installable release build.
+3. Finish security and data-protection software requirements, including private evidence handling and automated recovery functionality. Cloudflare R2 activation additionally depends on approved credentials.
+4. Consolidate the technical design and final user-facing interface, including remaining RAWYOD-agreed website integration **code**.
+
+Once software development is complete, proceed in order to **formal QA/UAT (item 14)**, then **production deployment, manuals, training, support and handover (items 15–20)**.
 
 ## Important scope distinction
 The EOI says implementation should be completed in an agreed period following contract signing and does not itself specify an 18 November deadline. Any exact dates from the separate signed agreement must be checked against that agreement, not attributed to the EOI.
 
-**Conclusion:** The core digital platform is substantially implemented. The 20 requested outputs must not be treated as 20 accepted deliverables yet. Full release/acceptance depends on native Android delivery, report revisions, approved documentation, security/backup validation, training, RAWYOD website integration and complete handover.
+**Conclusion:** The core digital platform is substantially implemented. For development tracking, use **7 implemented and 6 partial across items 1–13**, without treating items 15–20 as development gaps. Formal testing (item 14) and post-development delivery (items 15–20) are separate project phases, with their own completion and acceptance criteria.
