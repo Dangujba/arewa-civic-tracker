@@ -13,10 +13,6 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.CloudUpload
-import androidx.compose.material.icons.outlined.PhotoCamera
-import androidx.compose.material.icons.outlined.LocationOn
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -230,7 +226,7 @@ private fun FormScreen(vm:FieldViewModel) {
             gpsPermission.launch(arrayOf(Manifest.permission.ACCESS_FINE_LOCATION,
                 Manifest.permission.ACCESS_COARSE_LOCATION))
         },modifier=Modifier.fillMaxWidth()){
-            Icon(Icons.Outlined.LocationOn,null);Spacer(Modifier.width(6.dp))
+            Text("GPS");Spacer(Modifier.width(6.dp))
             Text("Capture current GPS location")
         }
         Row(horizontalArrangement=Arrangement.spacedBy(8.dp)){
@@ -248,7 +244,7 @@ private fun FormScreen(vm:FieldViewModel) {
                     context.packageName+".fileprovider",file)
                 camera.launch(uri)
             },enabled=vm.attachments.size<5 && !vm.busy,modifier=Modifier.weight(1f)){
-                Icon(Icons.Outlined.PhotoCamera,null);Text(" Camera")
+                Text("Camera")
             }
             OutlinedButton(onClick={picker.launch(arrayOf(
                 "image/jpeg","image/png","image/webp","application/pdf"
@@ -285,7 +281,7 @@ private fun FormScreen(vm:FieldViewModel) {
                     }
                 }catch(e:Exception){vm.display(e.message ?: "Please correct the fields")}
             }){
-            Icon(Icons.Outlined.CloudUpload,null);Spacer(Modifier.width(6.dp))
+            Text("Save");Spacer(Modifier.width(6.dp))
             Text(if(vm.busy)"Saving..." else "Encrypt and queue report")
         }
     }
