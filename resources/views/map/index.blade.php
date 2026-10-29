@@ -26,11 +26,11 @@
     <button class="gis-text-button" type="button" id="gis-reset"><i class="fa-solid fa-rotate-left" aria-hidden="true"></i> Clear all filters</button></div>
   <form id="gis-filter-form" class="gis-filter-grid" autocomplete="off">
     <label class="gis-field gis-field-search"><span>Search report / community</span><div class="gis-input-icon"><i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i><input id="gis-search" name="q" maxlength="120" placeholder="Search reference, report or community…"></div></label>
-    <label class="gis-field"><span>Local government</span><select id="gis-lga" name="lga_id"><option value="">All 17 LGAs</option>@foreach($lgas as $l)<option value="{{ $l->id }}" data-name="{{ $l->name }}">{{ $l->name }}</option>@endforeach</select></label>
+    <label class="gis-field"><span>Local government</span><select id="gis-lga" name="lga_id"><option value="">All local governments</option>@foreach($lgas as $l)<option value="{{ $l->id }}" data-name="{{ $l->name }}">{{ $l->name }}</option>@endforeach</select></label>
     <label class="gis-field"><span>Sector</span><select id="gis-sector" name="sector_id"><option value="">All monitoring sectors</option>@foreach($sectors as $s)<option value="{{ $s->id }}">{{ $s->name }}</option>@endforeach</select></label>
-    <label class="gis-field"><span>Verification status</span><select id="gis-status" name="verification_status"><option value="">All status levels</option>@foreach(['submitted','under_review','clarification_requested','verified','approved','rejected'] as $s)<option value="{{ $s }}">{{ ucwords(str_replace('_',' ',$s)) }}</option>@endforeach</select></label>
+    <label class="gis-field"><span>Verification status</span><select id="gis-status" name="verification_status"><option value="">All status levels</option>@foreach(['submitted','under_review','clarification_requested','verified','approved','rejected'] as $s)<option value="{{ $s }}">{{ \App\Models\WorkflowStatusLabel::label('verification',$s) }}</option>@endforeach</select></label>
     <label class="gis-field"><span>Observation type</span><select id="gis-type" name="type"><option value="">All report types</option><option value="public_project">Public project</option><option value="governance_issue">Governance issue</option></select></label>
-    <label class="gis-field"><span>Project progress</span><select id="gis-progress" name="progress_status"><option value="">All progress states</option>@foreach(['observed','not_started','ongoing','stalled','completed','resolved','other'] as $s)<option value="{{ $s }}">{{ ucwords(str_replace('_',' ',$s)) }}</option>@endforeach</select></label>
+    <label class="gis-field"><span>Project progress</span><select id="gis-progress" name="progress_status"><option value="">All progress states</option>@foreach(['observed','not_started','ongoing','stalled','completed','resolved','other'] as $s)<option value="{{ $s }}">{{ \App\Models\WorkflowStatusLabel::label('progress',$s) }}</option>@endforeach</select></label>
     <label class="gis-field"><span>From date</span><input id="gis-date-from" name="date_from" type="date" max="{{ now()->toDateString() }}"></label>
     <label class="gis-field"><span>To date</span><input id="gis-date-to" name="date_to" type="date" max="{{ now()->toDateString() }}"></label>
     <div class="gis-field gis-filter-submit"><span>Apply selection</span><button type="submit" class="gis-action" id="gis-apply"><i class="fa-solid fa-filter" aria-hidden="true"></i> Apply filters</button></div>
@@ -65,7 +65,7 @@
       <button type="button" id="gis-export-geojson" aria-label="Export GeoJSON" title="Download role-restricted GeoJSON"><i class="fa-solid fa-file-code" aria-hidden="true"></i></button>
     </div>
     <div id="map" data-feed="{{ route('map.data') }}" data-boundaries="{{ asset('geo/yobe-lgas.geojson') }}" role="application" aria-label="Interactive map of Yobe administrative boundaries and authorized field reports"></div>
-    <div class="gis-map-legend" aria-label="Verification legend"><strong>VERIFICATION STATUS</strong><span><i class="gis-dot" style="--dot:#c09c55"></i>Submitted</span><span><i class="gis-dot" style="--dot:#3083ae"></i>In review</span><span><i class="gis-dot" style="--dot:#1e7852"></i>Approved</span><span><i class="gis-dot" style="--dot:#b85455"></i>Needs attention</span></div>
+    <div class="gis-map-legend" aria-label="Verification legend"><strong>VERIFICATION STATUS</strong><span><i class="gis-dot" style="--dot:#c09c55"></i>{{ \App\Models\WorkflowStatusLabel::label('verification','submitted') }}</span><span><i class="gis-dot" style="--dot:#3083ae"></i>{{ \App\Models\WorkflowStatusLabel::label('verification','under_review') }}</span><span><i class="gis-dot" style="--dot:#1e7852"></i>{{ \App\Models\WorkflowStatusLabel::label('verification','approved') }}</span><span><i class="gis-dot" style="--dot:#b85455"></i>Needs attention</span></div>
     <div class="gis-map-bottom"><div id="gis-message" role="status" aria-live="polite"><span class="spin" aria-hidden="true"></span> Loading map…</div><span id="gis-coordinate">Yobe State, Nigeria</span></div>
   </div>
 </section>
@@ -74,6 +74,6 @@
 <script src="{{ asset('vendor/maps/leaflet.js') }}"></script>
 <script src="{{ asset('vendor/maps/markercluster.js') }}"></script>
 <script src="{{ asset('vendor/maps/heat.js') }}"></script>
-<script defer src="{{ asset('js/act-map.js') }}"></script>
+<script defer src="{{ asset('js/act-map.js') }}?v=20261029-labels1"></script>
 @endpush
 @endsection

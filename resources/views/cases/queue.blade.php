@@ -15,7 +15,7 @@
  <form method="GET" class="act-inline-filter act-queue-filter" action="{{ route('cases.queue') }}">
   <div class="field"><label for="queue-status">Review status</label><select id="queue-status" name="status">
    <option value="">All active queue items</option>
-   @foreach(['submitted','under_review','clarification_requested','verified'] as $value)<option value="{{ $value }}" @selected(request('status')===$value)>{{ ucwords(str_replace('_',' ',$value)) }}</option>@endforeach
+   @foreach(['submitted','under_review','clarification_requested','verified'] as $value)<option value="{{ $value }}" @selected(request('status')===$value)>{{ \App\Models\WorkflowStatusLabel::label('verification',$value) }}</option>@endforeach
   </select></div>
   <div class="act-filter-actions"><button type="submit" class="btn"><i class="fa-solid fa-filter" aria-hidden="true"></i> Filter</button><a class="btn-outline" href="{{ route('cases.queue') }}">Clear</a></div>
  </form>

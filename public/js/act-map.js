@@ -36,7 +36,7 @@ const addPinFeature=feature=>{
   if(!Number.isFinite(lat)||!Number.isFinite(lng)||Math.abs(lat)>90||Math.abs(lng)>180)return;
   const props=feature.properties||{}, id=Number(props.id),color=dotColor(props.verification_status);
   const marker=L.marker([lat,lng],{icon:L.divIcon({className:'',html:'<span class="gis-map-pin" style="--marker-color:'+color+'"></span>',iconSize:[21,21],iconAnchor:[10,10]})});
-  const wrap=el('div'),heading=el('div','gis-popup-title',props.title||'Field report'),metadata=el('div','gis-popup-meta',[props.reference,props.lga,props.sector, statusLabel(props.verification_status)].filter(Boolean).join(' • '));
+  const wrap=el('div'),heading=el('div','gis-popup-title',props.title||'Field report'),metadata=el('div','gis-popup-meta',[props.reference,props.lga,props.sector, statusLabel(props.verification_label || props.verification_status)].filter(Boolean).join(' • '));
   const link=el('a','gis-popup-link','Open record');
   link.href=props.url||'#';link.rel='noopener';wrap.append(heading,metadata,link);marker.bindPopup(wrap);
   marker.on('click',()=>selectReportInList(id));
@@ -92,7 +92,7 @@ function renderReports(){
  if(!features.length){const empty=el('div','gis-empty');empty.append(el('i','fa-regular fa-map',''),el('p','','No matching geotagged reports. Try another filter or explore the LGA boundaries.'));target.append(empty);return}
  for(const f of features){const p=f.properties;const row=el('button','gis-result');row.type='button';row.dataset.reportId=String(p.id);
   const icon=el('span','gis-result-icon');icon.append(el('i',p.type==='public_project'?'fa-solid fa-building':'fa-solid fa-file-circle-exclamation'));
-  const body=el('span','gis-result-body');body.append(el('strong','',p.title),el('small','',[p.reference,p.lga,p.community].filter(Boolean).join(' · ')),el('small','',statusLabel(p.verification_status)+' / '+statusLabel(p.progress_status)));
+  const body=el('span','gis-result-body');body.append(el('strong','',p.title),el('small','',[p.reference,p.lga,p.community].filter(Boolean).join(' · ')),el('small','',statusLabel(p.verification_label || p.verification_status)+' / '+statusLabel(p.progress_label || p.progress_status)));
   const dot=el('span','gis-status-indicator');dot.style.setProperty('--marker-color',dotColor(p.verification_status));row.append(icon,body,dot);row.addEventListener('click',()=>focusReport(p.id));target.append(row);
  }
 }
@@ -138,7 +138,7 @@ document.addEventListener('fullscreenchange',()=>setTimeout(()=>map.invalidateSi
 $('gis-copy-link').addEventListener('click',async()=>{try{await navigator.clipboard.writeText(location.href);status('Filtered map link copied. Recipients must have authorized access.')}catch{status('Unable to copy. Copy the URL from your browser address bar.',true)}});
 function download(name,content,mime){const obj=new Blob([content],{type:mime});const url=URL.createObjectURL(obj);const a=document.createElement('a');a.href=url;a.download=name;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),4000)}
 function csvCell(value){const v=String(value??'');const safe=/^[\s]*[=+\-@]/.test(v)?"'"+v:v;return '"'+safe.replaceAll('"','""')+'"'}
-$('gis-export-csv').addEventListener('click',()=>{if(!features.length)return status('No report locations to export.');const keys=['reference','title','lga','community','sector','type','verification_status','progress_status','observation_date'];const rows=[keys.join(',')];for(const f of features){rows.push([...keys.map(key=>csvCell(f.properties?.[key])),csvCell(f.geometry.coordinates[1]),csvCell(f.geometry.coordinates[0])].join(','))}rows[0]+=',latitude,longitude';download('arewa-map-authorized-'+new Date().toISOString().slice(0,10)+'.csv','\ufeff'+rows.join('\r\n'),'text/csv;charset=utf-8');status('Downloaded authorized CSV. Handle private location data securely.')});
+$('gis-export-csv').addEventListener('click',()=>{if(!features.length)return status('No report locations to export.');const keys=['reference','title','lga','community','sector','type','verification_label','progress_label','observation_date'];const rows=[keys.join(',')];for(const f of features){rows.push([...keys.map(key=>csvCell(f.properties?.[key])),csvCell(f.geometry.coordinates[1]),csvCell(f.geometry.coordinates[0])].join(','))}rows[0]+=',latitude,longitude';download('arewa-map-authorized-'+new Date().toISOString().slice(0,10)+'.csv','\ufeff'+rows.join('\r\n'),'text/csv;charset=utf-8');status('Downloaded authorized CSV. Handle private location data securely.')});
 $('gis-export-geojson').addEventListener('click',()=>{if(!features.length)return status('No report locations to export.');download('arewa-map-authorized-'+new Date().toISOString().slice(0,10)+'.geojson',JSON.stringify({type:'FeatureCollection',features},null,2),'application/geo+json');status('Downloaded role-restricted GeoJSON. Do not publish without approval.')});
 map.on('moveend',countVisible);map.on('zoomend',renderLgaLabels);
 map.on('mousemove',e=>{$('gis-coordinate').textContent=e.latlng.lat.toFixed(4)+', '+e.latlng.lng.toFixed(4)});

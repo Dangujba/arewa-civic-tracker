@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 use App\Models\CivicCase;
 use App\Models\Lga;
 use App\Models\Sector;
+use App\Models\WorkflowStatusLabel;
 use Illuminate\Http\Request;
 
 class MapController extends Controller
@@ -49,7 +50,9 @@ class MapController extends Controller
         $max = 1000;
         $rows = $query->with(['lga:id,name', 'sector:id,name'])
             ->orderByDesc('id')->limit($max)->get();
-        $features = $rows->map(static function ($case) {
+        $verificationLabels = WorkflowStatusLabel::labels('verification');
+        $progressLabels = WorkflowStatusLabel::labels('progress');
+        $features = $rows->map(static function ($case) use ($verificationLabels,$progressLabels) {
             return [
                 'type' => 'Feature',
                 'geometry' => ['type' => 'Point', 'coordinates' => [(float) $case->longitude, (float) $case->latitude]],
@@ -60,6 +63,8 @@ class MapController extends Controller
                     'type' => $case->type,
                     'verification_status' => $case->verification_status,
                     'progress_status' => $case->progress_status,
+                    'verification_label' => $verificationLabels[$case->verification_status] ?? $case->verification_status,
+                    'progress_label' => $progressLabels[$case->progress_status] ?? $case->progress_status,
                     'lga' => $case->lga?->name,
                     'sector' => $case->sector?->name,
                     'community' => $case->community,
