@@ -9,6 +9,7 @@ import android.webkit.WebResourceRequest
 import android.webkit.CookieManager
 import android.webkit.WebSettings
 import android.os.Bundle
+import android.app.DatePickerDialog
 import androidx.fragment.app.FragmentActivity
 import androidx.activity.viewModels
 import androidx.biometric.BiometricManager
@@ -18,6 +19,9 @@ import androidx.activity.compose.setContent
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -34,6 +38,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.core.content.FileProvider
 import androidx.lifecycle.viewmodel.compose.viewModel
 import ng.org.rawyod.arewa.ui.*
@@ -114,39 +119,47 @@ private fun FieldApplication(
     val user=vm.userId
     var tab by remember { mutableIntStateOf(0) }
     var guestPublic by remember { mutableStateOf(false) }
-    LaunchedEffect(user,vm.drafts){ vm.checkAuthentication() }
+    val notifications=remember { SnackbarHostState() }
+    LaunchedEffect(vm.message) {
+        val msg=vm.message
+        if(msg.isNotBlank()){
+            vm.clearMessage()
+            notifications.showSnackbar(msg.take(150),duration=SnackbarDuration.Short)
+        }
+    }
     Scaffold(
+        modifier=Modifier.safeDrawingPadding(),
+        snackbarHost={SnackbarHost(notifications)},
         topBar={
             Surface(color=green,contentColor=Color.White){
                 Column(Modifier.fillMaxWidth().padding(horizontal=18.dp,vertical=15.dp)){
-                    Text("AREWA CIVIC TRACKER",style=MaterialTheme.typography.titleMedium,fontWeight=FontWeight.Bold)
+                    Text("AREWA CIVIC TRACKER",style=MaterialTheme.typography.titleMedium,
+                        fontWeight=FontWeight.Bold,maxLines=1,overflow=TextOverflow.Ellipsis)
                     Text("RAWYOD • VOICES TO VOTES",style=MaterialTheme.typography.labelSmall)
                 }
             }
         },
         bottomBar={
             if(user!=null && !vm.isBiometricLocked && !vm.requiresAuthentication) NavigationBar(containerColor=Color.White){
-                listOf("New report","Outbox","My reports","Settings").forEachIndexed{index,label->
+                listOf("Report","Outbox","Reports","Profile","Settings").forEachIndexed{index,label->
                     NavigationBarItem(selected=tab==index,onClick={
                         tab=index
                         if(index==2)vm.refreshReports()
-                    },icon={Text(when(index){0->"✎";1->"◷";2->"▤";else->"⚙"})},
-                        label={Text(if(index==1)"Outbox (${vm.drafts.size})" else label)})
+                        if(index==3)vm.refreshProfile()
+                    },icon={
+                        Icon(when(index){
+                            0->Icons.Filled.Edit
+                            1->Icons.Filled.Inventory2
+                            2->Icons.Filled.ListAlt
+                            3->Icons.Filled.AccountCircle
+                            else->Icons.Filled.Settings
+                        },contentDescription=label,modifier=Modifier.size(22.dp))
+                    },label={Text(if(index==1)"Outbox (${vm.drafts.size})" else label)})
                 }
             }
         }
     ) { inner ->
         Column(Modifier.fillMaxSize().padding(inner)){
-            if(!vm.isBiometricLocked && vm.message.isNotBlank()) {
-                Surface(color=Color(0xFFFFF3D3)){
-                    Row(Modifier.fillMaxWidth().padding(12.dp),
-                        horizontalArrangement=Arrangement.SpaceBetween,
-                        verticalAlignment=Alignment.Top){
-                        Text(vm.message,Modifier.weight(1f),color=ink)
-                        TextButton(onClick=vm::clearMessage){Text("Dismiss")}
-                    }
-                }
-            }
             when {
                 (user==null || vm.requiresAuthentication) && guestPublic ->
                     PublicGuestScreen(onBack={guestPublic=false})
@@ -155,11 +168,12 @@ private fun FieldApplication(
                 vm.isBiometricLocked -> FingerprintLockScreen(
                     biometricNotice,
                     onUnlock={authenticate("Unlock Arewa Civic Tracker",vm::unlockWithFingerprint)},
-                    onPassword=vm::beginReauthentication
+                    onPassword=vm::beginReauthentication,vm=vm
                 )
                 tab==0 -> FormScreen(vm)
                 tab==1 -> OutboxScreen(vm,onEdit={tab=0})
                 tab==2 -> ReportsScreen(vm)
+                tab==3 -> ProfileScreen(vm)
                 else -> SecuritySettingsScreen(vm,fingerprintAvailable,biometricNotice,authenticate)
             }
         }
@@ -167,7 +181,9 @@ private fun FieldApplication(
 }
 
 @Composable
-private fun FingerprintLockScreen(notice:String,onUnlock:()->Unit,onPassword:()->Unit) {
+private fun FingerprintLockScreen(notice:String,onUnlock:()->Unit,onPassword:()->Unit,
+    vm:FieldViewModel) {
+    var pin by remember { mutableStateOf("") }
     Column(Modifier.fillMaxSize().padding(22.dp),
         verticalArrangement=Arrangement.Center,
         horizontalAlignment=Alignment.CenterHorizontally){
@@ -179,59 +195,21 @@ private fun FingerprintLockScreen(notice:String,onUnlock:()->Unit,onPassword:()-
         Button(onClick=onUnlock,shape=RectangleShape,modifier=Modifier.fillMaxWidth()){
             Text("Unlock with fingerprint")
         }
-        OutlinedButton(onClick=onPassword,shape=RectangleShape,modifier=Modifier.fillMaxWidth()){
-            Text("Sign in with account password")
-        }
-        if(notice.isNotBlank())Text(notice,color=MaterialTheme.colorScheme.error)
-        Text("Password sign-in requires internet access. Your offline drafts remain saved.",
-            style=MaterialTheme.typography.bodySmall,color=Color.DarkGray)
-    }
-}
-
-@Composable
-private fun SecuritySettingsScreen(
-    vm:FieldViewModel,
-    available:Boolean,
-    notice:String,
-    authenticate:(String,()->Unit)->Unit
-) {
-    Content("App settings","Protect field reports stored on this phone.") {
-        Text("Fingerprint security",style=MaterialTheme.typography.titleMedium,fontWeight=FontWeight.Bold)
-        Text(if(vm.fingerprintEnabled)"Enabled for your account" else "Not enabled",
-            color=if(vm.fingerprintEnabled)green else Color.DarkGray)
-        Text("Once enabled, a fingerprint is required when reopening or returning to the app. Your account password remains available as a fallback.",
-            style=MaterialTheme.typography.bodyMedium)
-        if(!available) {
-            Text("A compatible enrolled fingerprint is not available on this device. Add a fingerprint in Android Settings first.",
-                color=MaterialTheme.colorScheme.error)
-            if(vm.fingerprintEnabled) {
-                Text("After signing in with your account password, you may remove this unavailable device lock.",
-                    style=MaterialTheme.typography.bodySmall)
-                OutlinedButton(shape=RectangleShape,modifier=Modifier.fillMaxWidth(),
-                    onClick={vm.changeFingerprintSetting(false)}) {
-                    Text("Remove fingerprint lock after password sign-in")
-                }
+        if(vm.offlinePinEnabled){
+            OutlinedTextField(pin,{pin=it.filter(Char::isDigit).take(12)},singleLine=true,
+                label={Text("Offline PIN")},visualTransformation=PasswordVisualTransformation(),
+                keyboardOptions=KeyboardOptions(keyboardType=KeyboardType.NumberPassword),
+                shape=RectangleShape,modifier=Modifier.fillMaxWidth())
+            Button(onClick={vm.unlockWithPin(pin);pin=""},shape=RectangleShape,
+                enabled=pin.length>=6,modifier=Modifier.fillMaxWidth()){
+                Icon(Icons.Filled.LockOpen,contentDescription=null);Spacer(Modifier.width(7.dp))
+                Text("Unlock offline")
             }
-        } else {
-            Button(shape=RectangleShape,modifier=Modifier.fillMaxWidth(),
-                onClick={
-                    val enable=!vm.fingerprintEnabled
-                    authenticate(if(enable)"Enable fingerprint lock" else "Disable fingerprint lock"){
-                        vm.changeFingerprintSetting(enable)
-                    }
-                }) {Text(if(vm.fingerprintEnabled)"Disable fingerprint lock" else "Enable fingerprint lock")}
-            if(vm.fingerprintEnabled)
-                OutlinedButton(shape=RectangleShape,modifier=Modifier.fillMaxWidth(),
-                    onClick=vm::lockOnBackground){Text("Lock app now")}
         }
+        TextButton(onClick=onPassword){Text("Sign in online")}
         if(notice.isNotBlank())Text(notice,color=MaterialTheme.colorScheme.error)
-        HorizontalDivider()
-        Text("Account security",style=MaterialTheme.typography.titleMedium,fontWeight=FontWeight.SemiBold)
-        Text("Fingerprint unlock only opens the local app. Password and optional two-factor verification are still handled by the RAWYOD server.",
-            style=MaterialTheme.typography.bodySmall)
-        OutlinedButton(shape=RectangleShape,onClick=vm::logout,modifier=Modifier.fillMaxWidth()){
-            Text("Sign out")
-        }
+        Text("Reports and drafts saved on this device remain accessible offline.",
+            style=MaterialTheme.typography.bodySmall,color=Color.DarkGray)
     }
 }
 
@@ -300,6 +278,21 @@ private fun LoginScreen(vm:FieldViewModel,onPublicView:()->Unit) {
         Text(if(challenge==null)"Sign in" else "Verify your account",
             style=MaterialTheme.typography.headlineSmall,fontWeight=FontWeight.Bold)
         if(challenge==null) {
+            if(vm.userId!=null && vm.offlinePinEnabled){
+                var offlinePin by remember { mutableStateOf("") }
+                OutlinedTextField(offlinePin,{offlinePin=it.filter(Char::isDigit).take(12)},
+                    label={Text("Offline PIN")},singleLine=true,shape=RectangleShape,
+                    visualTransformation=PasswordVisualTransformation(),
+                    keyboardOptions=KeyboardOptions(keyboardType=KeyboardType.NumberPassword),
+                    modifier=Modifier.fillMaxWidth())
+                Button(shape=RectangleShape,enabled=offlinePin.length>=6,
+                    onClick={vm.unlockWithPin(offlinePin);offlinePin=""},
+                    modifier=Modifier.fillMaxWidth()){
+                    Icon(Icons.Filled.LockOpen,contentDescription=null)
+                    Spacer(Modifier.width(8.dp));Text("Unlock saved account offline")
+                }
+                HorizontalDivider()
+            }
             Surface(color=Color(0xFFF0F6EF),modifier=Modifier.fillMaxWidth()) {
                 Column(Modifier.padding(14.dp),verticalArrangement=Arrangement.spacedBy(7.dp)) {
                     Text("Visiting without an account?",fontWeight=FontWeight.Bold)
@@ -454,8 +447,17 @@ private fun FormScreen(vm:FieldViewModel) {
         OutlinedTextField(observation,{observation=it},label={Text("Observations")},modifier=Modifier.fillMaxWidth())
         OutlinedTextField(dutyBearers,{dutyBearers=it},label={Text("Duty bearers / stakeholders")},
             modifier=Modifier.fillMaxWidth())
-        OutlinedTextField(date,{date=it},label={Text("Observation date (YYYY-MM-DD)")},
-            modifier=Modifier.fillMaxWidth())
+        OutlinedButton(shape=RectangleShape,modifier=Modifier.fillMaxWidth(),
+            onClick={
+                val initial=runCatching{LocalDate.parse(date)}.getOrDefault(LocalDate.now())
+                DatePickerDialog(context,{_,y,m,d->date="%04d-%02d-%02d".format(y,m+1,d)},
+                    initial.year,initial.monthValue-1,initial.dayOfMonth).apply{
+                    datePicker.maxDate=System.currentTimeMillis()
+                }.show()
+            }){
+            Icon(Icons.Filled.DateRange,contentDescription=null)
+            Spacer(Modifier.width(8.dp));Text("Observation date: $date")
+        }
         ChoiceField("Progress",listOf(
             Choice(1,"Observed"),Choice(2,"Not started"),Choice(3,"Ongoing"),
             Choice(4,"Stalled"),Choice(5,"Completed"),Choice(6,"Resolved"),
@@ -467,10 +469,11 @@ private fun FormScreen(vm:FieldViewModel) {
         HorizontalDivider()
         Text("GPS and supporting evidence",fontWeight=FontWeight.Bold)
         OutlinedButton(shape=RectangleShape,onClick={
-            gpsPermission.launch(arrayOf(Manifest.permission.ACCESS_FINE_LOCATION,
-                Manifest.permission.ACCESS_COARSE_LOCATION))
+            runCatching { gpsPermission.launch(arrayOf(Manifest.permission.ACCESS_FINE_LOCATION,
+                Manifest.permission.ACCESS_COARSE_LOCATION)) }
+                .onFailure{vm.display("Location service unavailable. You may enter coordinates manually.")}
         },modifier=Modifier.fillMaxWidth()){
-            Text("GPS");Spacer(Modifier.width(6.dp))
+            Icon(Icons.Filled.MyLocation,contentDescription=null);Spacer(Modifier.width(6.dp))
             Text("Capture current GPS location")
         }
         Row(horizontalArrangement=Arrangement.spacedBy(8.dp)){
@@ -481,19 +484,26 @@ private fun FormScreen(vm:FieldViewModel) {
         }
         Row(horizontalArrangement=Arrangement.spacedBy(8.dp)){
             OutlinedButton(shape=RectangleShape,onClick={
-                val target=File(context.cacheDir,"camera").also {it.mkdirs()}
-                val file=File(target,"field-${UUID.randomUUID()}.jpg")
-                cameraFile=file
-                val uri=FileProvider.getUriForFile(context,
-                    context.packageName+".fileprovider",file)
-                camera.launch(uri)
+                runCatching {
+                    val target=File(context.cacheDir,"camera").also{check(it.isDirectory || it.mkdirs())}
+                    val file=File(target,"field-${UUID.randomUUID()}.jpg")
+                    check(file.createNewFile()){"Camera file could not be created"}
+                    cameraFile=file
+                    val uri=FileProvider.getUriForFile(context,
+                        context.packageName+".fileprovider",file)
+                    camera.launch(uri)
+                }.onFailure {vm.display("Unable to open camera: check camera app and permissions.")}
             },enabled=vm.attachments.size<5 && !vm.busy,modifier=Modifier.weight(1f)){
-                Text("Camera")
+                Icon(Icons.Filled.CameraAlt,contentDescription=null)
+                Spacer(Modifier.width(6.dp));Text("Camera")
             }
-            OutlinedButton(shape=RectangleShape,onClick={picker.launch(arrayOf(
-                "image/jpeg","image/png","image/webp","application/pdf"
-            ))},enabled=vm.attachments.size<5 && !vm.busy,modifier=Modifier.weight(1f)){
-                Text("Add evidence")
+            OutlinedButton(shape=RectangleShape,onClick={
+                runCatching{picker.launch(arrayOf(
+                    "image/jpeg","image/png","image/webp","application/pdf"
+                ))}.onFailure {vm.display("Cannot open file picker on this device.")}
+            },enabled=vm.attachments.size<5 && !vm.busy,modifier=Modifier.weight(1f)){
+                Icon(Icons.Filled.AttachFile,contentDescription=null)
+                Spacer(Modifier.width(6.dp));Text("Add evidence")
             }
         }
         Text("Original photos preserved: up to 10 MB each. PDFs up to 5 MB.",
@@ -585,8 +595,12 @@ private fun ReportsScreen(vm:FieldViewModel) {
     var response by remember { mutableStateOf("") }
     var editingReport by remember { mutableStateOf<Long?>(null) }
     Content("My submitted reports","Review verification status and respond to MEAL clarification requests.") {
-        OutlinedButton(shape=RectangleShape,onClick=vm::refreshReports,modifier=Modifier.fillMaxWidth()){
-            Text("Refresh from server")
+        OutlinedButton(shape=RectangleShape,onClick=vm::refreshReports,
+            enabled=!vm.refreshingReports,modifier=Modifier.fillMaxWidth()){
+            if(vm.refreshingReports)CircularProgressIndicator(Modifier.size(18.dp),strokeWidth=2.dp)
+            else Icon(Icons.Filled.Refresh,contentDescription=null)
+            Spacer(Modifier.width(8.dp))
+            Text(if(vm.refreshingReports)"Refreshing…" else "Refresh from server")
         }
         vm.reports.forEach{report->
             Surface(border=BorderStroke(1.dp,Color(0xFFCBD7CC))) {
@@ -621,8 +635,6 @@ private fun ReportsScreen(vm:FieldViewModel) {
             }
             }
         }
-        OutlinedButton(shape=RectangleShape,onClick=vm::logout,modifier=Modifier.fillMaxWidth()){
-            Text("Sign out")
-        }
+
     }
 }
