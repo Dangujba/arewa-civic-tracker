@@ -31,6 +31,6 @@
 </section></div>
 <section class="dash-panel dash-recent"><div class="dash-panel-heading"><h2>Latest field reports</h2><a href="{{ route('cases.index') }}" class="dash-text-link">View all reports</a></div>
 <div class="dash-table-wrap"><table><thead><tr><th>Reference</th><th>Report</th><th>LGA</th><th>Status</th></tr></thead><tbody>
-@forelse($recent as $case)<tr><td><a href="{{ route('cases.show',$case) }}">{{ $case->reference }}</a></td><td>{{ $case->title }}</td><td>{{ $case->lga?->name }}</td><td>{{ ucwords(str_replace('_',' ',$case->verification_status)) }}</td></tr>@empty<tr><td colspan="4">No reports received yet.</td></tr>@endforelse
+@forelse($recent as $case)<tr><td><a href="{{ route('cases.show',$case) }}">{{ $case->reference }}</a></td><td>{{ $case->title }}</td><td>{{ $case->lga?->name }}</td><td>{{ \App\Models\WorkflowStatusLabel::label('verification',$case->verification_status) }}</td></tr>@empty<tr><td colspan="4">No reports received yet.</td></tr>@endforelse
 </tbody></table></div></section>
 @endsection

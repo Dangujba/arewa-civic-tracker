@@ -84,6 +84,8 @@ Route::middleware(['auth',EnsurePasswordIsChanged::class])->group(function(){
         Route::post('/data-governance/approve',[\App\Http\Controllers\Admin\DataGovernanceController::class,'approve'])->name('governance.approve');
         Route::post('/data-governance/cases/{case}/hold',[\App\Http\Controllers\Admin\DataGovernanceController::class,'legalHold'])->whereNumber('case')->name('governance.hold');
         Route::get('/reference-data',[\App\Http\Controllers\Admin\ReferenceDataController::class,'index'])->name('reference.index');
+        Route::post('/reference-data/lgas',[\App\Http\Controllers\Admin\ReferenceDataController::class,'addLga'])->name('reference.lgas.create');
+        Route::put('/reference-data/lgas/{lga}',[\App\Http\Controllers\Admin\ReferenceDataController::class,'updateLga'])->name('reference.lgas.update');
         Route::post('/reference-data/communities',[\App\Http\Controllers\Admin\ReferenceDataController::class,'addCommunity'])->name('reference.communities.create');
         Route::put('/reference-data/communities/{community}',[\App\Http\Controllers\Admin\ReferenceDataController::class,'updateCommunity'])->name('reference.communities.update');
         Route::post('/reference-data/categories',[\App\Http\Controllers\Admin\ReferenceDataController::class,'addCategory'])->name('reference.categories.create');

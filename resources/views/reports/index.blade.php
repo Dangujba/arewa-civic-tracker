@@ -15,7 +15,8 @@
   <div class="field"><label>Search reports</label><input type="search" name="q" maxlength="150" value="{{ request('q') }}" placeholder="Reference, title, community"></div>
   <div class="field"><label>Local government</label><select name="lga_id"><option value="">All LGAs</option>@foreach($lgas as $lga)<option value="{{ $lga->id }}" @selected(request('lga_id')==$lga->id)>{{ $lga->name }}</option>@endforeach</select></div>
   <div class="field"><label>Sector</label><select name="sector_id"><option value="">All sectors</option>@foreach($sectors as $sector)<option value="{{ $sector->id }}" @selected(request('sector_id')==$sector->id)>{{ $sector->name }}</option>@endforeach</select></div>
-  <div class="field"><label>Status</label><select name="verification_status"><option value="">All statuses</option>@foreach(['submitted','under_review','clarification_requested','verified','approved','rejected'] as $status)<option value="{{ $status }}" @selected(request('verification_status')===$status)>{{ ucwords(str_replace('_',' ',$status)) }}</option>@endforeach</select></div>
+  <div class="field"><label for="report-community">Community</label><input id="report-community" type="search" name="community" maxlength="150" value="{{ request('community') }}" placeholder="Exact community name"></div>
+  <div class="field"><label>Status</label><select name="verification_status"><option value="">All statuses</option>@foreach(['submitted','under_review','clarification_requested','verified','approved','rejected'] as $status)<option value="{{ $status }}" @selected(request('verification_status')===$status)>{{ $verificationLabels[$status] ?? ucwords(str_replace('_',' ',$status)) }}</option>@endforeach</select></div>
   <div class="field"><label>Report type</label><select name="type"><option value="">All types</option><option value="public_project" @selected(request('type')==='public_project')>Public project</option><option value="governance_issue" @selected(request('type')==='governance_issue')>Governance issue</option></select></div>
   <div class="field"><label>From date</label><input type="date" name="date_from" value="{{ request('date_from') }}" max="{{ now()->format('Y-m-d') }}"></div>
   <div class="field"><label>To date</label><input type="date" name="date_to" value="{{ request('date_to') }}" max="{{ now()->format('Y-m-d') }}"></div>
@@ -47,7 +48,7 @@
 <div class="dash-panel reports-progress-panel">
  <div class="dash-panel-heading"><div><span class="eyebrow">PROJECT MONITORING</span><h2>Progress breakdown</h2></div></div>
  <div class="reports-status-grid">
- @forelse($byProgress as $row)<div class="reports-status-pill"><span>{{ ucwords(str_replace('_',' ',$row->progress_status)) }}</span><strong>{{ number_format($row->total) }}</strong></div>
+ @forelse($byProgress as $row)<div class="reports-status-pill"><span>{{ $progressLabels[$row->progress_status] ?? ucwords(str_replace('_',' ',$row->progress_status)) }}</span><strong>{{ number_format($row->total) }}</strong></div>
  @empty<p class="muted">Progress breakdown appears after reports are submitted.</p>
  @endforelse
  </div>
@@ -62,10 +63,18 @@
  @forelse($bySector as $row)<div class="dash-bar-row"><div><b>{{ $row->sector?->name??'Other' }}</b><span>{{ $row->total }}</span></div><div class="dash-bar-track gold"><div style="width:{{ round($row->total/$maxSector*100) }}%"></div></div></div>@empty<p class="muted">No matching reports.</p>@endforelse
  </section>
 </div>
+<section class="dash-panel">
+ <div class="dash-panel-heading"><div><span class="eyebrow">COMMUNITY INTELLIGENCE</span><h2>Reports by community</h2></div><small class="muted">Community names are grouped within each LGA. Select a row to drill down.</small></div>
+ <div class="dash-table-wrap"><table class="act-compact-table"><thead><tr><th>Community</th><th>LGA</th><th>Reports</th><th>Action</th></tr></thead><tbody>
+ @forelse($byCommunity as $row)
+ <tr><td>{{ $row->community }}</td><td>{{ $row->lga?->name ?? 'Unassigned' }}</td><td><strong>{{ number_format($row->total) }}</strong></td><td><a class="dash-text-link" href="{{ route('reports.index',array_merge(request()->query(),['lga_id'=>$row->lga_id,'community'=>$row->community])) }}" aria-label="View reports for {{ $row->community }} in {{ $row->lga?->name }}">View reports</a></td></tr>
+ @empty<tr><td colspan="4" class="muted">No matching community observations.</td></tr>@endforelse
+ </tbody></table></div>
+</section>
 <section class="dash-panel dash-recent">
  <div class="dash-panel-heading"><h2>Report register</h2><small class="muted">Includes only records accessible to your account</small></div>
  <div class="dash-table-wrap"><table><thead><tr><th>Reference</th><th>Report</th><th>LGA</th><th>Sector</th><th>Status</th><th>Observed</th></tr></thead><tbody>
- @forelse($recent as $case)<tr><td><a href="{{ route('cases.show',$case) }}">{{ $case->reference }}</a></td><td>{{ $case->title }}</td><td>{{ $case->lga?->name }}</td><td>{{ $case->sector?->name }}</td><td>{{ ucwords(str_replace('_',' ',$case->verification_status)) }}</td><td>{{ $case->observation_date?->format('d M Y') }}</td></tr>
+ @forelse($recent as $case)<tr><td><a href="{{ route('cases.show',$case) }}">{{ $case->reference }}</a></td><td>{{ $case->title }}</td><td>{{ $case->lga?->name }}</td><td>{{ $case->sector?->name }}</td><td>{{ $verificationLabels[$case->verification_status] ?? ucwords(str_replace('_',' ',$case->verification_status)) }}</td><td>{{ $case->observation_date?->format('d M Y') }}</td></tr>
  @empty<tr><td colspan="6">No reports match the selected filters.</td></tr>@endforelse
  </tbody></table></div><div class="act-panel-pagination act-pagination-bar"><span>Showing {{ $recent->firstItem()??0 }}–{{ $recent->lastItem()??0 }} of {{ number_format($recent->total()) }} reports</span>@if($recent->hasPages()){{ $recent->withQueryString()->links() }}@endif</div>
 </section>
@@ -78,14 +87,14 @@
  'use strict';
  if(!window.Chart)return;
  const labels=@json($monthLabels),series=@json($monthlyCounts);
- const statuses=@json($byStatus->pluck('verification_status')->values());
+ const statuses=@json($statusDisplayLabels);
  const statusCounts=@json($byStatus->pluck('total')->map(fn($value)=>(int)$value)->values());
  Chart.defaults.font.family='Inter, Segoe UI, Arial, sans-serif';
  Chart.defaults.color='#637769';
  const line=document.getElementById('reports-trend');
  if(line)new Chart(line,{type:'line',data:{labels,datasets:[{label:'Submitted reports',data:series,borderColor:'#206b49',backgroundColor:'rgba(39,124,78,.09)',fill:true,tension:.25,borderWidth:2.5,pointRadius:3,pointHoverRadius:6}]},options:{responsive:true,maintainAspectRatio:false,interaction:{intersect:false,mode:'index'},plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,ticks:{precision:0},grid:{color:'#ecf1eb'}},x:{grid:{display:false}}}}});
  const pie=document.getElementById('reports-status');
- if(pie&&statusCounts.length&&statusCounts.some(v=>v>0))new Chart(pie,{type:'doughnut',data:{labels:statuses.map(s=>s.replaceAll('_',' ')),datasets:[{data:statusCounts,backgroundColor:['#b79a57','#418ab0','#c47b49','#31876f','#205f43','#ba605a'],borderColor:'#ffffff',borderWidth:2}]},options:{responsive:true,maintainAspectRatio:false,cutout:'68%',plugins:{legend:{position:'bottom',labels:{boxWidth:9,padding:13,font:{size:10}}}}}});
+ if(pie&&statusCounts.length&&statusCounts.some(v=>v>0))new Chart(pie,{type:'doughnut',data:{labels:statuses,datasets:[{data:statusCounts,backgroundColor:['#b79a57','#418ab0','#c47b49','#31876f','#205f43','#ba605a'],borderColor:'#ffffff',borderWidth:2}]},options:{responsive:true,maintainAspectRatio:false,cutout:'68%',plugins:{legend:{position:'bottom',labels:{boxWidth:9,padding:13,font:{size:10}}}}}});
  else if(pie){const hint=document.createElement('p');hint.className='muted';hint.textContent='No status data available for the selected filters.';pie.parentNode.replaceChildren(hint)}
 })();
 </script>

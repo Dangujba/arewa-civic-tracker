@@ -19,6 +19,6 @@
 </section></div>
 <section class="dash-panel dash-recent"><div class="dash-panel-heading"><h2>My recent field reports</h2><a href="{{ route('cases.index') }}" class="dash-text-link">All my submissions</a></div>
 <div class="dash-table-wrap"><table><thead><tr><th>Reference</th><th>Report</th><th>Location</th><th>Status</th><th>Next step</th></tr></thead><tbody>
-@forelse($recent as $case)<tr><td><a href="{{ route('cases.show',$case) }}">{{ $case->reference }}</a></td><td>{{ $case->title }}</td><td>{{ $case->lga?->name }}</td><td>{{ ucwords(str_replace('_',' ',$case->verification_status)) }}</td><td>@if($case->verification_status==='clarification_requested')<a href="{{ route('cases.show',$case) }}">Respond to clarification</a>@else<a href="{{ route('cases.show',$case) }}">View</a>@endif</td></tr>@empty<tr><td colspan="5">No reports submitted yet.</td></tr>@endforelse
+@forelse($recent as $case)<tr><td><a href="{{ route('cases.show',$case) }}">{{ $case->reference }}</a></td><td>{{ $case->title }}</td><td>{{ $case->lga?->name }}</td><td>{{ \App\Models\WorkflowStatusLabel::label('verification',$case->verification_status) }}</td><td>@if($case->verification_status==='clarification_requested')<a href="{{ route('cases.show',$case) }}">Respond to clarification</a>@else<a href="{{ route('cases.show',$case) }}">View</a>@endif</td></tr>@empty<tr><td colspan="5">No reports submitted yet.</td></tr>@endforelse
 </tbody></table></div></section>
 @endsection

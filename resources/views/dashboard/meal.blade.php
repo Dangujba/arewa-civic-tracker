@@ -11,6 +11,6 @@
 <section class="dash-panel dash-recent"><div class="dash-panel-heading"><h2>Review priorities</h2><a href="{{ route('cases.queue') }}" class="dash-text-link">Full queue</a></div>
 <p class="muted">You may review unassigned submissions and those explicitly assigned to your account. Administrator approval is required after verification.</p>
 <div class="dash-table-wrap"><table><thead><tr><th>Reference</th><th>Field report</th><th>LGA</th><th>Assigned reviewer</th><th>Deadline</th><th>Status</th></tr></thead><tbody>
-@forelse($recent as $case)<tr><td><a href="{{ route('cases.show',$case) }}">{{ $case->reference }}</a></td><td>{{ $case->title }}</td><td>{{ $case->lga?->name }}</td><td>{{ $case->reviewer?->name ?? 'Unassigned' }}</td><td>{{ $case->review_due_at?->format('d M Y') ?? 'Not set' }}</td><td>{{ ucwords(str_replace('_',' ',$case->verification_status)) }}</td></tr>@empty<tr><td colspan="6">No submissions require your review.</td></tr>@endforelse
+@forelse($recent as $case)<tr><td><a href="{{ route('cases.show',$case) }}">{{ $case->reference }}</a></td><td>{{ $case->title }}</td><td>{{ $case->lga?->name }}</td><td>{{ $case->reviewer?->name ?? 'Unassigned' }}</td><td>{{ $case->review_due_at?->format('d M Y') ?? 'Not set' }}</td><td>{{ \App\Models\WorkflowStatusLabel::label('verification',$case->verification_status) }}</td></tr>@empty<tr><td colspan="6">No submissions require your review.</td></tr>@endforelse
 </tbody></table></div></section>
 @endsection

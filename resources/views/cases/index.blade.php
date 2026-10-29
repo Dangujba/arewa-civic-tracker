@@ -11,7 +11,7 @@
 <section class="card act-report-filter-card">
  <form method="GET" action="{{ route('cases.index') }}" class="act-inline-filter">
   <div class="field"><label for="report-filter-lga">Local government</label><select id="report-filter-lga" name="lga_id"><option value="">All LGAs</option>@foreach($lgas as $lga)<option value="{{ $lga->id }}" @selected(request('lga_id')==$lga->id)>{{ $lga->name }}</option>@endforeach</select></div>
-  <div class="field"><label for="report-filter-status">Verification status</label><select id="report-filter-status" name="verification_status"><option value="">All statuses</option>@foreach(['submitted','under_review','clarification_requested','verified','approved','rejected'] as $status)<option value="{{ $status }}" @selected(request('verification_status')===$status)>{{ ucwords(str_replace('_',' ',$status)) }}</option>@endforeach</select></div>
+  <div class="field"><label for="report-filter-status">Verification status</label><select id="report-filter-status" name="verification_status"><option value="">All statuses</option>@foreach(['submitted','under_review','clarification_requested','verified','approved','rejected'] as $status)<option value="{{ $status }}" @selected(request('verification_status')===$status)>{{ \App\Models\WorkflowStatusLabel::label('verification',$status) }}</option>@endforeach</select></div>
   <div class="act-filter-actions"><button type="submit" class="btn"><i class="fa-solid fa-filter" aria-hidden="true"></i> Filter</button><a class="btn-outline" href="{{ route('cases.index') }}">Clear</a></div>
  </form>
 </section>

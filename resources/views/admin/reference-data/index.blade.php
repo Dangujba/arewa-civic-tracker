@@ -2,7 +2,22 @@
 @section('title','Reference Data | Arewa Civic Tracker')
 @section('section_heading','Reference Data')
 @section('content')
-<section class="dash-heading"><div><span class="eyebrow">ADMINISTRATION</span><h1>Reference Data</h1><p class="muted">Manage report categories, communities and display labels without changing review permissions.</p></div></section>
+<section class="dash-heading"><div><span class="eyebrow">ADMINISTRATION</span><h1>Reference Data</h1><p class="muted">Manage LGAs, report categories, communities and display labels without changing review permissions.</p></div></section>
+<section class="dash-panel act-structured-panel" style="margin-bottom:20px">
+<div class="dash-panel-heading"><h2>Local governments</h2><small class="muted">{{ $lgas->count() }} records. Renaming an LGA must preserve its official geography.</small></div>
+<p class="muted">Existing report and focal-person assignments stay linked by LGA ID. If an official name changes, review the associated map-boundary labels.</p>
+<form class="act-reference-form" method="POST" action="{{ route('admin.reference.lgas.create') }}" data-no-ajax>@csrf
+<div class="field"><label for="new-lga-name">LGA Name</label><input id="new-lga-name" name="name" required maxlength="100" placeholder="Official LGA name"></div>
+<div class="field"><label for="new-lga-code">Unique code</label><input id="new-lga-code" name="code" required maxlength="10" placeholder="e.g. DAM"></div>
+<button class="btn" type="submit">Add LGA</button></form>
+<div class="dash-table-wrap"><table class="act-compact-table"><thead><tr><th>Local government</th><th>Code</th><th>Action</th></tr></thead><tbody>
+@foreach($lgas as $l)
+<tr><td colspan="3"><form method="POST" action="{{ route('admin.reference.lgas.update',$l) }}" class="act-reference-editor" data-no-ajax>@csrf @method('PUT')
+<input name="name" required maxlength="100" value="{{ $l->name }}" aria-label="LGA name for {{ $l->name }}">
+<input name="code" required maxlength="10" value="{{ $l->code }}" aria-label="LGA code for {{ $l->name }}">
+<button class="act-table-icon-link" title="Save LGA" aria-label="Save {{ $l->name }}"><i class="fa-solid fa-check"></i></button></form></td></tr>
+@endforeach
+</tbody></table></div></section>
 <section class="dash-panel act-structured-panel" style="margin-bottom:20px">
 <div class="dash-panel-heading"><h2>Communities</h2><small class="muted">{{ $communities->total() }} records</small></div>
 <form class="act-reference-form" method="POST" action="{{ route('admin.reference.communities.create') }}" data-no-ajax>@csrf

@@ -22,6 +22,29 @@ class ReferenceDataController extends Controller
    'statuses'=>WorkflowStatusLabel::orderBy('kind')->orderBy('code')->get(),
   ]);
  }
+ public function addLga(Request $request){
+  $this->guard($request);
+  $request->merge(['code'=>strtoupper(trim((string)$request->input('code')))]);
+  $data=$request->validate([
+   'name'=>['required','string','max:100',Rule::unique('lgas','name')],
+   'code'=>['required','regex:/^[A-Z0-9]{2,10}$/',Rule::unique('lgas','code')],
+  ]);
+  $lga=Lga::create($data);
+  AdminActivityLog::record($request->user(),'lga.created',$lga,$data);
+  return back()->with('message','Local government added.');
+ }
+ public function updateLga(Request $request,Lga $lga){
+  $this->guard($request);
+  $request->merge(['code'=>strtoupper(trim((string)$request->input('code')))]);
+  $data=$request->validate([
+   'name'=>['required','string','max:100',Rule::unique('lgas','name')->ignore($lga->id)],
+   'code'=>['required','regex:/^[A-Z0-9]{2,10}$/',Rule::unique('lgas','code')->ignore($lga->id)],
+  ]);
+  $before=$lga->only(['name','code']);
+  $lga->update($data);
+  AdminActivityLog::record($request->user(),'lga.updated',$lga,['before'=>$before,'after'=>$data]);
+  return back()->with('message','Local government updated. Existing reports and assignments were preserved.');
+ }
  public function addCommunity(Request $request){
   $this->guard($request);
   $data=$request->validate([

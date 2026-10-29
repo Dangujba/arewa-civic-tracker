@@ -108,10 +108,13 @@ No records match the selected criteria. All figures are shown as empty rather th
 <td><div class="figure-title">Reports by monitoring sector</div><div class="figure"><img src="{{ $figures['sector'] }}" alt="Reports by sector horizontal bar chart"></div></td>
 </tr></table>
 
+<h2 style="margin-top:20px">Community reporting concentrations</h2>
+<p class="section-note">Communities are grouped within LGAs to distinguish places sharing the same name. The top eight groups are shown.</p>
+<div class="figure" style="width:60%"><img src="{{ $figures['community'] }}" alt="Reports by community horizontal bar chart"></div>
 <h2 style="margin-top:22px">Review distribution</h2>
 <table class="analytics-summary"><thead><tr><th>Verification category</th><th class="number">Reports</th><th class="number">Share of matching reports</th></tr></thead><tbody>
 @forelse($summary as $status=>$count)
-<tr><td>{{ ucwords(str_replace('_',' ', $status)) }}</td><td class="number">{{ number_format((int)$count) }}</td><td class="number">{{ $total ? number_format(100 * $count / $total, 1).'%' : '0.0%' }}</td></tr>
+<tr><td>{{ $verificationLabels[$status] ?? ucwords(str_replace('_',' ', $status)) }}</td><td class="number">{{ number_format((int)$count) }}</td><td class="number">{{ $total ? number_format(100 * $count / $total, 1).'%' : '0.0%' }}</td></tr>
 @empty<tr><td colspan="3">No matching submissions.</td></tr>@endforelse
 </tbody></table>
 <p class="footnote">Interpretation: An approved status records workflow review, not proof of completed infrastructure. The charts exclude no matching records and do not infer or fabricate geographic coordinates.</p>
@@ -130,7 +133,7 @@ No records match the selected criteria. All figures are shown as empty rather th
 <td>{{ $case->lga?->name ?? 'Unassigned' }}</td>
 <td>{{ $case->sector?->name ?? 'Other' }}</td>
 <td>{{ ucwords(str_replace('_',' ', $case->type)) }}</td>
-<td>{{ ucwords(str_replace('_',' ', $case->verification_status)) }}</td>
+<td>{{ $verificationLabels[$case->verification_status] ?? ucwords(str_replace('_',' ', $case->verification_status)) }}</td>
 <td>{{ $case->observation_date?->format('d M Y') }}</td>
 </tr>
 @empty<tr><td colspan="7" class="muted">There are no matching monitoring reports for this selection.</td></tr>@endforelse

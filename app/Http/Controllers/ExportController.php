@@ -1,6 +1,7 @@
 <?php
 namespace App\Http\Controllers;
 use App\Models\CivicCase;
+use App\Models\WorkflowStatusLabel;
 use Illuminate\Http\Request;
 class ExportController extends Controller {
     public function csv(Request $request){
@@ -10,11 +11,13 @@ class ExportController extends Controller {
         foreach(['lga_id','sector_id','verification_status','type'] as $field){if(isset($filters[$field]))$q->where($field,$filters[$field]);}
         if(isset($filters['date_from']))$q->whereDate('observation_date','>=',$filters['date_from']);
         if(isset($filters['date_to']))$q->whereDate('observation_date','<=',$filters['date_to']);
-        return response()->streamDownload(function()use($q){
+        $verificationLabels=WorkflowStatusLabel::labels('verification');
+        $progressLabels=WorkflowStatusLabel::labels('progress');
+        return response()->streamDownload(function()use($q,$verificationLabels,$progressLabels){
             $out=fopen('php://output','wb');fputcsv($out,['Reference','Type','Title','LGA','Community','Sector','Observed on','Verification','Progress','Description']);
             foreach($q->cursor() as $c){
                 $safe=fn($v)=>preg_match('/^[\\s]*[=+@\\-]/u',(string)$v)?"'".(string)$v:(string)$v;
-                fputcsv($out,array_map($safe,[$c->reference,$c->type,$c->title,$c->lga?->name,$c->community,$c->sector?->name,$c->observation_date?->format('Y-m-d'),$c->verification_status,$c->progress_status,$c->description]));
+                fputcsv($out,array_map($safe,[$c->reference,$c->type,$c->title,$c->lga?->name,$c->community,$c->sector?->name,$c->observation_date?->format('Y-m-d'),$verificationLabels[$c->verification_status]??$c->verification_status,$progressLabels[$c->progress_status]??$c->progress_status,$c->description]));
             }
             fclose($out);
         },'arewa-civic-reports-'.now()->format('Ymd').'.csv',['Content-Type'=>'text/csv; charset=UTF-8']);

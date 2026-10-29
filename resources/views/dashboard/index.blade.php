@@ -53,7 +53,7 @@
   <div class="dash-panel-heading"><div><span class="eyebrow">ACTIVITY FEED</span><h2>Recent submissions</h2></div><a href="{{ route('cases.index') }}" class="dash-text-link">View all reports <i class="fa-solid fa-arrow-up-right-from-square" aria-hidden="true"></i></a></div>
   <div class="dash-table-wrap"><table><thead><tr><th>Reference</th><th>Report title</th><th>Location</th><th>Review status</th></tr></thead>
     <tbody>@forelse($recent as $c)<tr>
-      <td><a href="{{ route('cases.show',$c) }}" class="dash-text-link">{{ $c->reference }}</a></td><td>{{ $c->title }}</td><td>{{ $c->lga?->name ?? 'Not specified' }}</td><td><span class="dash-status">{{ ucwords(str_replace('_',' ',$c->verification_status)) }}</span></td>
+      <td><a href="{{ route('cases.show',$c) }}" class="dash-text-link">{{ $c->reference }}</a></td><td>{{ $c->title }}</td><td>{{ $c->lga?->name ?? 'Not specified' }}</td><td><span class="dash-status">{{ \App\Models\WorkflowStatusLabel::label('verification',$c->verification_status) }}</span></td>
     </tr>@empty<tr><td colspan="4"><div class="dash-empty"><i class="fa-regular fa-file-lines" aria-hidden="true"></i><b>There are no reports yet</b><p>New submissions will populate this activity feed automatically. No example statistics are presented as real reports.</p></div></td></tr>@endforelse</tbody></table></div>
 </section>
 @endsection
