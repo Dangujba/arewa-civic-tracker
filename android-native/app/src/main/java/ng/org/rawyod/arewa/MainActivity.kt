@@ -56,6 +56,7 @@ class MainActivity:ComponentActivity() {
 private fun FieldApplication(vm:FieldViewModel=viewModel()) {
     val user=vm.userId
     var tab by remember { mutableIntStateOf(0) }
+    LaunchedEffect(user,vm.drafts){ vm.checkAuthentication() }
     Scaffold(
         topBar={
             Surface(color=green,contentColor=Color.White){
@@ -88,10 +89,10 @@ private fun FieldApplication(vm:FieldViewModel=viewModel()) {
                     }
                 }
             }
-            if(user==null) LoginScreen(vm)
+            if(user==null || vm.requiresAuthentication) LoginScreen(vm)
             else when(tab){
                 0->FormScreen(vm)
-                1->OutboxScreen(vm)
+                1->OutboxScreen(vm,onEdit={tab=0})
                 else->ReportsScreen(vm)
             }
         }
@@ -129,12 +130,12 @@ private fun LoginScreen(vm:FieldViewModel) {
             OutlinedTextField(password,{password=it},label={Text("Password")},singleLine=true,
                 shape=RectangleShape,visualTransformation=PasswordVisualTransformation(),
                 modifier=Modifier.fillMaxWidth())
-            Button(onClick={vm.login(email,password)},shape=RectangleShape,
+            Button(shape=RectangleShape,onClick={vm.login(email,password)},
                 enabled=!vm.busy && email.isNotBlank() && password.isNotBlank(),
                 modifier=Modifier.fillMaxWidth()) {
                 if(vm.busy) CircularProgressIndicator(Modifier.size(18.dp),
                     strokeWidth=2.dp,color=Color.White)
-                else Text("Sign in")
+                Spacer(Modifier.width(6.dp));Text("Sign in")
             }
         } else {
             Text("Enter the 6-digit code from your authenticator.",
@@ -143,7 +144,7 @@ private fun LoginScreen(vm:FieldViewModel) {
                 label={Text("Authenticator code")},singleLine=true,shape=RectangleShape,
                 keyboardOptions=KeyboardOptions(keyboardType=KeyboardType.NumberPassword),
                 modifier=Modifier.fillMaxWidth())
-            Button(onClick={vm.verifyOtp(otp)},shape=RectangleShape,
+            Button(shape=RectangleShape,onClick={vm.verifyOtp(otp)},
                 enabled=!vm.busy && otp.length==6,modifier=Modifier.fillMaxWidth()){
                 if(vm.busy) CircularProgressIndicator(Modifier.size(18.dp),
                     strokeWidth=2.dp,color=Color.White)
@@ -160,7 +161,7 @@ private fun ChoiceField(label:String,items:List<Choice>,value:Int,onChoose:(Int)
     Column {
         Text(label,style=MaterialTheme.typography.labelMedium)
         Box {
-            OutlinedButton(onClick={expanded=true},modifier=Modifier.fillMaxWidth()){
+            OutlinedButton(shape=RectangleShape,onClick={expanded=true},modifier=Modifier.fillMaxWidth()){
                 Text(items.find{it.id==value}?.name ?: "Select $label",
                     modifier=Modifier.weight(1f))
                 Text("⌄")
@@ -179,6 +180,7 @@ private fun ChoiceField(label:String,items:List<Choice>,value:Int,onChoose:(Int)
 @Composable
 private fun FormScreen(vm:FieldViewModel) {
     val context=LocalContext.current
+    val editing=vm.restoredDraft
     var type by remember { mutableStateOf("public_project") }
     var lga by remember { mutableIntStateOf(0) }
     var sector by remember { mutableIntStateOf(0) }
@@ -192,6 +194,21 @@ private fun FormScreen(vm:FieldViewModel) {
     var latitude by remember { mutableStateOf("") }
     var longitude by remember { mutableStateOf("") }
     var cameraFile by remember { mutableStateOf<File?>(null) }
+    LaunchedEffect(editing?.id){
+        val data=editing?.payload ?: return@LaunchedEffect
+        type=data.optString("type","public_project")
+        lga=data.optInt("lga_id")
+        sector=data.optInt("sector_id")
+        title=data.optString("title")
+        description=data.optString("description")
+        community=data.optString("community")
+        observation=data.optString("observations")
+        dutyBearers=data.optString("duty_bearers")
+        date=data.optString("observation_date",LocalDate.now().toString())
+        progress=data.optString("progress_status","ongoing")
+        latitude=data.optString("latitude")
+        longitude=data.optString("longitude")
+    }
 
     val camera=rememberLauncherForActivityResult(ActivityResultContracts.TakePicture()) { ok->
         val file=cameraFile
@@ -214,15 +231,18 @@ private fun FormScreen(vm:FieldViewModel) {
         } else vm.display("Location permission denied; GPS is optional.")
     }
 
-    Content("New field report",
-        "Saved reports are encrypted and queued when there is no network.") {
+    Content(if(editing!=null)"Edit queued report" else "New field report",
+        if(editing!=null)"Correct this encrypted draft before retrying upload."
+        else "Saved reports are encrypted and queued when there is no network.") {
+        if(editing!=null) OutlinedButton(shape=RectangleShape,onClick=vm::cancelEditing,
+            modifier=Modifier.fillMaxWidth()){ Text("Cancel changes and keep original") }
         if(vm.lgas.isEmpty())Text("No assigned LGA. Contact your RAWYOD Administrator.",
             color=MaterialTheme.colorScheme.error)
         Text("Report category",fontWeight=FontWeight.SemiBold)
         Row(horizontalArrangement=Arrangement.spacedBy(8.dp)){
-            FilterChip(selected=type=="public_project",onClick={type="public_project"},
+            FilterChip(shape=RectangleShape,selected=type=="public_project",onClick={type="public_project"},
                 label={Text("Public project")})
-            FilterChip(selected=type=="governance_issue",onClick={type="governance_issue"},
+            FilterChip(shape=RectangleShape,selected=type=="governance_issue",onClick={type="governance_issue"},
                 label={Text("Governance issue")})
         }
         ChoiceField("Assigned LGA",vm.lgas,lga){lga=it}
@@ -246,7 +266,7 @@ private fun FormScreen(vm:FieldViewModel) {
             }
         HorizontalDivider()
         Text("GPS and supporting evidence",fontWeight=FontWeight.Bold)
-        OutlinedButton(onClick={
+        OutlinedButton(shape=RectangleShape,onClick={
             gpsPermission.launch(arrayOf(Manifest.permission.ACCESS_FINE_LOCATION,
                 Manifest.permission.ACCESS_COARSE_LOCATION))
         },modifier=Modifier.fillMaxWidth()){
@@ -260,7 +280,7 @@ private fun FormScreen(vm:FieldViewModel) {
                 modifier=Modifier.weight(1f))
         }
         Row(horizontalArrangement=Arrangement.spacedBy(8.dp)){
-            OutlinedButton(onClick={
+            OutlinedButton(shape=RectangleShape,onClick={
                 val target=File(context.cacheDir,"camera").also {it.mkdirs()}
                 val file=File(target,"field-${UUID.randomUUID()}.jpg")
                 cameraFile=file
@@ -270,7 +290,7 @@ private fun FormScreen(vm:FieldViewModel) {
             },enabled=vm.attachments.size<5 && !vm.busy,modifier=Modifier.weight(1f)){
                 Text("Camera")
             }
-            OutlinedButton(onClick={picker.launch(arrayOf(
+            OutlinedButton(shape=RectangleShape,onClick={picker.launch(arrayOf(
                 "image/jpeg","image/png","image/webp","application/pdf"
             ))},enabled=vm.attachments.size<5 && !vm.busy,modifier=Modifier.weight(1f)){
                 Text("Add evidence")
@@ -286,7 +306,7 @@ private fun FormScreen(vm:FieldViewModel) {
                 TextButton(onClick={vm.removeEvidence(index)}){Text("Remove")}
             }
         }
-        Button(modifier=Modifier.fillMaxWidth(),enabled=!vm.busy && vm.lgas.isNotEmpty(),
+        Button(shape=RectangleShape,modifier=Modifier.fillMaxWidth(),enabled=!vm.busy && vm.lgas.isNotEmpty(),
             onClick={
                 try {
                     val json=JSONObject()
@@ -306,13 +326,14 @@ private fun FormScreen(vm:FieldViewModel) {
                 }catch(e:Exception){vm.display(e.message ?: "Please correct the fields")}
             }){
             Text("Save");Spacer(Modifier.width(6.dp))
-            Text(if(vm.busy)"Saving..." else "Encrypt and queue report")
+            Text(if(vm.busy)"Saving..." else
+                if(editing!=null)"Save changes and queue" else "Encrypt and queue report")
         }
     }
 }
 
 @Composable
-private fun OutboxScreen(vm:FieldViewModel) {
+private fun OutboxScreen(vm:FieldViewModel,onEdit:()->Unit) {
     Content("Offline outbox","Encrypted reports remain here until synchronization succeeds.") {
         Row(Modifier.fillMaxWidth(),horizontalArrangement=Arrangement.SpaceBetween){
             Text("${vm.drafts.size} report(s) on device")
@@ -326,8 +347,18 @@ private fun OutboxScreen(vm:FieldViewModel) {
                         color=if(draft.status=="rejected")MaterialTheme.colorScheme.error else green)
                     if(!draft.lastError.isNullOrBlank()) Text(draft.lastError!!,
                         style=MaterialTheme.typography.bodySmall)
-                    if(draft.status=="rejected" || draft.status=="retry") {
-                        TextButton(onClick={vm.retryDraft(draft.id)}) {Text("Retry upload")}
+                    Row(horizontalArrangement=Arrangement.spacedBy(8.dp)){
+                        TextButton(onClick={vm.editDraft(draft.id,onEdit)},enabled=!vm.busy){
+                            Text(if(draft.status=="editing")"Resume editing" else "Edit draft")
+                        }
+                        if(draft.status=="rejected" || draft.status=="retry") {
+                            TextButton(onClick={vm.retryDraft(draft.id)}) {Text("Retry upload")}
+                        }
+                    }
+                    if(draft.lastError?.contains("Sign in again",ignoreCase=true)==true){
+                        TextButton(onClick=vm::beginReauthentication){
+                            Text("Reauthenticate")
+                        }
                     }
                 }
             }
@@ -342,7 +373,7 @@ private fun OutboxScreen(vm:FieldViewModel) {
 private fun ReportsScreen(vm:FieldViewModel) {
     var response by remember { mutableStateOf("") }
     Content("My submitted reports","Review verification status and respond to MEAL clarification requests.") {
-        OutlinedButton(onClick=vm::refreshReports,modifier=Modifier.fillMaxWidth()){
+        OutlinedButton(shape=RectangleShape,onClick=vm::refreshReports,modifier=Modifier.fillMaxWidth()){
             Text("Refresh from server")
         }
         vm.reports.forEach{report->
@@ -364,12 +395,12 @@ private fun ReportsScreen(vm:FieldViewModel) {
             if(detail.status=="clarification_requested"){
                 OutlinedTextField(response,{response=it},label={Text("Clarification response")},
                     modifier=Modifier.fillMaxWidth(),minLines=3)
-                Button(onClick={
+                Button(shape=RectangleShape,onClick={
                     vm.respondToClarification(response);response=""
                 },enabled=response.length>=5){Text("Submit clarification")}
             }
         }
-        OutlinedButton(onClick=vm::logout,modifier=Modifier.fillMaxWidth()){
+        OutlinedButton(shape=RectangleShape,onClick=vm::logout,modifier=Modifier.fillMaxWidth()){
             Text("Sign out")
         }
     }

@@ -33,8 +33,11 @@ class SyncWorker(context: Context, params: WorkerParameters) : CoroutineWorker(c
         val owner = session.userId() ?: return Result.success()
         val token = session.token() ?: return Result.success()
         val dao = app.database.dao()
+        // WorkManager runs this as unique work. Recover a claim abandoned by a process kill.
+        dao.recoverInterruptedUploads(owner)
         for (draft in dao.unsent(owner)) {
             if (isStopped) return Result.retry()
+            if (dao.claimUpload(draft.id,owner)==0) continue
             try {
                 val payload = app.repository.decode(draft)
                 app.api.upload(token, payload, dao.evidenceFor(draft.id))
@@ -43,6 +46,7 @@ class SyncWorker(context: Context, params: WorkerParameters) : CoroutineWorker(c
                 val error = ex.message?.take(400) ?: "Upload failed"
                 when {
                     ex.code == 401 || ex.code == 403 -> {
+                        if(ex.code==401)session.invalidateToken()
                         dao.mark(draft.id, owner, "retry", "Sign in again or check LGA assignment: $error")
                         return Result.success() // don't hammer the API when credentials are invalid
                     }

@@ -14,6 +14,7 @@ import ng.org.rawyod.arewa.network.ApiFailure
 import ng.org.rawyod.arewa.ArewaApp
 import ng.org.rawyod.arewa.data.Draft
 import ng.org.rawyod.arewa.data.StagedEvidence
+import ng.org.rawyod.arewa.data.RestoredDraft
 import ng.org.rawyod.arewa.worker.SyncScheduler
 import org.json.JSONObject
 import androidx.compose.runtime.getValue
@@ -51,6 +52,10 @@ class FieldViewModel(application: Application) : AndroidViewModel(application) {
         private set
     var attachments by mutableStateOf(emptyList<StagedEvidence>())
         private set
+    var restoredDraft by mutableStateOf<RestoredDraft?>(null)
+        private set
+    var requiresAuthentication by mutableStateOf(userId!=null && app.store.token()==null)
+        private set
     private var observing: Job? = null
 
     init {
@@ -83,6 +88,17 @@ class FieldViewModel(application: Application) : AndroidViewModel(application) {
     fun resetLogin() {
         loginChallenge=null
         message=""
+    }
+
+    fun checkAuthentication() {
+        if(userId!=null && app.store.token()==null)requiresAuthentication=true
+    }
+
+    fun beginReauthentication() {
+        app.store.invalidateToken()
+        requiresAuthentication=true
+        loginChallenge=null
+        message="Sign in again with the same field account to resume syncing."
     }
 
     private fun networkError(error: Exception): String = when(error) {
@@ -132,7 +148,12 @@ class FieldViewModel(application: Application) : AndroidViewModel(application) {
     private suspend fun completeLogin(result:JSONObject) {
         val token=result.getString("token")
         val user=result.getJSONObject("user")
+        val newId=user.optLong("id")
+        require(userId==null || userId==newId) {
+            "This device contains pending reports for another account. Sign in with the original field account."
+        }
         app.store.storeSession(token,user)
+        requiresAuthentication=false
         loginChallenge=null
         userName=user.optString("name");userId=user.optLong("id")
         observe()
@@ -171,6 +192,7 @@ class FieldViewModel(application: Application) : AndroidViewModel(application) {
             app.store.clearSession()
             userName="";userId=null;lgas=emptyList();sectors=emptyList()
             reports=emptyList();selectedReport=null;observing?.cancel();drafts=emptyList()
+            restoredDraft=null;attachments=emptyList();requiresAuthentication=false
             message="Signed out."
         }
     }
@@ -185,9 +207,8 @@ class FieldViewModel(application: Application) : AndroidViewModel(application) {
                 val detected=mime ?: app.contentResolver.getType(uri) ?: "application/octet-stream"
                 attachments=attachments + repo.prepareEvidence(uri,filename,detected)
                 message="Evidence encrypted and ready."
-                onComplete?.invoke()
             } catch(e: Exception) { message=e.message ?: "Cannot attach evidence" }
-            finally{busy=false}
+            finally{onComplete?.invoke();busy=false}
         }
     }
 
@@ -207,6 +228,40 @@ class FieldViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
+    fun editDraft(draftId: String,onReady:()->Unit) {
+        if(busy)return
+        viewModelScope.launch {
+            busy=true
+            try{
+                val recovered=repo.restoreDraft(draftId)
+                restoredDraft=recovered
+                attachments=recovered.files
+                message="Queued report loaded. Save changes to resume synchronization."
+                onReady()
+            }catch(e:Exception){message=e.message?:"Unable to restore this report"}
+            finally{busy=false}
+        }
+    }
+
+    fun cancelEditing() {
+        val restored=restoredDraft ?: return
+        val owner=userId ?: return
+        viewModelScope.launch {
+            busy=true
+            try {
+                val savedIds=restored.files.map { it.id }.toSet()
+                repo.abandonUnused(attachments.filterNot { it.id in savedIds })
+                repo.dao.mark(restored.id,owner,
+                    if(restored.status=="editing")"retry" else restored.status,restored.error)
+                if(restored.status in setOf("pending","retry","editing"))SyncScheduler.enqueue(app)
+                attachments=emptyList()
+                restoredDraft=null
+                message="Original queued report was kept."
+            } catch(e:Exception){message=e.message?:"Could not cancel changes"}
+            finally{busy=false}
+        }
+    }
+
     fun retryDraft(draftId: String) {
         val owner=userId ?: return
         viewModelScope.launch {
@@ -218,7 +273,8 @@ class FieldViewModel(application: Application) : AndroidViewModel(application) {
 
     fun removeEvidence(index: Int) {
         val removed=attachments.getOrNull(index) ?: return
-        repo.abandonUnused(listOf(removed))
+        if(restoredDraft?.files?.none { it.id==removed.id }!=false)
+            repo.abandonUnused(listOf(removed))
         attachments=attachments.filterIndexed { i,_ -> i!=index }
     }
 
@@ -228,7 +284,9 @@ class FieldViewModel(application: Application) : AndroidViewModel(application) {
             busy=true
             try {
                 validatePayload(payload)
+                restoredDraft?.let { payload.put("client_submission_id",it.id) }
                 repo.queue(payload,attachments)
+                restoredDraft=null
                 attachments=emptyList()
                 message="Report encrypted on this device. Automatic synchronization queued."
                 onSaved()
@@ -296,4 +354,23 @@ internal fun validatePayload(value: JSONObject) {
     require(value.optInt("lga_id")>0 && value.optInt("sector_id")>0) { "Choose a valid LGA and sector." }
     require(value.optString("observation_date").matches(Regex("\\d{4}-\\d{2}-\\d{2}"))) { "Use a valid YYYY-MM-DD date." }
     require(value.optString("type") in setOf("public_project","governance_issue")) { "Unknown report type." }
+    require(value.optString("progress_status") in setOf(
+        "observed","not_started","ongoing","stalled","completed","resolved","other")) {
+        "Choose a valid progress status."
+    }
+    require(runCatching {
+        val date=java.time.LocalDate.parse(value.optString("observation_date"))
+        !date.isAfter(java.time.LocalDate.now())
+    }.getOrDefault(false)) { "Observation date cannot be in the future." }
+    val lat=value.optString("latitude").trim()
+    val lon=value.optString("longitude").trim()
+    require((lat.isBlank() && lon.isBlank()) || (lat.isNotBlank() && lon.isNotBlank())) {
+        "Provide both GPS coordinates, or leave both blank."
+    }
+    if(lat.isNotBlank()) {
+        require(lat.toDoubleOrNull()?.let{it in -90.0..90.0}==true &&
+            lon.toDoubleOrNull()?.let{it in -180.0..180.0}==true) {
+            "GPS coordinates are outside the permitted range."
+        }
+    }
 }

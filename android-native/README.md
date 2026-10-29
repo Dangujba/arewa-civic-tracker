@@ -30,3 +30,14 @@ Real-device acceptance still needs airplane-mode reporting and multi-day storage
 The native app authenticates email and password first. Only a verified account with enabled 2FA receives a short-lived challenge and then sees the authenticator screen. Tokens are issued only after verification. All other accounts sign in directly. Native input fields and buttons use square corners.
 
 For the approved staging API hostname, Android DNS is tried first. A fallback to the verified IPv4 address is attempted only if that hostname cannot be resolved. HTTPS certificate validation and SNI remain active. This fallback must be updated if the API hosting IP changes. Internet access is still required to sign in.
+
+## v0.2.0 native completion
+
+- Encrypted offline drafts can be restored, edited, and resubmitted under their original idempotency ID.
+- WorkManager claims drafts before uploading; interrupted uploads can resume safely.
+- Expired API token reauthentication preserves the original account's encrypted draft data.
+- JPEG, PNG, WebP photographs can be downsampled and encoded as JPEG, targeting 2 MB and enforcing the backend 5 MB limit. PDFs remain unchanged.
+- Native form validation covers future dates, statuses and paired GPS coordinates.
+- Flat, square native action controls.
+
+The debug APK is for controlled testing, not production distribution. It uses Android debug signing and the staging API. RAWYOD must sign and verify a separate release artifact for production.

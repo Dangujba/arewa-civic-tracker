@@ -18,6 +18,8 @@ data class StagedEvidence(
     val id: String, val path: String, val filename: String,
     val mime: String, val bytes: Long
 )
+data class RestoredDraft(val id: String,val payload: JSONObject,
+                         val files: List<StagedEvidence>,val status: String,val error: String?)
 
 class FieldRepository(
     private val context: Context, val dao: FieldDao, val vault: CryptoVault,
@@ -44,43 +46,78 @@ class FieldRepository(
                     if (s >= 0 && !it.isNull(s)) declared = it.getLong(s)
                 }
             }
-            require(declared <= maxEvidenceBytes) { "Evidence file exceeds 5 MB" }
-            // A bounded read also checks providers that do not disclose file size.
-            val bytes = cr.openInputStream(uri)?.use { input ->
-                val buffer = java.io.ByteArrayOutputStream()
-                val chunk = ByteArray(8192)
-                while (buffer.size() <= maxEvidenceBytes) {
-                    val take = input.read(chunk, 0,
-                        minOf(chunk.size.toLong(), maxEvidenceBytes + 1 - buffer.size()).toInt())
-                    if (take <= 0) break
-                    buffer.write(chunk, 0, take)
-                }
-                buffer.toByteArray()
-            } ?: error("Cannot open evidence file")
+            require(declared <= 50L*1024L*1024L || declared<0) {
+                "Choose a photograph below 50 MB, or a PDF below 5 MB"
+            }
+            val isPhoto=mime in setOf("image/jpeg","image/png","image/webp")
+            val bytes = if(isPhoto) {
+                EvidenceOptimizer.optimize(cr,uri,mime)
+            } else {
+                require(declared <= maxEvidenceBytes || declared<0) { "PDF exceeds 5 MB" }
+                cr.openInputStream(uri)?.use { input ->
+                    val buffer=java.io.ByteArrayOutputStream()
+                    val chunk=ByteArray(8192)
+                    while(buffer.size()<=maxEvidenceBytes) {
+                        val take=input.read(chunk,0,
+                            minOf(chunk.size.toLong(),maxEvidenceBytes+1-buffer.size()).toInt())
+                        if(take<0)break
+                        if(take==0)continue
+                        buffer.write(chunk,0,take)
+                    }
+                    buffer.toByteArray()
+                } ?: error("Cannot open evidence file")
+            }
             require(bytes.size <= maxEvidenceBytes) { "Evidence file exceeds 5 MB" }
             val id = UUID.randomUUID().toString()
             val output = File(privateFiles, "$id.aes")
             try {
                 bytes.inputStream().use { vault.encryptStream(it, output) }
                 StagedEvidence(id, output.absolutePath,
-                    display.replace(Regex("[\\r\\n/\\\\]"), "_").take(120),
-                    mime, bytes.size.toLong())
+                    (if(isPhoto) display.substringBeforeLast('.',display)+".jpg" else display)
+                        .replace(Regex("[\\r\\n/\\\\]"), "_").take(120),
+                    if(isPhoto) "image/jpeg" else mime, bytes.size.toLong())
             } catch (e: Exception) { output.delete(); throw e }
         }
 
+    suspend fun restoreDraft(id: String): RestoredDraft = withContext(Dispatchers.IO) {
+        val owner=store.userId() ?: error("Sign in to restore your report")
+        val draft=dao.draft(id,owner) ?: error("Draft not found")
+        require(draft.status!="uploading") { "Upload is in progress. Wait for it to finish." }
+        // Pause automatic transmission while a user makes corrections.
+        val recovered=RestoredDraft(id,decode(draft),dao.evidenceFor(id).map {
+            StagedEvidence(it.id,it.encryptedPath,it.name,it.mimeType,it.originalSize)
+        },draft.status,draft.lastError)
+        dao.mark(id,owner,"editing",null)
+        recovered
+    }
+
     suspend fun queue(payload: JSONObject, attachments: List<StagedEvidence>): String =
         withContext(Dispatchers.IO) {
-            val owner = store.userId() ?: error("Sign in to save this report")
-            require(attachments.size <= 5) { "Maximum five supporting documents" }
+            val owner=store.userId() ?: error("Sign in to save this report")
+            require(attachments.size<=5) { "Maximum five supporting documents" }
             require(store.catalog()?.optJSONArray("lgas")?.let { list ->
-                (0 until list.length()).any { list.getJSONObject(it).optInt("id") == payload.optInt("lga_id") }
-            } == true) { "Your LGA has not been assigned" }
-            val id = payload.optString("client_submission_id").ifBlank { UUID.randomUUID().toString() }
-            payload.put("client_submission_id", id)
-            dao.putDraft(Draft(id, owner,
-                vault.encrypt(payload.toString().toByteArray(Charsets.UTF_8)), System.currentTimeMillis()))
-            for (file in attachments) dao.putEvidence(Evidence(
-                file.id, id, file.path, file.filename, file.mime, file.bytes))
+                (0 until list.length()).any {
+                    list.getJSONObject(it).optInt("id")==payload.optInt("lga_id")
+                }
+            }==true) { "Your LGA has not been assigned" }
+            val id=payload.optString("client_submission_id").ifBlank {
+                UUID.randomUUID().toString()
+            }
+            require(dao.ownerOf(id)?.let { it==owner }!=false) {
+                "Draft belongs to another account"
+            }
+            payload.put("client_submission_id",id)
+            val old=dao.evidenceFor(id)
+            val current=attachments.map { e->
+                require(File(e.path).isFile) { "Evidence file is unavailable" }
+                Evidence(e.id,id,e.path,e.filename,e.mime,e.bytes)
+            }
+            dao.replaceDraft(Draft(id,owner,
+                vault.encrypt(payload.toString().toByteArray(Charsets.UTF_8)),
+                System.currentTimeMillis()),current)
+            val currentPaths=current.map { it.encryptedPath }.toSet()
+            old.filterNot { it.encryptedPath in currentPaths }
+                .forEach { File(it.encryptedPath).delete() }
             SyncScheduler.enqueue(context)
             id
         }

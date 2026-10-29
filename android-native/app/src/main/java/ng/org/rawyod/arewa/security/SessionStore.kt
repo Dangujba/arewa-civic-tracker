@@ -23,5 +23,7 @@ class SessionStore(context: Context, private val vault: CryptoVault) {
     fun userId(): Long? = user()?.optLong("id")?.takeIf { it > 0 }
     fun cacheCatalog(data: JSONObject) = put("catalog", data.toString())
     fun catalog(): JSONObject? = get("catalog")?.let(::JSONObject)
+    /** Leave the owner and encrypted outbox intact when a 30-day token expires. */
+    fun invalidateToken() { preferences.edit().remove("token").commit() }
     fun clearSession() { preferences.edit().remove("token").remove("user").commit() }
 }

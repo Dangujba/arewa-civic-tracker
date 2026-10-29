@@ -51,10 +51,24 @@ interface FieldDao {
     suspend fun draft(id: String, owner: Long): Draft?
     @Query("SELECT * FROM evidence WHERE draftId=:id")
     suspend fun evidenceFor(id: String): List<Evidence>
+    @Query("DELETE FROM evidence WHERE draftId=:id")
+    suspend fun deleteEvidenceFor(id: String)
+    @Query("SELECT ownerId FROM drafts WHERE id=:id LIMIT 1")
+    suspend fun ownerOf(id: String): Long?
+    @androidx.room.Transaction
+    suspend fun replaceDraft(draft: Draft, attachments: List<Evidence>) {
+        deleteEvidenceFor(draft.id)
+        putDraft(draft)
+        attachments.forEach { putEvidence(it) }
+    }
     @Query("UPDATE drafts SET status=:state,lastError=:error WHERE id=:id AND ownerId=:owner")
     suspend fun mark(id: String, owner: Long, state: String, error: String?)
     @Query("DELETE FROM drafts WHERE id=:id AND ownerId=:owner")
     suspend fun deleteDraft(id: String, owner: Long)
+    @Query("UPDATE drafts SET status='uploading',lastError=NULL WHERE id=:id AND ownerId=:owner AND status IN ('pending','retry')")
+    suspend fun claimUpload(id: String,owner: Long): Int
+    @Query("UPDATE drafts SET status='retry',lastError='Interrupted upload. Retrying safely.' WHERE ownerId=:owner AND status='uploading'")
+    suspend fun recoverInterruptedUploads(owner: Long): Int
     @Query("SELECT COUNT(*) FROM drafts WHERE ownerId=:owner")
     suspend fun count(owner: Long): Int
 }
