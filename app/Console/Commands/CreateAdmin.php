@@ -10,8 +10,8 @@ class CreateAdmin extends Command {
         $email=strtolower(trim($this->argument('email')));
         if(!filter_var($email,FILTER_VALIDATE_EMAIL)){ $this->error('Invalid email');return self::FAILURE;}
         if(User::where('email',$email)->exists()){$this->error('Email already registered');return self::FAILURE;}
-        $name=$this->ask('Full name');$password=$this->secret('Password (minimum 12 characters)');
-        if(strlen((string)$password)<12){$this->error('Password too short');return self::FAILURE;}
+        $name=$this->ask('Full name');$password=$this->secret('Password');
+        if($password===null || $password===''){$this->error('Password is required');return self::FAILURE;}
         User::create(['name'=>$name,'email'=>$email,'password'=>Hash::make($password),'role'=>'admin','is_active'=>true,'must_change_password'=>true]);
         $this->info('Administrator account created; no credentials written to logs.');return self::SUCCESS;
     }

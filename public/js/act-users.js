@@ -90,5 +90,5 @@ const ready=()=>{
   }
  }));
 };
-if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',ready,{once:true});else ready();
+if(document.readyState==='complete')ready();else document.addEventListener('DOMContentLoaded',ready,{once:true});
 })();

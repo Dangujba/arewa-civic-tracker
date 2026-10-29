@@ -2,8 +2,7 @@
 @section('title','Users & Roles | Arewa Civic Tracker')
 @section('section_heading','Users & Roles')
 @push('head')
-<link rel="stylesheet" href="{{ asset('css/act-users.css') }}?v=20261029-staff2">
-<script defer src="{{ asset('js/act-users.js') }}?v=20261029-staff2"></script>
+<link rel="stylesheet" href="{{ asset('css/act-users.css') }}?v=20261029-staff3">
 @endpush
 @section('content')
 <section class="dash-heading act-staff-heading">
@@ -82,3 +81,7 @@
   </form>
 </dialog>
 @endsection
+
+@push('scripts')
+<script defer src="{{ asset('js/act-users.js') }}?v=20261029-staff3"></script>
+@endpush

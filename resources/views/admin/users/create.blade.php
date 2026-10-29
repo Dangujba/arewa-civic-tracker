@@ -2,8 +2,7 @@
 @section('title','Add Staff Member | Arewa Civic Tracker')
 @section('section_heading','Create Staff Account')
 @push('head')
-<link rel="stylesheet" href="{{ asset('css/act-users.css') }}?v=20261029-staff2">
-<script defer src="{{ asset('js/act-users.js') }}?v=20261029-staff2"></script>
+<link rel="stylesheet" href="{{ asset('css/act-users.css') }}?v=20261029-staff3">
 @endpush
 @section('content')
 <section class="dash-heading act-staff-heading">
@@ -28,12 +27,16 @@
       </select><small>Select one or more LGAs using searchable removable tags.</small>
     </div>
   </div>
-  <div class="act-user-section-heading act-user-password-heading"><h2>Initial password</h2><span>At least 12 characters. The staff member must change it on first sign-in.</span></div>
+  <div class="act-user-section-heading act-user-password-heading"><h2>Initial password</h2><span>The staff member must change this password on first sign-in.</span></div>
   <div class="act-user-fields">
-    <div class="act-user-field"><label for="create-user-password">Password <span aria-hidden="true">*</span></label><input id="create-user-password" type="password" name="password" minlength="12" autocomplete="new-password" required placeholder="Minimum 12 characters"></div>
-    <div class="act-user-field"><label for="create-user-confirm">Confirm password <span aria-hidden="true">*</span></label><input id="create-user-confirm" type="password" name="password_confirmation" minlength="12" autocomplete="new-password" required placeholder="Re-enter password"></div>
+    <div class="act-user-field"><label for="create-user-password">Password <span aria-hidden="true">*</span></label><input id="create-user-password" type="password" name="password" autocomplete="new-password" required placeholder="Enter initial password"></div>
+    <div class="act-user-field"><label for="create-user-confirm">Confirm password <span aria-hidden="true">*</span></label><input id="create-user-confirm" type="password" name="password_confirmation" autocomplete="new-password" required placeholder="Re-enter password"></div>
   </div>
   <div class="act-user-actions"><a class="btn-outline" href="{{ route('admin.users.index') }}">Cancel</a><button type="submit" class="btn"><i class="fa-solid fa-user-plus" aria-hidden="true"></i> Create account</button></div>
  </form>
 </section>
 @endsection
+
+@push('scripts')
+<script defer src="{{ asset('js/act-users.js') }}?v=20261029-staff3"></script>
+@endpush

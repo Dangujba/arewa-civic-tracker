@@ -3,7 +3,6 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\AdminActivityLog;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Validation\Rules\Password;
 class AccountController extends Controller {
     public function form(Request $request) {
         return response()->view('account.security', ['mustChange'=>(bool) $request->user()->must_change_password,'twoFactorQr'=>app(\App\Http\Controllers\TwoFactorController::class)->qrDataUri($request)])->header('Cache-Control','private, no-store')->header('Pragma','no-cache');
@@ -11,7 +10,7 @@ class AccountController extends Controller {
     public function update(Request $request) {
         $data=$request->validate([
             'current_password'=>['required','current_password'],
-            'password'=>['required','confirmed',Password::min(12)->mixedCase()->numbers()->symbols()],
+            'password'=>['required','string','confirmed'],
         ]);
         $user=$request->user();
         if (Hash::check($data['password'],$user->password)) {

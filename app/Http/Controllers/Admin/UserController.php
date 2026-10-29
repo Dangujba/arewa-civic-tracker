@@ -25,7 +25,7 @@ class UserController extends Controller {
  public function store(Request $r){
   $this->gate($r);
   $data=$r->validate(['name'=>['required','string','max:150'],'email'=>['required','email','max:255','unique:users,email'],
-   'role'=>['required',Rule::in(['admin','meal','focal'])],'password'=>['required','string','min:12','confirmed'],
+   'role'=>['required',Rule::in(['admin','meal','focal'])],'password'=>['required','string','confirmed'],
    'lga_ids'=>['sometimes','array'],'lga_ids.*'=>['integer','distinct','exists:lgas,id']]);
   $ids=$this->assignmentIds($r,$data['role']);unset($data['lga_ids']);
   DB::transaction(function()use($r,$data,$ids){
