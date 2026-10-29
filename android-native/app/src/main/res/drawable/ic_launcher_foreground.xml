@@ -1,19 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<vector xmlns:android="http://schemas.android.com/apk/res/android"
-    android:width="108dp" android:height="108dp"
-    android:viewportWidth="512" android:viewportHeight="512">
-    <group android:pivotX="256" android:pivotY="256"
-        android:scaleX="0.79" android:scaleY="0.79">
-        <path android:strokeColor="#E9BC5E" android:strokeWidth="20"
-            android:strokeLineCap="round" android:fillColor="@android:color/transparent"
-            android:pathData="M87,360 C136,424 278,451 379,399 C406,385 426,365 436,345"/>
-        <path android:fillColor="#FFFFFF"
-            android:pathData="M255,73 C168,73 103,137 103,221 C103,332 209,414 255,452 C302,413 408,329 408,221 C408,136 342,73 255,73 Z"/>
-        <path android:fillColor="#0E5E3E"
-            android:pathData="M255,111 C190,111 143,157 143,222 C143,300 205,359 255,404 C305,359 367,300 367,222 C367,157 320,111 255,111 Z"/>
-        <path android:fillColor="#FFFFFF"
-            android:pathData="M255,155 A65,65 0,1 1,255 285 A65,65 0,1 1,255 155 Z"/>
-        <path android:fillColor="#F7C45A"
-            android:pathData="M255,183 A37,37 0,1 1,255 257 A37,37 0,1 1,255 183 Z"/>
-    </group>
-</vector>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Reuse the approved map-and-pin website mark without text. -->
+    <item android:drawable="@drawable/arewa_handdrawn_map"
+          android:gravity="center"
+          android:width="76dp"
+          android:height="76dp" />
+</layer-list>
