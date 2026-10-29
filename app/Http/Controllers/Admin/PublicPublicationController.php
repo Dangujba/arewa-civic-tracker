@@ -14,10 +14,10 @@ class PublicPublicationController extends Controller
     public function update(Request $request, CivicCase $case)
     {
         abort_unless($request->user()?->isAdmin(),403);
-        $data=$request->validate([
-            'action'=>['required','in:publish,unpublish'],
-            'confirm_public'=>['required_if:action,publish','accepted'],
-        ]);
+        $data=$request->validate(['action'=>['required','in:publish,unpublish']]);
+        if($data['action']==='publish') {
+            $request->validate(['confirm_public'=>['required','accepted']]);
+        }
         $message=DB::transaction(function()use($request,$case,$data) {
             $locked=CivicCase::whereKey($case->id)->lockForUpdate()->firstOrFail();
             if($data['action']==='publish') {
