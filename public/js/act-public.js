@@ -23,7 +23,7 @@
   const title=document.createElement('strong');title.textContent=props.title||'Published report';
   box.append(title);
   const small=document.createElement('p');
-  small.textContent=[props.reference,props.community,props.lga,props.sector,props.progress].filter(Boolean).join(' · ');
+  small.textContent=[props.reference,props.ward,props.community,props.lga,props.sector,props.progress].filter(Boolean).join(' · ');
   box.append(small);
   return box;
  }

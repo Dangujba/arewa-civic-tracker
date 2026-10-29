@@ -15,7 +15,7 @@ Civic monitoring, public project reporting and evidence verification for **Roadm
 - Evidence-aware mobile report form with image/PDF attachments, permission-based editable GPS coordinates, unchanged original evidence, private optimized previews, and offline evidence outbox
 - Optional authenticator-app two-factor sign-in with secure QR setup, one-time recovery codes and account security controls
 
-**Development status (29 October 2026):** The EOI and technical-proposal development baseline is implemented, including the final six closing items. The isolated Laravel suite passed **116 tests, 859 assertions**. This is not RAWYOD acceptance. The staging Android v0.3.5 debug APK is publicly downloadable at https://arewa.kasua.ng/download/android without website login. Native app access still requires authorized staff credentials. Production signing, physical-device offline acceptance and final deployment remain separate work.
+**Development status (29 October 2026):** The EOI and technical-proposal development baseline is implemented, including the final six closing items. The isolated Laravel suite passed **116 tests, 859 assertions**. This is not RAWYOD acceptance. The staging Android v0.3.6 debug APK is publicly downloadable at https://arewa.kasua.ng/download/android without website login. Native app access still requires authorized staff credentials. Production signing, physical-device offline acceptance and final deployment remain separate work.
 
 ## Development deliverables
 
@@ -78,3 +78,10 @@ Uploaded JPEG/PNG/WebP photos are retained byte-for-byte in private evidence sto
 - A *previously paired* device may be unlocked with its enrolled fingerprint or preconfigured offline PIN; saved assigned LGAs/categories, encrypted queued drafts/evidence, cached profile and previously loaded report listings can be viewed offline. First account enrollment, changes to password/2FA, reports not yet cached, live public web content and server synchronization necessarily require internet; never imply otherwise.
 - Network failures present short actionable messages rather than raw socket diagnostics; legacy hard-coded IP resolution fallback was removed. GPS and camera/file-picking callbacks fail safely and preserve form state; runtime behavior on the affected physical device remains pending acceptance.
 - Staff profile/password/2FA API regression tests passed; a native debug APK was compiled and tested, pending physical-device crash reproduction and acceptance.
+
+### Yobe State Ward support (29 October 2026)
+
+- The browser and Android field forms now capture **Ward separately from Community**, using the currently chosen LGA to filter choices. Search wards or choose **Ward not listed? Enter manually**. Existing reports and queued historical mobile payloads without a Ward remain valid.
+- The Yobe-only reference table contains 178 wards across 17 LGAs, derived from the [public Nigerian state/LGA/ward repository](https://github.com/afeibukun/nigerian-state-lgas-wards-polling-units). The original slugs are retained in `database/data/yobe_wards.json`; normalized labels are displayed to users. Reference data is treated as editable-local-input assistance, not an official legal boundary authority.
+- The source dataset is bundled locally so offline Android reference data is available after the initial bootstrap. New wards are not automatically added to the shared roster when typed manually; the report retains the typed ward as submitted.
+- Report revisions, staff analytics, spreadsheet export, published report metadata, and API synchronization also support Ward. No public registration or write access was introduced.

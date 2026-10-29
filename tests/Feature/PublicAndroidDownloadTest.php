@@ -21,7 +21,7 @@ class PublicAndroidDownloadTest extends TestCase
             $this->get(route('downloads.android'))->assertOk()
                 ->assertHeader('Content-Type', 'application/vnd.android.package-archive')
                 ->assertHeader('X-Content-Type-Options', 'nosniff')
-                ->assertDownload('arewa-civic-tracker-v0.3.5-debug.apk');
+                ->assertDownload('arewa-civic-tracker-v0.3.6-debug.apk');
         } finally {
             unlink($path);
         }

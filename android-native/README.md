@@ -87,3 +87,10 @@ Field officers can open their submitted reports and edit eligible records online
 - Offline unlock requires one successful online enrollment and a configured device PIN or enrolled fingerprint. An offline PIN verifier uses PBKDF2-HMAC-SHA256 with unique salt, protected by the device Keystore. PIN failure throttling is local convenience, not a substitute for server authentication.
 - Previously loaded profile, report list and assigned reference data are cached locally with encrypted storage. Server-only password changes, TOTP setup/disable, uncached data, uploading and the public website need a connection.
 - The native profile/password/2FA endpoints use account-scoped bearer authorization and current-password/TOTP verification. Account recovery codes are presented once after enrollment.
+
+## v0.3.6 Yobe Ward in field reports
+
+- The offline field form and submitted report revision form include Ward as a separate value from Community.
+- Ward choices use cached LGA-specific Yobe reference data received in the signed-in bootstrap payload; searchable selection is available and staff may enter an unlisted ward manually.
+- Ward is included in locally encrypted drafts, synchronized uploads and revision payloads. The server accepts legacy queued evidence/reports without a Ward field.
+- Ward reference data source: afeibukun/nigerian-state-lgas-wards-polling-units (Yobe subset, 178 wards in 17 LGAs, snapshot 2026-10-29). Live GPS and camera behavior remains subject to acceptance on the target phone.
