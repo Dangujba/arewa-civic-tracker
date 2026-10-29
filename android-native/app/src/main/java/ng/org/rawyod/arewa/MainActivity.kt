@@ -168,7 +168,10 @@ private fun FieldApplication(
                 (user==null || vm.requiresAuthentication) && guestPublic ->
                     PublicGuestScreen(onBack={guestPublic=false})
                 user==null || vm.requiresAuthentication ->
-                    LoginScreen(vm,onPublicView={guestPublic=true})
+                    LoginScreen(vm,onPublicView={guestPublic=true},
+                        onBiometric={
+                            authenticate("Unlock saved field account",vm::unlockWithFingerprint)
+                        })
                 vm.isBiometricLocked -> FingerprintLockScreen(
                     biometricNotice,
                     onUnlock={authenticate("Unlock Arewa Civic Tracker",vm::unlockWithFingerprint)},
@@ -271,7 +274,7 @@ private fun PublicGuestScreen(onBack:()->Unit) {
 }
 
 @Composable
-private fun LoginScreen(vm:FieldViewModel,onPublicView:()->Unit) {
+private fun LoginScreen(vm:FieldViewModel,onPublicView:()->Unit,onBiometric:()->Unit) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var otp by remember { mutableStateOf("") }
@@ -282,6 +285,13 @@ private fun LoginScreen(vm:FieldViewModel,onPublicView:()->Unit) {
         Text(if(challenge==null)"Sign in" else "Verify your account",
             style=MaterialTheme.typography.headlineSmall,fontWeight=FontWeight.Bold)
         if(challenge==null) {
+            if(vm.userId!=null && vm.fingerprintEnabled){
+                OutlinedButton(shape=RectangleShape,onClick=onBiometric,
+                    modifier=Modifier.fillMaxWidth()){
+                    Icon(Icons.Filled.Fingerprint,contentDescription=null)
+                    Spacer(Modifier.width(8.dp));Text("Unlock saved account with fingerprint")
+                }
+            }
             if(vm.userId!=null && vm.offlinePinEnabled){
                 var offlinePin by remember { mutableStateOf("") }
                 OutlinedTextField(offlinePin,{offlinePin=it.filter(Char::isDigit).take(12)},

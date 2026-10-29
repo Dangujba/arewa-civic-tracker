@@ -65,7 +65,12 @@ class SessionStore(context: Context, private val vault: CryptoVault) {
         check(preferences.edit().putLong("fingerprint_owner", owner)
             .putBoolean("fingerprint_enabled",value).commit())
     }
-    fun clearSession() { preferences.edit().remove("token").remove("user")
-        .remove("fingerprint_enabled").remove("fingerprint_owner").remove("offline_pin")
-        .remove("catalog").remove("account").remove("reports").commit() }
+    fun clearSession() {
+        val editor=preferences.edit()
+            .remove("token").remove("user")
+            .remove("fingerprint_enabled").remove("fingerprint_owner").remove("offline_pin")
+            .remove("catalog").remove("account").remove("reports")
+        preferences.all.keys.filter{it.startsWith("report_")}.forEach(editor::remove)
+        check(editor.commit()) { "Could not clear the saved account." }
+    }
 }
