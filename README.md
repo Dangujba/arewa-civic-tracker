@@ -15,7 +15,7 @@ Civic monitoring, public project reporting and evidence verification for **Roadm
 - Evidence-aware mobile report form with image/PDF attachments, permission-based editable GPS coordinates, unchanged original evidence, private optimized previews, and offline evidence outbox
 - Optional authenticator-app two-factor sign-in with secure QR setup, one-time recovery codes and account security controls
 
-**Development status (29 October 2026):** The EOI and technical-proposal development baseline is implemented, including the final six closing items. The isolated Laravel suite passed **116 tests, 859 assertions**. This is not RAWYOD acceptance. The staging Android v0.3.6 debug APK is publicly downloadable at https://arewa.kasua.ng/download/android without website login. Native app access still requires authorized staff credentials. Production signing, physical-device offline acceptance and final deployment remain separate work.
+**Development status (29 October 2026):** The EOI and technical-proposal development baseline is implemented, including the final six closing items. The isolated Laravel suite passed **116 tests, 859 assertions**. This is not RAWYOD acceptance. The staging Android v0.3.7 debug APK is publicly downloadable at https://arewa.kasua.ng/download/android without website login. Native app access still requires authorized staff credentials. Production signing, physical-device offline acceptance and final deployment remain separate work.
 
 ## Development deliverables
 
@@ -85,3 +85,7 @@ Uploaded JPEG/PNG/WebP photos are retained byte-for-byte in private evidence sto
 - The Yobe-only reference table contains 178 wards across 17 LGAs, derived from the [public Nigerian state/LGA/ward repository](https://github.com/afeibukun/nigerian-state-lgas-wards-polling-units). The original slugs are retained in `database/data/yobe_wards.json`; normalized labels are displayed to users. Reference data is treated as editable-local-input assistance, not an official legal boundary authority.
 - The source dataset is bundled locally so offline Android reference data is available after the initial bootstrap. New wards are not automatically added to the shared roster when typed manually; the report retains the typed ward as submitted.
 - Report revisions, staff analytics, spreadsheet export, published report metadata, and API synchronization also support Ward. No public registration or write access was introduced.
+
+### Android v0.3.7 capture/permissions repair
+
+Camera, GPS and Add Evidence launchers are now registered on the MainActivity rather than its conditional Compose form; camera/GPS permissions are requested where appropriate, Camera receives explicit URI grants, and file-backed original photos are encrypted safely. Users see a status for every action, including cancellation, permission denial and GPS timeout. Android's SAF picker intentionally requires no broad storage permission.

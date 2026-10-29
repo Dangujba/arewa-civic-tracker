@@ -27,7 +27,7 @@ class NativeAndroidArtifactAccessTest extends TestCase
                     'must_change_password' => false,
                 ]);
                 $this->actingAs($user)->get($url)->assertOk()
-                    ->assertDownload('arewa-civic-tracker-v0.3.6-debug.apk');
+                    ->assertDownload('arewa-civic-tracker-v0.3.7-debug.apk');
             }
         } finally {
             unlink($path);

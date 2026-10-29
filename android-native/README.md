@@ -94,3 +94,11 @@ Field officers can open their submitted reports and edit eligible records online
 - Ward choices use cached LGA-specific Yobe reference data received in the signed-in bootstrap payload; searchable selection is available and staff may enter an unlisted ward manually.
 - Ward is included in locally encrypted drafts, synchronized uploads and revision payloads. The server accepts legacy queued evidence/reports without a Ward field.
 - Ward reference data source: afeibukun/nigerian-state-lgas-wards-polling-units (Yobe subset, 178 wards in 17 LGAs, snapshot 2026-10-29). Live GPS and camera behavior remains subject to acceptance on the target phone.
+
+## v0.3.7 device capture repair
+
+- Camera, document selection and runtime GPS/camera permissions are registered at the Activity level, not inside the conditional reporting Compose screen. This keeps callbacks registered during navigation, permission dialogs and biometric locks.
+- Camera explicitly requests CAMERA permission when necessary. GPS requests fine/coarse Location when necessary. Add Evidence uses Android's document picker and does not need a broad storage permission. Previously granted permissions may not prompt again.
+- OEM camera compatibility: grant URI read/write permissions through both clip data and intent flags. File URI camera evidence is read via FileInputStream, and originals are encrypted locally without changing image bytes.
+- Every tap provides actionable inline feedback; GPS shows active acquisition, and cancelling the camera or document picker produces a status. If users permanently deny permissions, a direct link to Android app settings appears.
+- Release checks: automated build and unit tests verify compilation, but camera/document-provider/GPS workflows must also be accepted on an actual device. Do not claim device-level verification before it occurs.
