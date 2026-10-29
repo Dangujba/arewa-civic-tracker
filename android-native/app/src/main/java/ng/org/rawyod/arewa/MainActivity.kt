@@ -156,7 +156,7 @@ private fun LoginScreen(vm:FieldViewModel) {
 }
 
 @Composable
-private fun ChoiceField(label:String,items:List<Choice>,value:Int,onChoose:(Int)->Unit) {
+internal fun ChoiceField(label:String,items:List<Choice>,value:Int,onChoose:(Int)->Unit) {
     var expanded by remember { mutableStateOf(false) }
     Column {
         Text(label,style=MaterialTheme.typography.labelMedium)
@@ -394,13 +394,14 @@ private fun OutboxScreen(vm:FieldViewModel,onEdit:()->Unit) {
 @Composable
 private fun ReportsScreen(vm:FieldViewModel) {
     var response by remember { mutableStateOf("") }
+    var editingReport by remember { mutableStateOf<Long?>(null) }
     Content("My submitted reports","Review verification status and respond to MEAL clarification requests.") {
         OutlinedButton(shape=RectangleShape,onClick=vm::refreshReports,modifier=Modifier.fillMaxWidth()){
             Text("Refresh from server")
         }
         vm.reports.forEach{report->
             Surface(border=BorderStroke(1.dp,Color(0xFFCBD7CC))) {
-                Column(Modifier.fillMaxWidth().clickable { vm.selectReport(report.id) }
+                Column(Modifier.fillMaxWidth().clickable { editingReport=null;vm.selectReport(report.id) }
                     .padding(12.dp)){
                     Text(report.title,fontWeight=FontWeight.Bold)
                     Text("${report.reference}  •  ${report.status.replace('_',' ')}",
@@ -410,16 +411,25 @@ private fun ReportsScreen(vm:FieldViewModel) {
         }
         vm.selectedReport?.let{detail->
             HorizontalDivider()
+            if(editingReport==detail.id && detail.editable) {
+                SubmittedRevisionForm(vm,detail,
+                  onCancel={editingReport=null},onSaved={editingReport=null})
+            } else {
             Text(detail.title,style=MaterialTheme.typography.titleLarge)
             Text(detail.description)
             Text("Status: ${detail.status.replace('_',' ')}")
-            detail.followups.forEach{Text("Follow-up: $it")}
+            detail.followups.forEach{Text("Follow-up: "+it)}
+            if(detail.editable){
+                OutlinedButton(shape=RectangleShape,onClick={editingReport=detail.id},
+                    modifier=Modifier.fillMaxWidth()){Text("Edit Submitted Report")}
+            }
             if(detail.status=="clarification_requested"){
                 OutlinedTextField(response,{response=it},label={Text("Clarification response")},
                     modifier=Modifier.fillMaxWidth(),minLines=3)
                 Button(shape=RectangleShape,onClick={
                     vm.respondToClarification(response);response=""
                 },enabled=response.length>=5){Text("Submit clarification")}
+            }
             }
         }
         OutlinedButton(shape=RectangleShape,onClick=vm::logout,modifier=Modifier.fillMaxWidth()){

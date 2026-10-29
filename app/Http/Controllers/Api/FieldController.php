@@ -110,8 +110,14 @@ class FieldController extends Controller {
   abort_unless((int)$case->reporter_id===(int)$u->id,403);
   $case->load(['lga:id,name','sector:id,name','followups:id,case_id,author_id,note,created_at',
    'evidence:id,case_id,original_name,mime_type,size_bytes']);
+  $fields=$case->only(['type','title','description','lga_id','community','sector_id','report_category_id',
+    'observations','duty_bearers','progress_status','latitude','longitude']);
+  $fields['observation_date']=$case->observation_date->format('Y-m-d');
   return response()->json(['report'=>$case->only(['id','reference','title','description','verification_status','progress_status',
-   'observation_date','community','latitude','longitude','lga','sector','followups','evidence'])])
+   'observation_date','community','latitude','longitude','lga','sector','followups','evidence','closure_status']),
+   'editable'=>$u->can('update',$case),
+   'version'=>(int)\App\Models\CaseRevision::where('case_id',$case->id)->max('version'),
+   'fields'=>$fields])
    ->header('Cache-Control','private, no-store');
  }
  public function store(StoreCaseRequest $r,CaseSubmissionService $service,CaseEvidenceService $evidenceService){

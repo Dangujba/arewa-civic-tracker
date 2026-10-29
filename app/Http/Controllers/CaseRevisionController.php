@@ -20,6 +20,23 @@ class CaseRevisionController extends Controller {
      'communities'=>\App\Models\Community::whereIn('lga_id',$lgas->pluck('id'))->where('is_active',true)->orderBy('name')->get()]);
  }
  public function update(Request $r,CivicCase $case){
+  $this->applyRevision($r,$case);
+  return redirect()->route('cases.show',$case)->with('message','Report changes saved with version history.');
+ }
+ public function apiUpdate(Request $r,CivicCase $case){
+  $user=$r->user();
+  abort_unless($user instanceof \App\Models\User && $user->is_active &&
+      $user->role==='focal' && !$user->must_change_password &&
+      $user->tokenCan('field:report') && (int)$case->reporter_id===(int)$user->id,403);
+  $this->applyRevision($r,$case);
+  return response()->json([
+   'message'=>'Report revision saved.',
+   'version'=>(int)CaseRevision::where('case_id',$case->id)->max('version'),
+   'reference'=>$case->reference,
+  ])->header('Cache-Control','private, no-store');
+ }
+ private function applyRevision(Request $r,CivicCase $case):void{
+
   $r->user()->can('update',$case)||abort(403);
   $data=$r->validate([
    'version'=>['required','integer','min:0'],
@@ -71,6 +88,5 @@ class CaseRevisionController extends Controller {
    AdminActivityLog::record($r->user(),'case.revised',$locked,
     ['version'=>$current+1,'changed_fields'=>array_keys($changes)]);
   });
-  return redirect()->route('cases.show',$case)->with('message','Report changes saved with version history.');
  }
 }

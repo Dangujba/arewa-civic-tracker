@@ -47,3 +47,7 @@ The debug APK is for controlled testing, not production distribution. It uses An
 - Enrolled officers can select published categories and communities for their assigned LGAs while retaining manual community entry.
 - Category IDs are transmitted only when a valid category for the selected report type has been chosen.
 - The administrator-only debug APK endpoint now serves v0.3.0. This is not production-signed.
+
+## v0.3.1 submitted report amendments
+
+Field officers can open their submitted reports and edit eligible records online. The application fetches the latest server-side version, supports correction of report details with a mandatory reason, and preserves the shared web/API version history. Approved, rejected or closed reports are locked. Offline draft editing remains available separately. This build remains debug-signed for development verification.

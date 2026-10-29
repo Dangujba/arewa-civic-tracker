@@ -27,7 +27,8 @@ data class CategoryChoice(val id:Int,val name:String,val type:String)
 data class CommunityChoice(val id:Int,val name:String,val lgaId:Int)
 data class ReportRow(val id: Long, val reference: String, val title: String, val status: String)
 data class ReportDetails(val id: Long, val reference: String, val title: String,
-                         val status: String, val description: String, val followups: List<String>)
+                         val status: String, val description: String, val followups: List<String>,
+                         val fields: JSONObject,val version:Int,val editable:Boolean)
 
 class FieldViewModel(application: Application) : AndroidViewModel(application) {
     private val app = application as ArewaApp
@@ -361,13 +362,40 @@ class FieldViewModel(application: Application) : AndroidViewModel(application) {
         val token=app.store.token() ?: return
         viewModelScope.launch {
             try {
-                val item=app.api.report(token,id).getJSONObject("report")
+                val response=app.api.report(token,id)
+                val item=response.getJSONObject("report")
                 val follows=item.optJSONArray("followups")
                 selectedReport=ReportDetails(id,item.optString("reference"),item.optString("title"),
                     item.optString("verification_status"),item.optString("description"),
                     if(follows==null) emptyList() else (0 until follows.length())
-                        .map { follows.getJSONObject(it).optString("note") })
+                        .map { follows.getJSONObject(it).optString("note") },
+                    response.optJSONObject("fields") ?: JSONObject(),
+                    response.optInt("version",0),response.optBoolean("editable",false))
             } catch(e:Exception){message=e.message ?: "Cannot load report"}
+        }
+    }
+
+    fun reviseSubmittedReport(report:ReportDetails,payload:JSONObject,onSaved:()->Unit){
+        if(busy)return
+        val token=app.store.token() ?: run {beginReauthentication();return}
+        viewModelScope.launch{
+            busy=true
+            try {
+                require(report.editable) {"This report is locked for editing."}
+                validatePayload(payload)
+                require(payload.optString("reason").trim().length in 5..2000){
+                    "Explain the reason for this correction (at least five characters)."
+                }
+                payload.put("version",report.version)
+                val result=app.api.reviseReport(token,report.id,payload)
+                message=result.optString("message","Report changes saved.")
+                onSaved()
+                selectReport(report.id)
+                refreshReports()
+            }catch(e:Exception){
+                if(e is ApiFailure && e.code==401)beginReauthentication()
+                else message=networkError(e)
+            }finally{busy=false}
         }
     }
 

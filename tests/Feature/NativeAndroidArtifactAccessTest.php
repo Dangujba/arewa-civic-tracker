@@ -21,7 +21,7 @@ class NativeAndroidArtifactAccessTest extends TestCase
         $focal=$this->account('focal','apk-field@example.test');
         $this->actingAs($focal)->get($url)->assertForbidden();
         $admin=$this->account('admin','apk-admin@example.test');
-        $path=storage_path('app/private/native-release/arewa-civic-tracker-v0.3.0-debug.apk');
+        $path=storage_path('app/private/native-release/arewa-civic-tracker-v0.3.1-debug.apk');
         @mkdir(dirname($path),0700,true);
         file_put_contents($path,'temporary-test-content');
         try {

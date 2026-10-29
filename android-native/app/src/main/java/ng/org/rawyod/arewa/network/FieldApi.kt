@@ -52,6 +52,7 @@ class FieldApi(private val vault: CryptoVault) {
         if(token != null) builder.header("Authorization","Bearer $token")
         when(method) {
             "POST" -> builder.post(body ?: "{}".toRequestBody("application/json".toMediaType()))
+            "PUT" -> builder.put(body ?: "{}".toRequestBody("application/json".toMediaType()))
             else -> builder.get()
         }
         client.newCall(builder.build()).execute().use { response ->
@@ -95,6 +96,12 @@ class FieldApi(private val vault: CryptoVault) {
     suspend fun report(token: String, id: Long): JSONObject =
         kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
             call("reports/$id","GET",token)
+        }
+
+    suspend fun reviseReport(token: String, reportId: Long, request: JSONObject): JSONObject =
+        kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
+            call("reports/"+reportId, "PUT", token,
+                request.toString().toRequestBody("application/json".toMediaType()))
         }
 
     suspend fun similarReports(token: String, request: JSONObject): JSONObject =

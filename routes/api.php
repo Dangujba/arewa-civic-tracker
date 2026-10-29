@@ -9,6 +9,7 @@ Route::prefix('v1')->group(function(){
   Route::get('/bootstrap',[FieldController::class,'bootstrap']);
   Route::get('/reports',[FieldController::class,'index']);
   Route::get('/reports/{case}',[FieldController::class,'show'])->whereNumber('case');
+  Route::put('/reports/{case}',[\App\Http\Controllers\CaseRevisionController::class,'apiUpdate'])->whereNumber('case');
   Route::post('/reports',[FieldController::class,'store'])->middleware('throttle:20,1');
   Route::post('/reports/similar',[FieldController::class,'similar'])->middleware('throttle:30,1');
   Route::post('/reports/{case}/clarification',[FieldController::class,'clarification'])->whereNumber('case');
