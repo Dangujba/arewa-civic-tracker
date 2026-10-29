@@ -49,13 +49,33 @@ jobs:
         run: npm ci --no-audit --no-fund
       - name: Build frontend and locally bundled icon assets
         run: npm run build
-      - name: Verify Android field bundle
-        run: |
-          npm ci --prefix mobile --no-audit --no-fund
-          npm run build --prefix mobile
       - name: Verify JavaScript syntax
         run: |
           node --check public/js/act-sidebar.js
           node --check public/js/act-map.js
           node --check public/js/act-interactions.js
           node --check public/js/act-select-dialogs.js
+
+  android-native:
+    name: Native Android Kotlin unit tests and debug APK
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+          cache: gradle
+      - uses: android-actions/setup-android@v3
+      - name: Install Android 36 SDK
+        run: sdkmanager "platforms;android-36" "build-tools;35.0.0"
+      - name: Run native Android tests and compile
+        working-directory: android-native
+        run: ./gradlew --no-daemon --stacktrace testDebugUnitTest assembleDebug
+      - name: Upload debug APK for QA
+        uses: actions/upload-artifact@v4
+        with:
+          name: arewa-native-android-debug
+          path: android-native/app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error

@@ -1,0 +1,252 @@
+package ng.org.rawyod.arewa.ui
+
+import android.app.Application
+import android.net.Uri
+import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
+import ng.org.rawyod.arewa.ArewaApp
+import ng.org.rawyod.arewa.data.Draft
+import ng.org.rawyod.arewa.data.StagedEvidence
+import ng.org.rawyod.arewa.worker.SyncScheduler
+import org.json.JSONObject
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+import java.util.UUID
+
+data class Choice(val id: Int, val name: String)
+data class ReportRow(val id: Long, val reference: String, val title: String, val status: String)
+data class ReportDetails(val id: Long, val reference: String, val title: String,
+                         val status: String, val description: String, val followups: List<String>)
+
+class FieldViewModel(application: Application) : AndroidViewModel(application) {
+    private val app = application as ArewaApp
+    private val repo = app.repository
+    var userName by mutableStateOf(app.store.user()?.optString("name").orEmpty())
+        private set
+    var userId by mutableStateOf(app.store.userId())
+        private set
+    var message by mutableStateOf("")
+        private set
+    var busy by mutableStateOf(false)
+        private set
+    var lgas by mutableStateOf(emptyList<Choice>())
+        private set
+    var sectors by mutableStateOf(emptyList<Choice>())
+        private set
+    var drafts by mutableStateOf(emptyList<Draft>())
+        private set
+    var reports by mutableStateOf(emptyList<ReportRow>())
+        private set
+    var selectedReport by mutableStateOf<ReportDetails?>(null)
+        private set
+    var attachments by mutableStateOf(emptyList<StagedEvidence>())
+        private set
+    private var observing: Job? = null
+
+    init {
+        parseCatalog(app.store.catalog())
+        observe()
+        if (userId != null) refreshCatalog()
+    }
+
+    private fun parseCatalog(json: JSONObject?) {
+        fun read(key: String): List<Choice> {
+            val array=json?.optJSONArray(key) ?: return emptyList()
+            return (0 until array.length()).map { i ->
+                array.getJSONObject(i).let { Choice(it.getInt("id"), it.getString("name")) }
+            }
+        }
+        lgas=read("lgas");sectors=read("sectors")
+    }
+
+    private fun observe() {
+        observing?.cancel()
+        val owner=userId ?: run { drafts=emptyList(); return }
+        observing=viewModelScope.launch {
+            repo.pending(owner).collectLatest { drafts=it }
+        }
+    }
+
+    fun display(text: String) { message=text }
+    fun clearMessage() { message="" }
+
+    fun login(email: String, password: String, otp: String) {
+        if(busy) return
+        viewModelScope.launch {
+            busy=true
+            try {
+                val result=app.api.login(email.trim(),password,otp.trim())
+                val token=result.getString("token")
+                val user=result.getJSONObject("user")
+                app.store.storeSession(token,user)
+                userName=user.optString("name");userId=user.optLong("id")
+                observe()
+                try {
+                    val catalog=app.api.bootstrap(token)
+                    app.store.cacheCatalog(catalog);parseCatalog(catalog)
+                } catch (e: Exception) {
+                    message="Signed in. LGA/sector data will refresh when connected: ${e.message}"
+                }
+                SyncScheduler.enqueue(app)
+            } catch (e: Exception) { message=e.message ?: "Unable to sign in" }
+            finally { busy=false }
+        }
+    }
+
+    fun refreshCatalog() {
+        val token=app.store.token() ?: return
+        viewModelScope.launch {
+            try {
+                val catalog=app.api.bootstrap(token)
+                app.store.cacheCatalog(catalog);parseCatalog(catalog)
+            } catch (e: Exception) {
+                if (app.store.catalog()==null)message="Connect to internet to retrieve your assigned LGAs."
+            }
+        }
+    }
+
+    fun logout() {
+        if(busy) return
+        viewModelScope.launch {
+            val owner=userId ?: return@launch
+            if(repo.dao.count(owner)>0) {
+                message="Synchronize all pending field reports before signing out. Your evidence is protected."
+                return@launch
+            }
+            // Revocation is best-effort; the token expires server-side even if temporarily offline.
+            val token=app.store.token()
+            if(token!=null) runCatching { app.api.logout(token) }
+            app.store.clearSession()
+            userName="";userId=null;lgas=emptyList();sectors=emptyList()
+            reports=emptyList();selectedReport=null;observing?.cancel();drafts=emptyList()
+            message="Signed out."
+        }
+    }
+
+    fun captureEvidence(uri: Uri, filename: String? = null, mime: String? = null,
+                        onComplete: (() -> Unit)? = null) {
+        if(busy) return
+        viewModelScope.launch {
+            busy=true
+            try {
+                if (attachments.size>=5) error("Maximum five evidence items")
+                val detected=mime ?: app.contentResolver.getType(uri) ?: "application/octet-stream"
+                attachments=attachments + repo.prepareEvidence(uri,filename,detected)
+                message="Evidence encrypted and ready."
+                onComplete?.invoke()
+            } catch(e: Exception) { message=e.message ?: "Cannot attach evidence" }
+            finally{busy=false}
+        }
+    }
+
+    fun captureMany(uris: List<Uri>) {
+        if(busy) return
+        viewModelScope.launch {
+            busy=true
+            try {
+                val space=(5-attachments.size).coerceAtLeast(0)
+                for(uri in uris.take(space)) {
+                    val mime=app.contentResolver.getType(uri) ?: "application/octet-stream"
+                    attachments=attachments + repo.prepareEvidence(uri,null,mime)
+                }
+                if(uris.size>space) message="Only five supporting files can be attached."
+            } catch(e:Exception){message=e.message ?: "Could not attach file"}
+            finally {busy=false}
+        }
+    }
+
+    fun retryDraft(draftId: String) {
+        val owner=userId ?: return
+        viewModelScope.launch {
+            repo.dao.mark(draftId,owner,"retry",null)
+            SyncScheduler.enqueue(app)
+            message="Retry scheduled. The report remains encrypted on your device."
+        }
+    }
+
+    fun removeEvidence(index: Int) {
+        val removed=attachments.getOrNull(index) ?: return
+        repo.abandonUnused(listOf(removed))
+        attachments=attachments.filterIndexed { i,_ -> i!=index }
+    }
+
+    fun save(payload: JSONObject, onSaved: () -> Unit) {
+        if(busy) return
+        viewModelScope.launch {
+            busy=true
+            try {
+                validatePayload(payload)
+                repo.queue(payload,attachments)
+                attachments=emptyList()
+                message="Report encrypted on this device. Automatic synchronization queued."
+                onSaved()
+            } catch(e: Exception){message=e.message ?: "Unable to save report"}
+            finally{busy=false}
+        }
+    }
+
+    fun synchronize() {
+        SyncScheduler.enqueue(app)
+        message="Synchronization scheduled for when a network is available."
+    }
+
+    fun refreshReports() {
+        val token=app.store.token() ?: run { message="Please sign in";return }
+        viewModelScope.launch {
+            try {
+                val rows=app.api.reports(token).getJSONArray("reports")
+                reports=(0 until rows.length()).map { i ->
+                    rows.getJSONObject(i).let {
+                        ReportRow(it.getLong("id"),it.optString("reference"),
+                            it.optString("title"),it.optString("verification_status"))
+                    }
+                }
+            }catch(e:Exception){message=e.message ?: "Connect to refresh submitted reports"}
+        }
+    }
+
+    fun selectReport(id: Long) {
+        val token=app.store.token() ?: return
+        viewModelScope.launch {
+            try {
+                val item=app.api.report(token,id).getJSONObject("report")
+                val follows=item.optJSONArray("followups")
+                selectedReport=ReportDetails(id,item.optString("reference"),item.optString("title"),
+                    item.optString("verification_status"),item.optString("description"),
+                    if(follows==null) emptyList() else (0 until follows.length())
+                        .map { follows.getJSONObject(it).optString("note") })
+            } catch(e:Exception){message=e.message ?: "Cannot load report"}
+        }
+    }
+
+    fun respondToClarification(text: String) {
+        val report=selectedReport ?: return
+        val token=app.store.token() ?: return
+        viewModelScope.launch {
+            try {
+                require(text.trim().length >= 5) { "Enter at least five characters" }
+                app.api.clarification(token,report.id,text.trim())
+                message="Clarification response submitted."
+                selectReport(report.id)
+                refreshReports()
+            }catch(e:Exception){message=e.message ?: "Cannot submit response"}
+        }
+    }
+
+    fun draftTitle(draft: Draft): String =
+        runCatching { repo.decode(draft).optString("title","Untitled field report") }.getOrDefault("Locked draft")
+}
+
+internal fun validatePayload(value: JSONObject) {
+    require(value.optString("title").trim().length in 5..200) { "Title must be between 5 and 200 characters." }
+    require(value.optString("description").trim().length in 15..10000) { "Description must contain at least 15 characters." }
+    require(value.optString("community").trim().isNotBlank()) { "Community is required." }
+    require(value.optInt("lga_id")>0 && value.optInt("sector_id")>0) { "Choose a valid LGA and sector." }
+    require(value.optString("observation_date").matches(Regex("\\d{4}-\\d{2}-\\d{2}"))) { "Use a valid YYYY-MM-DD date." }
+    require(value.optString("type") in setOf("public_project","governance_issue")) { "Unknown report type." }
+}
