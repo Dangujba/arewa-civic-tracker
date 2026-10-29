@@ -69,6 +69,7 @@ Route::middleware(['auth',EnsurePasswordIsChanged::class])->group(function(){
     Route::post('/cases/{case}/clarification',[ClarificationController::class,'respond'])->name('cases.clarification')->whereNumber('case');
     Route::post('/cases/{case}/progress',[ProgressController::class,'update'])->name('cases.progress')->whereNumber('case');
     Route::post('/cases/{case}/evidence',[EvidenceController::class,'store'])->name('cases.evidence')->whereNumber('case');
+    Route::get('/evidence/{evidence}/preview',[EvidenceController::class,'preview'])->name('evidence.preview')->whereNumber('evidence');
     Route::get('/evidence/{evidence}/download',[EvidenceController::class,'download'])->name('evidence.download')->whereNumber('evidence');
     Route::get('/map',[MapController::class,'page'])->name('map.index');
     Route::get('/map/data',[MapController::class,'data'])->name('map.data');

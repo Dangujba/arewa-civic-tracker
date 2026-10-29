@@ -96,7 +96,7 @@ class FieldController extends Controller {
    'communities'=>\App\Models\Community::where('is_active',true)
      ->whereIn('lga_id',$u->assignedLgas()->pluck('lgas.id'))->get(['id','lga_id','name']),
    'status_labels'=>\App\Models\WorkflowStatusLabel::get(['kind','code','label']),
-   'max_evidence_files'=>5,'max_evidence_bytes'=>5242880,'server_time'=>now()->toIso8601String()])
+   'max_evidence_files'=>5,'max_evidence_bytes'=>10485760,'server_time'=>now()->toIso8601String()])
    ->header('Cache-Control','private, no-store');
  }
  public function index(Request $r){
