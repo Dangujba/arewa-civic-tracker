@@ -1,0 +1,80 @@
+/* Shared flat workspace components: reports, verification, sectors, staff and activity logs. */
+.portal-main .act-page-heading{margin-bottom:15px}
+.portal-main .act-page-heading h1{font-size:29px;margin:5px 0 5px;letter-spacing:-.035em}
+.portal-main .act-page-heading p{font-size:12px;margin:0}
+.portal-main .act-report-filter-card{padding:15px 18px!important;overflow:visible!important;margin-bottom:18px}
+.portal-main .act-report-filter-card .field{margin:0!important;min-width:0}
+.portal-main .act-inline-filter{display:grid;grid-template-columns:repeat(2,minmax(0,1fr)) auto;align-items:end;gap:12px;width:100%}
+.portal-main .act-inline-filter .field{min-width:0;margin:0!important}
+.portal-main .act-inline-filter label,.portal-main .reporting-filters label{font-size:11px;font-weight:800;color:#436550;margin-bottom:7px;display:block}
+.portal-main .act-inline-filter select,.portal-main .act-inline-filter input,.portal-main .reporting-filters select,.portal-main .reporting-filters input{width:100%;height:41px;min-height:41px;font-size:12px;padding:8px 11px;border:1px solid #c7d6c9;border-radius:0;background:#fff}
+.portal-main .act-filter-actions{display:flex;gap:7px;align-items:center;justify-content:flex-end;flex-wrap:nowrap;min-width:0;margin:0!important}
+.portal-main .act-filter-actions .btn,.portal-main .act-filter-actions .btn-outline{display:inline-flex;justify-content:center;align-items:center;gap:7px;white-space:nowrap;min-height:41px;height:41px;padding:8px 14px;font-size:12px;margin:0;line-height:1.2}
+.portal-main .act-filter-actions .btn i{font-size:11px}
+.portal-main .reporting-filters{padding:15px 18px!important;overflow:visible!important}
+.portal-main .reporting-filters .act-analytics-filter-grid{display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:12px!important;margin:0!important;align-items:end}
+.portal-main .reporting-filters .act-analytics-filter-grid .field{margin:0!important;min-width:0}
+.portal-main .act-queue-filter{grid-template-columns:minmax(220px,360px) auto;justify-content:start}
+.portal-main .act-structured-panel{padding:0!important;overflow:hidden}
+.portal-main .act-structured-panel .dash-panel-heading{padding:20px 20px 10px;margin:0}
+.portal-main .act-structured-panel .dash-panel-heading h2{font-size:17px}
+.portal-main .act-compact-table{width:100%;min-width:700px;border-collapse:collapse}
+.portal-main .act-compact-table th,.portal-main .dash-table-wrap table th{padding:12px 16px;background:#f8faf7;color:#698070;border-bottom:1px solid #e1ebe1;font-size:10px;letter-spacing:.07em;text-transform:uppercase;font-weight:800;white-space:nowrap}
+.portal-main .act-compact-table td,.portal-main .dash-table-wrap table td{padding:13px 16px;border-bottom:1px solid #edf1ed;vertical-align:middle;font-size:12px;line-height:1.45}
+.portal-main .act-compact-table tbody tr:hover,.portal-main .dash-table-wrap table tbody tr:hover{background:#fbfdfb}
+.portal-main .act-state-chip{display:inline-flex;align-items:center;padding:5px 8px;font-size:10px;font-weight:760;background:#edf5ed;color:#236b45;white-space:nowrap}
+.portal-main .act-table-icon-link{display:inline-grid;place-items:center;width:31px;height:31px;border:1px solid #d6e4d9;color:#2c6950;background:#fff}
+.portal-main .act-table-icon-link:hover{background:#eaf5ee}
+.portal-main .act-table-empty{text-align:center;padding:36px 16px!important;color:#728878;font-size:12px}
+.portal-main .act-panel-pagination{padding:13px 18px;border-top:1px solid #e5ece5}
+.portal-main .dash-panel .dash-table-wrap{overflow-x:auto}
+.portal-main .dash-panel table{border-collapse:collapse;width:100%}
+.portal-main .dash-panel .dash-table-wrap table a:not(.btn){color:#216d49;font-weight:750}
+.portal-main .dash-panel .dash-table-wrap table a:hover{text-decoration:underline}
+.portal-main .reporting-filters .ts-wrapper.single .ts-control,.portal-main .act-inline-filter .ts-wrapper.single .ts-control{height:41px;min-height:41px;padding:7px 10px}
+.portal-main .act-inline-filter .ts-wrapper{min-width:0}
+.portal-main .act-sector-heading{margin:0 0 17px}
+.portal-main .act-sector-heading h1{font-size:29px;margin:4px 0}
+.portal-main .act-sector-create{padding:16px 18px!important;margin-bottom:16px}
+.portal-main .act-sector-create form{display:grid;grid-template-columns:minmax(200px,1fr) auto;gap:12px;align-items:end}
+.portal-main .act-sector-create .field{margin:0!important}
+.portal-main .act-sector-create label{font-size:11px;color:#45634e;margin:0 0 7px}
+.portal-main .act-sector-create input{height:41px;min-height:41px}
+.portal-main .act-sector-create button{height:41px;font-size:12px}
+.portal-main .act-sector-table td,.portal-main .act-sector-table th{vertical-align:middle}
+.portal-main .act-sector-editor{display:flex;gap:8px;align-items:center}
+.portal-main .act-sector-editor input{height:37px;min-width:140px}
+.portal-main .act-sector-editor select{height:37px;max-width:160px}
+.portal-main .act-sector-editor button{height:37px;font-size:11px}
+.portal-main .dash-panel .muted{font-size:12px;line-height:1.5}
+.portal-main .dash-panel form .field label{color:#3a5b44}
+.portal-main .dash-panel form input:not([type=checkbox]),.portal-main .dash-panel form select{border-radius:0;box-shadow:none}
+.portal-main .dash-panel input[type=checkbox]{width:auto!important;margin-right:8px}
+@media(max-width:1160px){
+ .portal-main .reporting-filters .act-analytics-filter-grid{grid-template-columns:repeat(3,minmax(0,1fr))!important}
+}
+@media(max-width:800px){
+ .portal-main .act-inline-filter{grid-template-columns:1fr 1fr}
+ .portal-main .act-inline-filter .act-filter-actions{grid-column:1/-1;justify-content:flex-start}
+ .portal-main .reporting-filters .act-analytics-filter-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+ .portal-main .act-queue-filter{grid-template-columns:1fr}
+ .portal-main .act-queue-filter .act-filter-actions{grid-column:auto}
+}
+@media(max-width:560px){
+ .portal-main .act-inline-filter,.portal-main .reporting-filters .act-analytics-filter-grid{grid-template-columns:1fr!important}
+ .portal-main .act-inline-filter .act-filter-actions{grid-column:1}
+ .portal-main .act-queue-filter .act-filter-actions{grid-column:1}
+ .portal-main .act-filter-actions .btn,.portal-main .act-filter-actions .btn-outline{flex:1}
+ .portal-main .act-sector-create form{grid-template-columns:1fr}
+ .portal-main .act-sector-editor{min-width:420px}
+}
+
+/* Consistent paginator footer and compact removable tags */
+.portal-main .act-pagination-bar{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:14px;padding:11px 16px;border-top:1px solid #e7eee8;color:#728474;font-size:11px;font-weight:700}
+.portal-main .act-pagination-bar nav{max-width:100%}
+.portal-main .act-pagination-bar nav a,.portal-main .act-pagination-bar nav span{border-radius:0!important}
+.portal-main .act-user-field .ts-wrapper.multi.plugin-remove_button .item{max-width:100%;overflow:visible;white-space:nowrap;padding-right:0!important}
+.portal-main .act-user-field .ts-wrapper.multi.plugin-remove_button .item .remove{display:inline-flex;align-items:center;justify-content:center;min-width:25px;height:24px;cursor:pointer;font-weight:800;flex:none}
+.portal-main .act-user-field .ts-wrapper.multi.plugin-remove_button .item .remove:focus-visible{outline:2px solid #226a46;outline-offset:1px}
+.portal-main .act-user-field .ts-wrapper.multi .ts-control{overflow:visible!important;flex-wrap:wrap!important}
+@media(max-width:560px){.portal-main .act-pagination-bar{align-items:start;flex-direction:column}}

@@ -2,8 +2,8 @@
 @section('title','Add Staff Member | Arewa Civic Tracker')
 @section('section_heading','Create Staff Account')
 @push('head')
-<link rel="stylesheet" href="{{ asset('css/act-users.css') }}?v=20261029-staff1">
-<script defer src="{{ asset('js/act-users.js') }}?v=20261029-staff1"></script>
+<link rel="stylesheet" href="{{ asset('css/act-users.css') }}?v=20261029-staff2">
+<script defer src="{{ asset('js/act-users.js') }}?v=20261029-staff2"></script>
 @endpush
 @section('content')
 <section class="dash-heading act-staff-heading">

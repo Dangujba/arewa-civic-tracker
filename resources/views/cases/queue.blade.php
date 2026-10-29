@@ -12,11 +12,12 @@
   <article class="dash-metric"><div class="dash-metric-head">Verified <i class="fa-solid fa-circle-check"></i></div><strong>{{ $counts['verified'] }}</strong><small>Pending administrator approval</small></article>
 </div>
 <section class="card">
- <form method="GET" class="queue-filter" action="{{ route('cases.queue') }}">
- <label for="queue-status">Review status</label><select id="queue-status" name="status">
- <option value="">All active queue items</option>
- @foreach(['submitted','under_review','clarification_requested','verified'] as $value)<option value="{{ $value }}" @selected(request('status')===$value)>{{ ucwords(str_replace('_',' ',$value)) }}</option>@endforeach
- </select><button type="submit" class="btn"><i class="fa-solid fa-filter" aria-hidden="true"></i> Filter</button>
+ <form method="GET" class="act-inline-filter act-queue-filter" action="{{ route('cases.queue') }}">
+  <div class="field"><label for="queue-status">Review status</label><select id="queue-status" name="status">
+   <option value="">All active queue items</option>
+   @foreach(['submitted','under_review','clarification_requested','verified'] as $value)<option value="{{ $value }}" @selected(request('status')===$value)>{{ ucwords(str_replace('_',' ',$value)) }}</option>@endforeach
+  </select></div>
+  <div class="act-filter-actions"><button type="submit" class="btn"><i class="fa-solid fa-filter" aria-hidden="true"></i> Filter</button><a class="btn-outline" href="{{ route('cases.queue') }}">Clear</a></div>
  </form>
  <div style="overflow-x:auto"><table><thead><tr><th>Reference</th><th>Field report</th><th>LGA</th><th>Current state</th><th>Reviewer</th><th>Due</th><th>Action</th></tr></thead><tbody>
  @forelse($cases as $case)

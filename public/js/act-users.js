@@ -3,12 +3,23 @@
 const ready=()=>{
  const initTags=(select)=>{
   if(!select||select.tomselect||!window.TomSelect)return;
-  new window.TomSelect(select,{
-   plugins:{remove_button:{title:'Remove this LGA'}},
+  let controller;
+  try { controller=new window.TomSelect(select,{
+   plugins:{remove_button:{title:'Remove this LGA',label:'×',tabindex:0}},
    create:false,maxItems:null,closeAfterSelect:false,hideSelected:true,
    persist:false,maxOptions:50,searchField:['text'],
    placeholder:'Search and select LGAs',
    render:{no_results:()=>'<div class="no-results">No matching LGAs</div>'}
+  }); }catch(error) {
+   console.error('LGA selector unavailable; using native multi-select:',error);
+   return;
+  }
+  // Make each tag's remove control usable by keyboard as well as pointer.
+  controller.control.addEventListener('keydown',event=>{
+   if((event.key==='Enter'||event.key===' ')&&event.target.closest('.remove')){
+    event.preventDefault();
+    event.target.click();
+   }
   });
  };
  const toggleRole=(form,clear=true)=>{
@@ -22,11 +33,15 @@ const ready=()=>{
    if(select.tomselect)select.tomselect.clear(true);
    else Array.from(select.options).forEach(o=>o.selected=false);
   }
-  select.disabled=!enabled;
+  if(select.tomselect){
+   if(enabled) select.tomselect.enable();
+   else select.tomselect.disable();
+  }else select.disabled=!enabled;
  };
  document.querySelectorAll('[data-user-lga-tags]').forEach(initTags);
- document.querySelectorAll('form:has([data-user-role])').forEach(form=>{
-  const role=form.querySelector('[data-user-role]');
+ document.querySelectorAll('[data-user-role]').forEach(role=>{
+  const form=role.closest('form');
+  if(!form)return;
   role.addEventListener('change',()=>toggleRole(form));
   toggleRole(form,false);
  });
@@ -45,6 +60,7 @@ const ready=()=>{
    else Array.from(select.options).forEach(o=>o.selected=ids.includes(o.value));
    toggleRole(editForm,false);
    dialog.showModal();
+   if(select.tomselect)select.tomselect.refreshOptions(false);
   }));
   dialog.querySelectorAll('[data-user-close]').forEach(btn=>btn.addEventListener('click',()=>dialog.close()));
   dialog.addEventListener('click',event=>{

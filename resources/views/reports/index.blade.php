@@ -11,7 +11,7 @@
  </div>
 </section>
 <form method="GET" action="{{ route('reports.index') }}" class="card reporting-filters">
- <div class="grid">
+ <div class="grid act-analytics-filter-grid">
   <div class="field"><label>Search reports</label><input type="search" name="q" maxlength="150" value="{{ request('q') }}" placeholder="Reference, title, community"></div>
   <div class="field"><label>Local government</label><select name="lga_id"><option value="">All LGAs</option>@foreach($lgas as $lga)<option value="{{ $lga->id }}" @selected(request('lga_id')==$lga->id)>{{ $lga->name }}</option>@endforeach</select></div>
   <div class="field"><label>Sector</label><select name="sector_id"><option value="">All sectors</option>@foreach($sectors as $sector)<option value="{{ $sector->id }}" @selected(request('sector_id')==$sector->id)>{{ $sector->name }}</option>@endforeach</select></div>
@@ -19,9 +19,8 @@
   <div class="field"><label>Report type</label><select name="type"><option value="">All types</option><option value="public_project" @selected(request('type')==='public_project')>Public project</option><option value="governance_issue" @selected(request('type')==='governance_issue')>Governance issue</option></select></div>
   <div class="field"><label>From date</label><input type="date" name="date_from" value="{{ request('date_from') }}" max="{{ now()->format('Y-m-d') }}"></div>
   <div class="field"><label>To date</label><input type="date" name="date_to" value="{{ request('date_to') }}" max="{{ now()->format('Y-m-d') }}"></div>
+  <div class="act-filter-actions"><button type="submit" class="btn"><i class="fa-solid fa-filter" aria-hidden="true"></i> Filter</button><a class="btn-outline" href="{{ route('reports.index') }}">Clear</a></div>
  </div>
- <button type="submit" class="btn"><i class="fa-solid fa-filter" aria-hidden="true"></i> Apply filters</button>
- <a class="btn-outline" href="{{ route('reports.index') }}">Clear filters</a>
 </form>
 <div class="dash-metrics">
  @foreach([
@@ -68,7 +67,7 @@
  <div class="dash-table-wrap"><table><thead><tr><th>Reference</th><th>Report</th><th>LGA</th><th>Sector</th><th>Status</th><th>Observed</th></tr></thead><tbody>
  @forelse($recent as $case)<tr><td><a href="{{ route('cases.show',$case) }}">{{ $case->reference }}</a></td><td>{{ $case->title }}</td><td>{{ $case->lga?->name }}</td><td>{{ $case->sector?->name }}</td><td>{{ ucwords(str_replace('_',' ',$case->verification_status)) }}</td><td>{{ $case->observation_date?->format('d M Y') }}</td></tr>
  @empty<tr><td colspan="6">No reports match the selected filters.</td></tr>@endforelse
- </tbody></table></div>{{ $recent->links() }}
+ </tbody></table></div><div class="act-panel-pagination act-pagination-bar"><span>Showing {{ $recent->firstItem()??0 }}–{{ $recent->lastItem()??0 }} of {{ number_format($recent->total()) }} reports</span>@if($recent->hasPages()){{ $recent->withQueryString()->links() }}@endif</div>
 </section>
 @endsection
 

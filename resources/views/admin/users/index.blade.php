@@ -2,8 +2,8 @@
 @section('title','Users & Roles | Arewa Civic Tracker')
 @section('section_heading','Users & Roles')
 @push('head')
-<link rel="stylesheet" href="{{ asset('css/act-users.css') }}?v=20261029-staff1">
-<script defer src="{{ asset('js/act-users.js') }}?v=20261029-staff1"></script>
+<link rel="stylesheet" href="{{ asset('css/act-users.css') }}?v=20261029-staff2">
+<script defer src="{{ asset('js/act-users.js') }}?v=20261029-staff2"></script>
 @endpush
 @section('content')
 <section class="dash-heading act-staff-heading">
@@ -55,7 +55,7 @@
       </tbody>
     </table>
   </div>
-  @if($users->hasPages())<div class="act-staff-pagination">{{ $users->links() }}</div>@endif
+  <div class="act-staff-pagination act-pagination-bar"><span>Showing {{ $users->firstItem()??0 }}–{{ $users->lastItem()??0 }} of {{ number_format($users->total()) }} staff</span>@if($users->hasPages()){{ $users->links() }}@endif</div>
 </section>
 
 <dialog class="act-user-dialog" id="act-user-edit-dialog" aria-labelledby="act-user-edit-heading">
