@@ -25,5 +25,17 @@ class SessionStore(context: Context, private val vault: CryptoVault) {
     fun catalog(): JSONObject? = get("catalog")?.let(::JSONObject)
     /** Leave the owner and encrypted outbox intact when a 30-day token expires. */
     fun invalidateToken() { preferences.edit().remove("token").commit() }
-    fun clearSession() { preferences.edit().remove("token").remove("user").commit() }
+    /** Fingerprint is a per-account, device-local app lock, not a replacement for server login. */
+    fun fingerprintEnabled(): Boolean {
+        val owner=userId() ?: return false
+        return preferences.getLong("fingerprint_owner", -1L)==owner &&
+            preferences.getBoolean("fingerprint_enabled",false)
+    }
+    fun setFingerprintEnabled(value: Boolean) {
+        val owner=userId() ?: error("Sign in before enabling fingerprint access.")
+        check(preferences.edit().putLong("fingerprint_owner", owner)
+            .putBoolean("fingerprint_enabled",value).commit())
+    }
+    fun clearSession() { preferences.edit().remove("token").remove("user")
+        .remove("fingerprint_enabled").remove("fingerprint_owner").commit() }
 }

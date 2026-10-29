@@ -4,7 +4,11 @@ import android.Manifest
 import android.content.Context
 import android.net.Uri
 import android.os.Bundle
-import androidx.activity.ComponentActivity
+import androidx.fragment.app.FragmentActivity
+import androidx.activity.viewModels
+import androidx.biometric.BiometricManager
+import androidx.biometric.BiometricPrompt
+import androidx.core.content.ContextCompat
 import androidx.activity.compose.setContent
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -37,7 +41,49 @@ private val gold=Color(0xFFAE8131)
 private val ink=Color(0xFF1D2D25)
 private val paper=Color(0xFFF4F7F3)
 
-class MainActivity:ComponentActivity() {
+class MainActivity:FragmentActivity() {
+    private val fieldVm:FieldViewModel by viewModels()
+    private var biometricNotice by mutableStateOf("")
+    private val fingerprintAvailable: Boolean
+        get() = BiometricManager.from(this).canAuthenticate(
+            BiometricManager.Authenticators.BIOMETRIC_STRONG
+        ) == BiometricManager.BIOMETRIC_SUCCESS
+
+    private fun authenticateFingerprint(title:String, onSuccess:()->Unit) {
+        if(!fingerprintAvailable) {
+            biometricNotice="Strong fingerprint authentication is unavailable. Check your phone's fingerprint settings or sign in with your account password."
+            return
+        }
+        biometricNotice=""
+        val prompt=BiometricPrompt(this,ContextCompat.getMainExecutor(this),
+            object:BiometricPrompt.AuthenticationCallback() {
+                override fun onAuthenticationSucceeded(result:BiometricPrompt.AuthenticationResult) {
+                    super.onAuthenticationSucceeded(result)
+                    biometricNotice=""
+                    onSuccess()
+                }
+                override fun onAuthenticationError(errorCode:Int,errString:CharSequence) {
+                    super.onAuthenticationError(errorCode,errString)
+                    biometricNotice=errString.toString()
+                }
+                override fun onAuthenticationFailed() {
+                    super.onAuthenticationFailed()
+                    biometricNotice="Fingerprint not recognized. Try again."
+                }
+            })
+        prompt.authenticate(
+            BiometricPrompt.PromptInfo.Builder()
+                .setTitle(title)
+                .setSubtitle("Use an enrolled fingerprint to access your field reports")
+                .setAllowedAuthenticators(BiometricManager.Authenticators.BIOMETRIC_STRONG)
+                .setNegativeButtonText("Cancel")
+                .build()
+        )
+    }
+    override fun onStop() {
+        super.onStop()
+        fieldVm.lockOnBackground()
+    }
     override fun onCreate(savedInstanceState:Bundle?){
         super.onCreate(savedInstanceState)
         window.statusBarColor=android.graphics.Color.rgb(23,84,59)
@@ -47,13 +93,18 @@ class MainActivity:ComponentActivity() {
                     secondary=gold,background=paper,surface=Color.White,onSurface=ink),
                 shapes=Shapes(small=RoundedCornerShape(0.dp),medium=RoundedCornerShape(0.dp),
                     large=RoundedCornerShape(0.dp))
-            ) { FieldApplication() }
+            ) { FieldApplication(fieldVm,fingerprintAvailable,biometricNotice,::authenticateFingerprint) }
         }
     }
 }
 
 @Composable
-private fun FieldApplication(vm:FieldViewModel=viewModel()) {
+private fun FieldApplication(
+    vm:FieldViewModel,
+    fingerprintAvailable:Boolean,
+    biometricNotice:String,
+    authenticate:(String,()->Unit)->Unit
+) {
     val user=vm.userId
     var tab by remember { mutableIntStateOf(0) }
     LaunchedEffect(user,vm.drafts){ vm.checkAuthentication() }
@@ -68,18 +119,18 @@ private fun FieldApplication(vm:FieldViewModel=viewModel()) {
         },
         bottomBar={
             if(user!=null) NavigationBar(containerColor=Color.White){
-                listOf("New report","Outbox","My reports").forEachIndexed{index,label->
+                listOf("New report","Outbox","My reports","Settings").forEachIndexed{index,label->
                     NavigationBarItem(selected=tab==index,onClick={
                         tab=index
                         if(index==2)vm.refreshReports()
-                    },icon={Text(if(index==0)"✎" else if(index==1)"◷" else "▤")},
+                    },icon={Text(when(index){0->"✎";1->"◷";2->"▤";else->"⚙"})},
                         label={Text(if(index==1)"Outbox (${vm.drafts.size})" else label)})
                 }
             }
         }
     ) { inner ->
         Column(Modifier.fillMaxSize().padding(inner)){
-            if(vm.message.isNotBlank()) {
+            if(!vm.isBiometricLocked && vm.message.isNotBlank()) {
                 Surface(color=Color(0xFFFFF3D3)){
                     Row(Modifier.fillMaxWidth().padding(12.dp),
                         horizontalArrangement=Arrangement.SpaceBetween,
@@ -89,12 +140,79 @@ private fun FieldApplication(vm:FieldViewModel=viewModel()) {
                     }
                 }
             }
-            if(user==null || vm.requiresAuthentication) LoginScreen(vm)
-            else when(tab){
-                0->FormScreen(vm)
-                1->OutboxScreen(vm,onEdit={tab=0})
-                else->ReportsScreen(vm)
+            when {
+                user==null || vm.requiresAuthentication -> LoginScreen(vm)
+                vm.isBiometricLocked -> FingerprintLockScreen(
+                    biometricNotice,
+                    onUnlock={authenticate("Unlock Arewa Civic Tracker",vm::unlockWithFingerprint)},
+                    onPassword=vm::beginReauthentication
+                )
+                tab==0 -> FormScreen(vm)
+                tab==1 -> OutboxScreen(vm,onEdit={tab=0})
+                tab==2 -> ReportsScreen(vm)
+                else -> SecuritySettingsScreen(vm,fingerprintAvailable,biometricNotice,authenticate)
             }
+        }
+    }
+}
+
+@Composable
+private fun FingerprintLockScreen(notice:String,onUnlock:()->Unit,onPassword:()->Unit) {
+    Column(Modifier.fillMaxSize().padding(22.dp),
+        verticalArrangement=Arrangement.Center,
+        horizontalAlignment=Alignment.CenterHorizontally){
+        Text("App locked",style=MaterialTheme.typography.headlineSmall,fontWeight=FontWeight.Bold)
+        Spacer(Modifier.height(10.dp))
+        Text("Use your fingerprint to unlock your field reports and encrypted drafts.",
+            color=Color.DarkGray)
+        Spacer(Modifier.height(18.dp))
+        Button(onClick=onUnlock,shape=RectangleShape,modifier=Modifier.fillMaxWidth()){
+            Text("Unlock with fingerprint")
+        }
+        OutlinedButton(onClick=onPassword,shape=RectangleShape,modifier=Modifier.fillMaxWidth()){
+            Text("Sign in with account password")
+        }
+        if(notice.isNotBlank())Text(notice,color=MaterialTheme.colorScheme.error)
+        Text("Password sign-in requires internet access. Your offline drafts remain saved.",
+            style=MaterialTheme.typography.bodySmall,color=Color.DarkGray)
+    }
+}
+
+@Composable
+private fun SecuritySettingsScreen(
+    vm:FieldViewModel,
+    available:Boolean,
+    notice:String,
+    authenticate:(String,()->Unit)->Unit
+) {
+    Content("App settings","Protect field reports stored on this phone.") {
+        Text("Fingerprint security",style=MaterialTheme.typography.titleMedium,fontWeight=FontWeight.Bold)
+        Text(if(vm.fingerprintEnabled)"Enabled for your account" else "Not enabled",
+            color=if(vm.fingerprintEnabled)green else Color.DarkGray)
+        Text("Once enabled, a fingerprint is required when reopening or returning to the app. Your account password remains available as a fallback.",
+            style=MaterialTheme.typography.bodyMedium)
+        if(!available) {
+            Text("A compatible enrolled fingerprint is not available on this device. Add a fingerprint in Android Settings first.",
+                color=MaterialTheme.colorScheme.error)
+        } else {
+            Button(shape=RectangleShape,modifier=Modifier.fillMaxWidth(),
+                onClick={
+                    val enable=!vm.fingerprintEnabled
+                    authenticate(if(enable)"Enable fingerprint lock" else "Disable fingerprint lock"){
+                        vm.changeFingerprintSetting(enable)
+                    }
+                }) {Text(if(vm.fingerprintEnabled)"Disable fingerprint lock" else "Enable fingerprint lock")}
+            if(vm.fingerprintEnabled)
+                OutlinedButton(shape=RectangleShape,modifier=Modifier.fillMaxWidth(),
+                    onClick=vm::lockOnBackground){Text("Lock app now")}
+        }
+        if(notice.isNotBlank())Text(notice,color=MaterialTheme.colorScheme.error)
+        HorizontalDivider()
+        Text("Account security",style=MaterialTheme.typography.titleMedium,fontWeight=FontWeight.SemiBold)
+        Text("Fingerprint unlock only opens the local app. Password and optional two-factor verification are still handled by the RAWYOD server.",
+            style=MaterialTheme.typography.bodySmall)
+        OutlinedButton(shape=RectangleShape,onClick=vm::logout,modifier=Modifier.fillMaxWidth()){
+            Text("Sign out")
         }
     }
 }

@@ -10,6 +10,15 @@ This is the **native Kotlin / Jetpack Compose** Android application for RAWYOD. 
 - Native photo capture uses Android Activity Result API with a private FileProvider, not a WebView.
 - GPS uses Android LocationManager with runtime permissions.
 
+## v0.3.2 branded launcher and fingerprint setting
+
+- The launcher now uses Arewa's map-and-pin identity rather than the generic Android icon; an adaptive icon scales across launchers.
+- The native **Settings** tab provides an opt-in **fingerprint lock** for a previously authenticated focal person's active session.
+- Android's BiometricPrompt requires an enrolled **strong biometric** to enable, disable and unlock the local app. It is not a substitute for the server login or TOTP.
+- After backgrounding the app, field screens remain hidden until fingerprint verification. Users can explicitly choose account-password sign-in instead; doing so requires internet but preserves queued drafts.
+- Fingerprint enablement is scoped to the authenticated account and cleared on sign-out. On phones without enrolled strong biometrics the setting remains unavailable.
+- This is a local UI session lock, not cryptographic authentication of a server request or a way to recover a revoked or expired token.
+
 ## Build / QA
 From `android-native/`, with Android SDK Platform 36, Build Tools 35.0.0, JDK 17:
 `./gradlew testDebugUnitTest assembleDebug`

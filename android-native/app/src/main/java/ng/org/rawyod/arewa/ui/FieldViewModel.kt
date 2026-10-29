@@ -65,6 +65,30 @@ class FieldViewModel(application: Application) : AndroidViewModel(application) {
         private set
     var requiresAuthentication by mutableStateOf(userId!=null && app.store.token()==null)
         private set
+    var fingerprintEnabled by mutableStateOf(app.store.fingerprintEnabled())
+        private set
+    var isBiometricLocked by mutableStateOf(
+        fingerprintEnabled && userId!=null && app.store.token()!=null
+    )
+        private set
+
+    /** Sensitive screens must stay hidden after the activity leaves the foreground. */
+    fun lockOnBackground() {
+        if(fingerprintEnabled && userId!=null && !requiresAuthentication) isBiometricLocked=true
+    }
+    fun unlockWithFingerprint() {
+        if(fingerprintEnabled && userId!=null && !requiresAuthentication && app.store.token()!=null)
+            isBiometricLocked=false
+    }
+    fun changeFingerprintSetting(enabled:Boolean) {
+        if(userId==null || requiresAuthentication) return
+        app.store.setFingerprintEnabled(enabled)
+        fingerprintEnabled=enabled
+        isBiometricLocked=false
+        message=if(enabled) "Fingerprint lock enabled. You will be asked to unlock when returning to the app."
+          else "Fingerprint lock disabled."
+    }
+
     private var observing: Job? = null
 
     init {
@@ -138,6 +162,7 @@ class FieldViewModel(application: Application) : AndroidViewModel(application) {
 
     fun beginReauthentication() {
         app.store.invalidateToken()
+        isBiometricLocked=false
         requiresAuthentication=true
         loginChallenge=null
         message="Sign in again with the same field account to resume syncing."
@@ -196,6 +221,8 @@ class FieldViewModel(application: Application) : AndroidViewModel(application) {
         }
         app.store.storeSession(token,user)
         requiresAuthentication=false
+        isBiometricLocked=false
+        fingerprintEnabled=app.store.fingerprintEnabled()
         loginChallenge=null
         userName=user.optString("name");userId=user.optLong("id")
         observe()
@@ -235,6 +262,7 @@ class FieldViewModel(application: Application) : AndroidViewModel(application) {
             userName="";userId=null;lgas=emptyList();sectors=emptyList()
             reports=emptyList();selectedReport=null;observing?.cancel();drafts=emptyList()
             restoredDraft=null;attachments=emptyList();requiresAuthentication=false
+            fingerprintEnabled=false;isBiometricLocked=false
             message="Signed out."
         }
     }
