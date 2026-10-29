@@ -55,6 +55,15 @@ private val paper=Color(0xFFF4F7F3)
 
 class MainActivity:FragmentActivity() {
     private val fieldVm:FieldViewModel by viewModels()
+    private lateinit var fieldCapture:FieldCaptureCoordinator
+    internal fun captureGps(){fieldCapture.requestGps()}
+    internal fun captureCamera(){fieldCapture.requestCamera()}
+    internal fun pickEvidence(){fieldCapture.requestFiles()}
+    internal fun openCapturePermissions(){fieldCapture.openPermissions()}
+    override fun onSaveInstanceState(outState:Bundle){
+        fieldCapture.saveState(outState)
+        super.onSaveInstanceState(outState)
+    }
     private var biometricNotice by mutableStateOf("")
     private val fingerprintAvailable: Boolean
         get() = BiometricManager.from(this).canAuthenticate(
@@ -98,6 +107,9 @@ class MainActivity:FragmentActivity() {
     }
     override fun onCreate(savedInstanceState:Bundle?){
         super.onCreate(savedInstanceState)
+        // These launchers must be registered before START, regardless of the
+        // currently visible Compose tab or the biometric security screen.
+        fieldCapture=FieldCaptureCoordinator(this,fieldVm,savedInstanceState)
         window.statusBarColor=android.graphics.Color.rgb(23,84,59)
         setContent {
             MaterialTheme(
@@ -406,6 +418,7 @@ internal fun WardInput(vm:FieldViewModel,lga:Int,ward:String,onWardChange:(Strin
 @Composable
 private fun FormScreen(vm:FieldViewModel) {
     val context=LocalContext.current
+    val activity=context as MainActivity
     val editing=vm.restoredDraft
     var type by rememberSaveable { mutableStateOf("public_project") }
     var lga by rememberSaveable { mutableIntStateOf(0) }
@@ -421,7 +434,14 @@ private fun FormScreen(vm:FieldViewModel) {
     var progress by rememberSaveable { mutableStateOf("ongoing") }
     var latitude by rememberSaveable { mutableStateOf("") }
     var longitude by rememberSaveable { mutableStateOf("") }
-    var cameraPath by rememberSaveable { mutableStateOf("") }
+    // System activity-result callbacks write coordinates to FieldViewModel.
+    // The form may be recomposed or hidden while an external app is open.
+    LaunchedEffect(vm.locationCoordinates){
+        vm.locationCoordinates?.let { (lat,lng)->
+            latitude=lat.toString()
+            longitude=lng.toString()
+        }
+    }
     LaunchedEffect(editing?.id){
         val data=editing?.payload ?: return@LaunchedEffect
         type=data.optString("type","public_project")
@@ -438,31 +458,6 @@ private fun FormScreen(vm:FieldViewModel) {
         progress=data.optString("progress_status","ongoing")
         latitude=data.optString("latitude")
         longitude=data.optString("longitude")
-    }
-
-    val camera=rememberLauncherForActivityResult(ActivityResultContracts.TakePicture()) { ok->
-        vm.endExternalPicker()
-        val file=cameraPath.takeIf{it.isNotBlank()}?.let(::File)
-        if(ok && file?.isFile==true) {
-            vm.captureEvidence(Uri.fromFile(file),file.name,"image/jpeg"){file.delete()}
-        } else file?.delete()
-        cameraPath=""
-    }
-    val picker=rememberLauncherForActivityResult(ActivityResultContracts.OpenMultipleDocuments()){uris->
-        vm.endExternalPicker()
-        vm.captureMany(uris)
-    }
-    val gpsPermission=rememberLauncherForActivityResult(
-        ActivityResultContracts.RequestMultiplePermissions()
-    ){results->
-        vm.endExternalPicker()
-        if(results.values.any{it}) LocationOnce.capture(context){location->
-            if(location!=null){
-                latitude=location.latitude.toString()
-                longitude=location.longitude.toString()
-                vm.display("GPS captured. Review coordinates before saving.")
-            } else vm.display("A current GPS fix was unavailable. You can enter coordinates.")
-        } else vm.display("Location permission denied; GPS is optional.")
     }
 
     Content(if(editing!=null)"Edit queued report" else "New field report",
@@ -519,14 +514,12 @@ private fun FormScreen(vm:FieldViewModel) {
             }
         HorizontalDivider()
         Text("GPS and supporting evidence",fontWeight=FontWeight.Bold)
-        OutlinedButton(shape=RectangleShape,onClick={
-            vm.beginExternalPicker()
-            runCatching { gpsPermission.launch(arrayOf(Manifest.permission.ACCESS_FINE_LOCATION,
-                Manifest.permission.ACCESS_COARSE_LOCATION)) }
-                .onFailure{vm.endExternalPicker();vm.display("Location service unavailable. You may enter coordinates manually.")}
-        },modifier=Modifier.fillMaxWidth()){
-            Icon(Icons.Filled.MyLocation,contentDescription=null);Spacer(Modifier.width(6.dp))
-            Text("Capture current GPS location")
+        OutlinedButton(shape=RectangleShape,onClick=activity::captureGps,
+            enabled=!vm.locating,modifier=Modifier.fillMaxWidth()){
+            if(vm.locating) CircularProgressIndicator(Modifier.size(17.dp),strokeWidth=2.dp)
+            else Icon(Icons.Filled.MyLocation,contentDescription=null)
+            Spacer(Modifier.width(6.dp))
+            Text(if(vm.locating)"Searching for GPS…" else "Capture current GPS location")
         }
         Row(horizontalArrangement=Arrangement.spacedBy(8.dp)){
             OutlinedTextField(latitude,{latitude=it},label={Text("Latitude")},
@@ -535,29 +528,28 @@ private fun FormScreen(vm:FieldViewModel) {
                 modifier=Modifier.weight(1f))
         }
         Row(horizontalArrangement=Arrangement.spacedBy(8.dp)){
-            OutlinedButton(shape=RectangleShape,onClick={
-                runCatching {
-                    val target=File(context.cacheDir,"camera").also{check(it.isDirectory || it.mkdirs())}
-                    val file=File(target,"field-${UUID.randomUUID()}.jpg")
-                    check(file.createNewFile()){"Camera file could not be created"}
-                    cameraPath=file.absolutePath
-                    val uri=FileProvider.getUriForFile(context,
-                        context.packageName+".fileprovider",file)
-                    vm.beginExternalPicker()
-                    camera.launch(uri)
-                }.onFailure {vm.endExternalPicker();vm.display("Unable to open camera: check camera app and permissions.")}
-            },enabled=vm.attachments.size<5 && !vm.busy,modifier=Modifier.weight(1f)){
+            OutlinedButton(shape=RectangleShape,onClick=activity::captureCamera,
+                enabled=vm.attachments.size<5 && !vm.busy,modifier=Modifier.weight(1f)){
                 Icon(Icons.Filled.CameraAlt,contentDescription=null)
                 Spacer(Modifier.width(6.dp));Text("Camera")
             }
-            OutlinedButton(shape=RectangleShape,onClick={
-                vm.beginExternalPicker()
-                runCatching{picker.launch(arrayOf(
-                    "image/jpeg","image/png","image/webp","application/pdf"
-                ))}.onFailure {vm.endExternalPicker();vm.display("Cannot open file picker on this device.")}
-            },enabled=vm.attachments.size<5 && !vm.busy,modifier=Modifier.weight(1f)){
+            OutlinedButton(shape=RectangleShape,onClick=activity::pickEvidence,
+                enabled=vm.attachments.size<5 && !vm.busy,modifier=Modifier.weight(1f)){
                 Icon(Icons.Filled.AttachFile,contentDescription=null)
                 Spacer(Modifier.width(6.dp));Text("Add evidence")
+            }
+        }
+        if(vm.captureStatus.isNotBlank()) {
+            Text(vm.captureStatus,style=MaterialTheme.typography.bodySmall,
+                color=if(vm.captureStatus.contains("denied",ignoreCase=true) ||
+                         vm.captureStatus.contains("unavailable",ignoreCase=true))
+                    MaterialTheme.colorScheme.error else green)
+            if(vm.captureStatus.contains("permission denied",ignoreCase=true)){
+                TextButton(onClick=activity::openCapturePermissions) {
+                    Icon(Icons.Filled.Settings,contentDescription=null,modifier=Modifier.size(15.dp))
+                    Spacer(Modifier.width(6.dp))
+                    Text("Open Android app permissions")
+                }
             }
         }
         Text("Original photos preserved: up to 10 MB each. PDFs up to 5 MB.",
