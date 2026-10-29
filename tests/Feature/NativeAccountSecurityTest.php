@@ -5,12 +5,14 @@ use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
 use Laravel\Sanctum\Sanctum;
+use Illuminate\Routing\Middleware\ThrottleRequests;
 use PragmaRX\Google2FA\Google2FA;
 use Tests\TestCase;
 
 class NativeAccountSecurityTest extends TestCase
 {
     use RefreshDatabase;
+    protected function setUp():void {parent::setUp();$this->withoutMiddleware(ThrottleRequests::class);}
 
     private function focal():User {
         return User::create([

@@ -52,7 +52,6 @@ class FieldViewModel(application: Application) : AndroidViewModel(application) {
         private set
     private var offlineUnlocked=false
     private var pinFailures=0
-        private set
     var busy by mutableStateOf(false)
         private set
     var loginChallenge by mutableStateOf<String?>(null)
@@ -70,7 +69,6 @@ class FieldViewModel(application: Application) : AndroidViewModel(application) {
     var drafts by mutableStateOf(emptyList<Draft>())
         private set
     var reports by mutableStateOf(readReports(app.store.reports()))
-        private set
         private set
     var selectedReport by mutableStateOf<ReportDetails?>(null)
         private set
