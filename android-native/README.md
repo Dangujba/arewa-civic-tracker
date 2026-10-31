@@ -102,3 +102,11 @@ Field officers can open their submitted reports and edit eligible records online
 - OEM camera compatibility: grant URI read/write permissions through both clip data and intent flags. File URI camera evidence is read via FileInputStream, and originals are encrypted locally without changing image bytes.
 - Every tap provides actionable inline feedback; GPS shows active acquisition, and cancelling the camera or document picker produces a status. If users permanently deny permissions, a direct link to Android app settings appears.
 - Release checks: automated build and unit tests verify compilation, but camera/document-provider/GPS workflows must also be accepted on an actual device. Do not claim device-level verification before it occurs.
+
+## v0.3.8 Android capture compatibility update
+
+The Android v0.3.7 Camera/Location permission and document picker buttons could all fail with generic "cannot request" messages on a field device. The original ActivityResultLauncher implementation obscured the actual exception class. This version routes all three actions through direct native Android activity permission and result callbacks, instead of the ActivityResult registry. The file picker falls back to ACTION_GET_CONTENT when ACTION_OPEN_DOCUMENT cannot open. Camera uses FileProvider content URIs, write grants and output-file validation. Failures are logged as `ArewaCapture` and displayed as action-specific diagnostics.
+
+**Important:** Android only prompts for permission when it has not already been granted and the operating system allows another request. After repeated denial, the user must enable Camera/Location via Settings → Apps → Arewa Civic Tracker → Permissions. Add Evidence uses Android's document picker, so it does not request broad storage access.
+
+These changes require physical-phone validation before claiming the hardware actions work. Automated unit tests alone cannot prove permission UI, installed camera handling or document providers.
