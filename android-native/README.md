@@ -110,3 +110,14 @@ The Android v0.3.7 Camera/Location permission and document picker buttons could 
 **Important:** Android only prompts for permission when it has not already been granted and the operating system allows another request. After repeated denial, the user must enable Camera/Location via Settings → Apps → Arewa Civic Tracker → Permissions. Add Evidence uses Android's document picker, so it does not request broad storage access.
 
 These changes require physical-phone validation before claiming the hardware actions work. Automated unit tests alone cannot prove permission UI, installed camera handling or document providers.
+
+## v0.4.0 direct reporting and offline outbox
+
+- The new field report's primary action is **Submit Report**, which validates and encrypts the report into a durable local record before immediately attempting authenticated server submission.
+- A successful server response shows its authoritative ACT-YOB reference and refreshes the submitted-report list.
+- A secondary **Save to Outbox** action explicitly stores the report for automatic synchronization, even without internet.
+- Offline/timeout/server failures preserve the encrypted report and evidence with its existing client UUID; users see persistent on-form feedback rather than only a momentary toast. Validation errors are visible without clearing the current inputs.
+- Server-rejected records remain editable in the Outbox. A token/assignment problem is not reported as successful submission.
+- The immediate uploader claims the same Room draft used by WorkManager, preventing concurrent submissions for the same UUID. All subsequent retries remain server-side idempotent.
+- GPS, camera, evidence picker and bundled 178 Yobe wards retain their v0.3.9 implementations.
+- Physical-phone acceptance is required to confirm successful upload, visible reference, and offline fallback.
