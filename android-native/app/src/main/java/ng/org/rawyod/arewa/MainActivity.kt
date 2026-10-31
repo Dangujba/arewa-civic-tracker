@@ -60,6 +60,19 @@ class MainActivity:FragmentActivity() {
     internal fun captureCamera(){fieldCapture.requestCamera()}
     internal fun pickEvidence(){fieldCapture.requestFiles()}
     internal fun openCapturePermissions(){fieldCapture.openPermissions()}
+    @Suppress("DEPRECATION")
+    override fun onRequestPermissionsResult(requestCode:Int,permissions:Array<out String>,
+        grantResults:IntArray) {
+        if(!fieldCapture.onPermissionResult(requestCode,permissions,grantResults)) {
+            super.onRequestPermissionsResult(requestCode,permissions,grantResults)
+        }
+    }
+    @Suppress("DEPRECATION")
+    override fun onActivityResult(requestCode:Int,resultCode:Int,data:android.content.Intent?) {
+        if(!fieldCapture.onActivityResult(requestCode,resultCode,data)) {
+            super.onActivityResult(requestCode,resultCode,data)
+        }
+    }
     override fun onSaveInstanceState(outState:Bundle){
         fieldCapture.saveState(outState)
         super.onSaveInstanceState(outState)
