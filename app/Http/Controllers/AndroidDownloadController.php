@@ -13,7 +13,10 @@ class AndroidDownloadController extends Controller
         return response()->download($path, config('native.android_apk_name'), [
             'Content-Type' => 'application/vnd.android.package-archive',
             'X-Content-Type-Options' => 'nosniff',
-            'Cache-Control' => 'public, max-age=3600',
+            // APK changes must not reuse a previously cached download at this URL.
+            'Cache-Control' => 'private, no-store, no-cache, must-revalidate',
+            'Pragma' => 'no-cache',
+            'Expires' => '0',
         ]);
     }
 }
