@@ -39,7 +39,7 @@ assert any(l["lga"]=="damaturu" and len(l["wards"])==11 for l in x["lgas"])
 print("Validated: all 178 wards and 17 Yobe LGAs embedded in APK")
 '
 "$BT/apksigner" verify --print-certs "$APK" >/dev/null
-PREV_NAME="$(php -r '$c=require $argv[1];echo $c["android_apk_name"];' "$CONFIG")"
+PREV_NAME="$(php -r 'function storage_path($p){return $p;} $c=require $argv[1];echo $c["android_apk_name"];' "$CONFIG")"
 PREV="$RELEASE_DIR/$PREV_NAME"
 test -s "$PREV"
 NEW_CERT="$("$BT/apksigner" verify --print-certs "$APK" | sed -n 's/^Signer #1 certificate SHA-256 digest: //p')"
