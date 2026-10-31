@@ -13,6 +13,7 @@ import java.net.SocketTimeoutException
 import ng.org.rawyod.arewa.network.ApiFailure
 import ng.org.rawyod.arewa.ArewaApp
 import ng.org.rawyod.arewa.data.Draft
+import ng.org.rawyod.arewa.data.WardCatalog
 import ng.org.rawyod.arewa.data.StagedEvidence
 import ng.org.rawyod.arewa.data.RestoredDraft
 import ng.org.rawyod.arewa.worker.SyncScheduler
@@ -90,6 +91,20 @@ class FieldViewModel(application: Application) : AndroidViewModel(application) {
         private set
     var wards by mutableStateOf(emptyList<WardChoice>())
         private set
+
+    private val offlineWardNames:Map<String,List<String>> by lazy {
+        runCatching {WardCatalog.fromAssets(app.assets)}.getOrDefault(emptyMap())
+    }
+
+    /** Local reference always works for an assigned LGA, even with stale bootstrap. */
+    fun wardNamesFor(lgaId:Int):List<String> {
+        val name=lgas.firstOrNull{it.id==lgaId}?.name ?: return emptyList()
+        val local=offlineWardNames[WardCatalog.normalizeLga(name)].orEmpty()
+        val server=wards.filter{it.lgaId==lgaId}.map{it.name}
+        return (local+server).filter(String::isNotBlank)
+            .distinctBy{it.trim().lowercase(java.util.Locale.ROOT)}
+            .sortedBy{it.lowercase(java.util.Locale.ROOT)}
+    }
     var communities by mutableStateOf(emptyList<CommunityChoice>())
         private set
     var similarMatches by mutableStateOf(emptyList<String>())

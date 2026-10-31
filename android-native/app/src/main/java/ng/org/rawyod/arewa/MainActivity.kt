@@ -400,30 +400,67 @@ internal fun ChoiceField(label:String,items:List<Choice>,value:Int,onChoose:(Int
 
 @Composable
 internal fun WardInput(vm:FieldViewModel,lga:Int,ward:String,onWardChange:(String)->Unit) {
-    val available=vm.wards.filter{it.lgaId==lga}.map{it.name}
-    var manual by rememberSaveable(lga) { mutableStateOf(ward.isNotBlank() && ward !in available) }
-    var search by rememberSaveable(lga) { mutableStateOf("") }
-    Column(verticalArrangement=Arrangement.spacedBy(6.dp)) {
-        Text("Ward",style=MaterialTheme.typography.labelMedium,fontWeight=FontWeight.Medium)
-        if(manual || available.isEmpty()) {
-            OutlinedTextField(ward,onWardChange,label={Text("Enter ward name")},
-                shape=RectangleShape,singleLine=true,modifier=Modifier.fillMaxWidth())
-        } else {
-            OutlinedTextField(search,{search=it},label={Text("Search wards")},
-                singleLine=true,shape=RectangleShape,modifier=Modifier.fillMaxWidth())
-            val filtered=available.filter{it.contains(search,ignoreCase=true)}
-            val selected=available.indexOf(ward)+1
-            ChoiceField("Select ward",
-                listOf(Choice(0,"Choose ward"))+
-                    filtered.mapIndexed{idx,name->Choice(idx+1,name)},
-                filtered.indexOf(ward)+1
-            ){id-> if(id>0)onWardChange(filtered[id-1])}
+    val available=vm.wardNamesFor(lga)
+    val existing=available.firstOrNull{it.equals(ward,ignoreCase=true)}
+    var manualRequested by rememberSaveable(lga) {mutableStateOf(false)}
+    var search by rememberSaveable(lga) {mutableStateOf("")}
+    val manualMode=manualRequested || (ward.isNotBlank() && existing==null)
+
+    Column(verticalArrangement=Arrangement.spacedBy(7.dp)){
+        Row(verticalAlignment=Alignment.CenterVertically,
+            horizontalArrangement=Arrangement.spacedBy(8.dp)){
+            Icon(Icons.Filled.Place,contentDescription=null,
+                tint=green,modifier=Modifier.size(19.dp))
+            Text("Ward",style=MaterialTheme.typography.labelLarge,
+                fontWeight=FontWeight.SemiBold)
         }
-        TextButton(onClick={
-            manual=!manual
-            if(!manual)onWardChange("")
-        }) {
-            Text(if(manual)"Choose from listed wards" else "Ward not listed? Type ward")
+        if(lga==0){
+            Text("Select your assigned LGA to view its wards.",
+                style=MaterialTheme.typography.bodySmall,color=Color.DarkGray)
+        } else {
+            if(manualMode || available.isEmpty()){
+                OutlinedTextField(ward,{onWardChange(it.take(150))},
+                    label={Text("Enter ward name")},
+                    placeholder={Text("Type a ward not listed")},
+                    shape=RectangleShape,singleLine=true,
+                    modifier=Modifier.fillMaxWidth())
+                if(available.isEmpty()){
+                    Text("No reference wards found for this LGA. You can enter a ward manually.",
+                        style=MaterialTheme.typography.bodySmall,color=Color.DarkGray)
+                }
+            } else {
+                OutlinedTextField(search,{search=it.take(80)},
+                    label={Text("Search wards")},shape=RectangleShape,
+                    singleLine=true,modifier=Modifier.fillMaxWidth(),
+                    leadingIcon={Icon(Icons.Filled.Search,contentDescription=null)})
+                val filtered=available.filter{it.contains(search.trim(),ignoreCase=true)}
+                if(filtered.isEmpty()){
+                    Text("No matching wards. Try another spelling or enter the ward manually.",
+                        style=MaterialTheme.typography.bodySmall,color=Color.DarkGray)
+                } else {
+                    val choices=filtered.mapIndexed {idx,name->Choice(idx+1,name)}
+                    val chosen=filtered.indexOfFirst{it.equals(ward,ignoreCase=true)}+1
+                    ChoiceField("Select ward (${available.size} available)",
+                        listOf(Choice(0,"Choose a ward"))+choices,chosen){
+                        id->if(id>0)onWardChange(filtered[id-1])
+                    }
+                }
+                if(existing!=null && existing !in filtered) {
+                    Text("Selected ward: $existing",
+                        style=MaterialTheme.typography.bodySmall,color=green)
+                }
+            }
+            TextButton(onClick={
+                if(manualMode){
+                    manualRequested=false
+                    onWardChange("")
+                } else {
+                    manualRequested=true
+                }
+            }){
+                Text(if(manualMode)"Choose from listed wards"
+                    else "Ward not listed? Enter manually")
+            }
         }
     }
 }
