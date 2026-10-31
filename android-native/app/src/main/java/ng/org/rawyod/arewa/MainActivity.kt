@@ -620,7 +620,7 @@ private fun FormScreen(vm:FieldViewModel) {
             Text("Possible match: "+match,style=MaterialTheme.typography.bodySmall,
                 color=Color(0xFF795B2C))
         }
-        Button(shape=RectangleShape,modifier=Modifier.fillMaxWidth(),enabled=!vm.busy && vm.lgas.isNotEmpty(),
+        Button(shape=RectangleShape,modifier=Modifier.fillMaxWidth(),enabled=!vm.busy,
             onClick={
                 try {
                     val json=JSONObject()
@@ -637,16 +637,53 @@ private fun FormScreen(vm:FieldViewModel) {
                         json.put("latitude",latitude.toDouble())
                         json.put("longitude",longitude.toDouble())
                     }
-                    vm.save(json){
+                    vm.save(json,onSaved={
                         title=""; description="";community="";observation="";dutyBearers=""
-                        latitude="";longitude=""
-                    }
+                        latitude="";longitude="";ward=""
+                    },submitNow=true)
                 }catch(e:Exception){vm.display(e.message ?: "Please correct the fields")}
             }){
-            Text("Save");Spacer(Modifier.width(6.dp))
-            Text(if(vm.busy)"Saving..." else
-                if(editing!=null)"Save changes and queue" else "Encrypt and queue report")
+            if(vm.busy && vm.submittingReport){
+                CircularProgressIndicator(Modifier.size(18.dp),strokeWidth=2.dp,
+                    color=Color.White)
+                Spacer(Modifier.width(8.dp))
+            }else Icon(Icons.Filled.Send,contentDescription=null)
+            Spacer(Modifier.width(6.dp))
+            Text(if(vm.submittingReport)"Submitting…" else "Submit Report")
         }
+        OutlinedButton(shape=RectangleShape,modifier=Modifier.fillMaxWidth(),
+            enabled=!vm.busy,onClick={
+                try {
+                    val json=JSONObject()
+                        .put("type",type).put("title",title.trim())
+                        .put("description",description.trim()).put("community",community.trim())
+                        .put("ward",ward.trim()).put("lga_id",lga).put("sector_id",sector)
+                        .put("report_category_id",
+                            if(category>0 && vm.categories.any{it.id==category && it.type==type})
+                                category else JSONObject.NULL)
+                        .put("observation_date",date).put("progress_status",progress)
+                        .put("observations",observation).put("duty_bearers",dutyBearers)
+                    if(latitude.isNotBlank() && longitude.isNotBlank()){
+                        json.put("latitude",latitude.toDouble())
+                        json.put("longitude",longitude.toDouble())
+                    }
+                    vm.save(json,onSaved={
+                        title="";description="";community="";ward=""
+                        observation="";dutyBearers="";latitude="";longitude=""
+                    },submitNow=false)
+                }catch(e:Exception){vm.display(e.message?:"Please correct the fields")}
+            }){
+            Icon(Icons.Filled.Save,contentDescription=null)
+            Spacer(Modifier.width(7.dp))
+            Text(if(vm.busy)"Saving…" else "Save to Outbox")
+        }
+        if(vm.reportStatus.isNotBlank()) {
+            Text(vm.reportStatus,style=MaterialTheme.typography.bodyMedium,
+                color=if(vm.reportStatusIsError) MaterialTheme.colorScheme.error else green)
+        }
+        Text("Submit sends the report to the server when connected. Save to Outbox keeps "+
+            "it encrypted on this device for automatic synchronization.",
+            style=MaterialTheme.typography.bodySmall,color=Color.DarkGray)
     }
 }
 

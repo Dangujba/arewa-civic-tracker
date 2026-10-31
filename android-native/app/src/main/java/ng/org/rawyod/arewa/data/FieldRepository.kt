@@ -6,6 +6,8 @@ import android.provider.OpenableColumns
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.withContext
+import ng.org.rawyod.arewa.network.ApiFailure
+import java.io.IOException
 import ng.org.rawyod.arewa.network.FieldApi
 import ng.org.rawyod.arewa.security.CryptoVault
 import ng.org.rawyod.arewa.security.SessionStore
@@ -100,7 +102,8 @@ class FieldRepository(
         recovered
     }
 
-    suspend fun queue(payload: JSONObject, attachments: List<StagedEvidence>): String =
+    suspend fun queue(payload: JSONObject, attachments: List<StagedEvidence>,
+                      scheduleSync:Boolean=true): String =
         withContext(Dispatchers.IO) {
             val owner=store.userId() ?: error("Sign in to save this report")
             require(attachments.size<=5) { "Maximum five supporting documents" }
@@ -127,8 +130,37 @@ class FieldRepository(
             val currentPaths=current.map { it.encryptedPath }.toSet()
             old.filterNot { it.encryptedPath in currentPaths }
                 .forEach { File(it.encryptedPath).delete() }
-            SyncScheduler.enqueue(context)
+            if(scheduleSync) SyncScheduler.enqueue(context)
             id
+        }
+
+    /**
+     * Uploads the exact encrypted outbox record immediately. A Room claim
+     * guarantees that the WorkManager retry and a user tap cannot post the
+     * same record simultaneously. All failures remain recoverable in Room.
+     */
+    suspend fun submitQueuedNow(draftId:String,token:String):JSONObject? =
+        withContext(Dispatchers.IO) {
+            val owner=store.userId() ?: error("Sign in to submit the report.")
+            if(dao.claimUpload(draftId,owner)==0)return@withContext null
+            val draft=dao.draft(draftId,owner) ?: error("The saved report is missing.")
+            try {
+                val result=api.upload(token,decode(draft),dao.evidenceFor(draftId))
+                deleteSent(draft)
+                result
+            } catch(e:ApiFailure) {
+                val retryable=e.code in setOf(408,429) || e.code>=500 ||
+                    e.code==401 || e.code==403
+                dao.mark(draftId,owner,if(retryable)"retry" else "rejected",
+                    e.message?.take(400) ?: "Submission rejected")
+                throw e
+            } catch(e:IOException) {
+                dao.mark(draftId,owner,"retry",e.message?.take(400))
+                throw e
+            } catch(e:Exception) {
+                dao.mark(draftId,owner,"rejected",e.message?.take(400))
+                throw e
+            }
         }
 
     fun decode(draft: Draft): JSONObject =

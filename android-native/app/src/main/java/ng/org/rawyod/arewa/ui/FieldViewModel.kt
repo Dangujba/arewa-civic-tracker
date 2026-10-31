@@ -2,6 +2,9 @@ package ng.org.rawyod.arewa.ui
 
 import android.app.Application
 import android.net.Uri
+import android.content.Context
+import android.net.ConnectivityManager
+import android.net.NetworkCapabilities
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Dispatchers
@@ -80,6 +83,12 @@ class FieldViewModel(application: Application) : AndroidViewModel(application) {
     private var offlineUnlocked=false
     private var pinFailures=0
     var busy by mutableStateOf(false)
+        private set
+    var reportStatus by mutableStateOf("")
+        private set
+    var reportStatusIsError by mutableStateOf(false)
+        private set
+    var submittingReport by mutableStateOf(false)
         private set
     var loginChallenge by mutableStateOf<String?>(null)
         private set
@@ -248,7 +257,11 @@ class FieldViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    fun display(text: String) { message=text }
+    fun display(text: String) {
+        reportStatus=text
+        reportStatusIsError=true
+        message=text
+    }
     fun clearMessage() { message="" }
 
     fun resetLogin() {
@@ -522,21 +535,91 @@ class FieldViewModel(application: Application) : AndroidViewModel(application) {
         attachments=attachments.filterIndexed { i,_ -> i!=index }
     }
 
-    fun save(payload: JSONObject, onSaved: () -> Unit) {
-        if(busy) return
+    private fun networkAvailable():Boolean {
+        val manager=app.getSystemService(Context.CONNECTIVITY_SERVICE) as? ConnectivityManager
+            ?: return false
+        val network=manager.activeNetwork ?: return false
+        return manager.getNetworkCapabilities(network)
+            ?.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)==true
+    }
+
+    fun save(payload:JSONObject, onSaved:()->Unit,submitNow:Boolean=true){
+        if(busy){
+            reportStatus="Another action is in progress. Complete it before submitting."
+            reportStatusIsError=true
+            return
+        }
         viewModelScope.launch {
             busy=true
+            submittingReport=submitNow
+            reportStatusIsError=false
+            reportStatus="Validating report…"
+            var storedId:String?=null
             try {
                 validatePayload(payload)
-                restoredDraft?.let { payload.put("client_submission_id",it.id) }
-                repo.queue(payload,attachments)
+                restoredDraft?.let {payload.put("client_submission_id",it.id)}
+                reportStatus="Encrypting and saving report on this device…"
+                val online=submitNow && networkAvailable()
+                storedId=repo.queue(payload,attachments,scheduleSync=!online)
                 restoredDraft=null
                 attachments=emptyList()
                 similarMatches=emptyList()
-                message="Report encrypted on this device. Automatic synchronization queued."
                 onSaved()
-            } catch(e: Exception){message=e.message ?: "Unable to save report"}
-            finally{busy=false}
+
+                if(!submitNow){
+                    reportStatus="Saved in Outbox. The report will sync automatically when connected."
+                    message="Report saved in Outbox."
+                }else if(!online){
+                    reportStatus="No network available. Report saved safely in Outbox for later synchronization."
+                    message="Saved offline. No server submission has occurred."
+                }else {
+                    val token=app.store.token()
+                    if(token.isNullOrBlank()){
+                        reportStatus="Report saved in Outbox. Sign in online again to submit it."
+                        message="Report queued. Your session needs renewal."
+                    }else{
+                        reportStatus="Submitting report to the server…"
+                        try {
+                            val result=repo.submitQueuedNow(storedId,token)
+                            if(result==null){
+                                reportStatus="Report saved in Outbox. A background upload is already handling it."
+                                message="Upload in progress. Check My Reports for confirmation."
+                            }else{
+                                val reference=result.optString("reference")
+                                reportStatus=if(reference.isBlank())
+                                    "Server accepted your report successfully."
+                                else "Submitted successfully. Reference: $reference"
+                                message=reportStatus
+                                refreshReports()
+                            }
+                        }catch(e:ApiFailure){
+                            val retryable=e.code in setOf(401,403,408,429)||e.code>=500
+                            reportStatusIsError=true
+                            val reason=e.message?.take(180) ?: "Server rejected the submission"
+                            reportStatus=if(retryable)
+                                "Not submitted yet. Saved in Outbox. $reason"
+                            else "Server rejected the report. Open Outbox, correct it and retry. $reason"
+                            message=reportStatus
+                            if(retryable && e.code !in setOf(401,403))SyncScheduler.enqueue(app)
+                        }catch(e:Exception){
+                            reportStatusIsError=true
+                            reportStatus="Upload failed, but the report is saved in Outbox. "+
+                                (e.message?.take(140) ?: "Try synchronizing when connected.")
+                            message=reportStatus
+                            // Network failures are retryable. An unexpected local
+                            // validation error stays in the Outbox for correction.
+                            if(e is java.io.IOException)SyncScheduler.enqueue(app)
+                        }
+                    }
+                }
+            }catch(e:Exception){
+                reportStatusIsError=true
+                reportStatus=e.message ?: "Could not save this report. Check the required fields."
+                message=reportStatus
+            }finally{
+                submittingReport=false
+                busy=false
+            }
         }
     }
 
