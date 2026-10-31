@@ -21,7 +21,7 @@ class PublicAndroidDownloadTest extends TestCase
             $this->get(route('downloads.android'))->assertOk()
                 ->assertHeader('Content-Type', 'application/vnd.android.package-archive')
                 ->assertHeader('X-Content-Type-Options', 'nosniff')
-                ->assertHeader('Cache-Control', 'private, no-store, no-cache, must-revalidate')
+                ->assertHeader('Cache-Control', 'must-revalidate, no-cache, no-store, private')
                 ->assertHeader('Pragma', 'no-cache')
                 ->assertHeader('Expires', '0')
                 ->assertDownload('arewa-civic-tracker-v0.4.0-debug.apk');
@@ -43,7 +43,7 @@ class PublicAndroidDownloadTest extends TestCase
         try {
             $this->get(route('downloads.android', ['v' => config('native.android_apk_name')]))
                 ->assertOk()
-                ->assertHeader('Cache-Control', 'private, no-store, no-cache, must-revalidate')
+                ->assertHeader('Cache-Control', 'must-revalidate, no-cache, no-store, private')
                 ->assertDownload('arewa-civic-tracker-v0.4.0-debug.apk');
         } finally {
             unlink($path);
