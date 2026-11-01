@@ -1,0 +1,10 @@
+/* One searchable Ward selector, aligned with other report fields.
+   Tom Select supplies its own dropdown overlay and create-new option. */
+.portal-main .report-form .act-ward-field{min-width:0;align-self:start}
+.portal-main .report-form .act-ward-field .ts-wrapper{width:100%;min-width:0}
+.portal-main .report-form .act-ward-field .ts-wrapper .ts-control{min-height:41px;max-height:41px}
+.portal-main .report-form .act-ward-field .ts-dropdown{z-index:130}
+.portal-main .report-form .act-ward-field .ts-dropdown .create{padding:10px 12px;color:#19583d;background:#eef6ef}
+.portal-main .report-form .act-ward-field .ts-dropdown .create strong{font-weight:750}
+.portal-main .report-form .act-ward-field [hidden]{display:none!important}
+.portal-main .report-form .act-ward-manual{margin:6px 0 0;width:100%}

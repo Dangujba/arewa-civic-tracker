@@ -1,5 +1,6 @@
 @extends('layouts.app')
 @push('head')
+<link rel="stylesheet" href="{{ asset('css/act-ward-picker.css') }}?v=20261101-single1">
 <link rel="stylesheet" href="{{ asset('vendor/quill/quill.snow.css') }}">
 <link rel="stylesheet" href="{{ asset('css/act-report-richtext.css') }}?v=20261031-quill1">
 @endpush
@@ -37,7 +38,7 @@
 <script defer src="{{ asset('vendor/quill/quill.js') }}"></script>
 <script defer src="{{ asset('js/act-report-richtext.js') }}?v=20261031-quill1"></script>
 @endpush
-@push('scripts')<script defer src="{{ asset('js/act-similar-reports.js') }}?v=20261029-similar1"></script><script defer src="{{ asset('js/act-report-location.js') }}?v=20261029-ring1"></script><script defer src="{{ asset('js/offline-reports.js') }}?v=20261101-richtext1"></script><script defer src="{{ asset('js/act-wards.js') }}?v=20261029-wards1"></script>@endpush
+@push('scripts')<script defer src="{{ asset('js/act-similar-reports.js') }}?v=20261029-similar1"></script><script defer src="{{ asset('js/act-report-location.js') }}?v=20261029-ring1"></script><script defer src="{{ asset('js/offline-reports.js') }}?v=20261101-richtext1"></script><script defer src="{{ asset('js/act-wards.js') }}?v=20261101-single1"></script>@endpush
 @endsection
 
 @push('scripts')<script defer src="{{ asset('js/act-reference-forms.js') }}?v=20261029-master1"></script>@endpush
