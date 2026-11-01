@@ -1,0 +1,49 @@
+.act-case-report{margin:0 0 24px;color:#1c3025}
+.act-case-breadcrumb{display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin:0 0 18px;font-size:.87rem;color:#6a7d70}
+.act-case-breadcrumb a{color:#17543b;text-decoration:none;font-weight:650}
+.act-case-header{display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:18px;border:1px solid #dbe4dd;background:#fff;padding:24px 28px}
+.act-case-overline{font-size:.78rem;text-transform:uppercase;letter-spacing:.08em;color:#317355;font-weight:750;margin:0 0 12px}
+.act-case-heading{flex:1;min-width:260px}
+.act-case-heading h1{font-size:clamp(1.55rem,2.2vw,2.2rem);line-height:1.26;letter-spacing:-.02em;margin:0 0 14px;color:#193b2a;overflow-wrap:anywhere}
+.act-case-metadata{display:flex;gap:9px 18px;flex-wrap:wrap;color:#607368;font-size:.91rem}
+.act-case-metadata span i{margin-right:4px;color:#4b785b}
+.act-case-statuses{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px}
+.act-case-status{display:inline-flex;align-items:center;gap:6px;border:1px solid #d6e1d8;background:#f1f6f1;color:#235d41;padding:5px 10px;font-weight:680;font-size:.79rem}
+.act-case-status-submitted,.act-case-status-under_review{background:#f8f3e8;border-color:#e6d4a5;color:#7c5d22}
+.act-case-status-rejected{background:#fdf0ef;border-color:#e5bdb9;color:#9b3830}
+.act-case-status-approved,.act-case-status-verified{background:#eaf5ec;border-color:#b6d6c1;color:#1d6541}
+.act-case-status-closed{color:#566774;background:#eef3f5}
+.act-case-progress{background:#eef2f0;color:#3e5f50}
+.act-case-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.act-case-actions>a,.act-case-actions>button{white-space:nowrap}
+.act-case-overview{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));background:#fbfcfa;border:1px solid #dbe4dd;border-top:0}
+.act-case-overview-item{padding:20px 21px;min-width:0;border-right:1px solid #e1e8e2}
+.act-case-overview-item:last-child{border-right:0}
+.act-case-label{display:block;color:#667c6d;font-size:.81rem;margin-bottom:9px}
+.act-case-label i{margin-right:5px}
+.act-case-overview-item strong{font-weight:700;font-size:.99rem;line-height:1.4;overflow-wrap:anywhere}
+.act-case-content-grid{display:grid;grid-template-columns:minmax(0,1.8fr) minmax(235px,1fr);gap:18px;margin-top:18px;align-items:start}
+.act-case-content-main,.act-case-facts{border:1px solid #dbe4dd;background:#fff;min-width:0}
+.act-case-section{padding:23px 27px}
+.act-case-section+.act-case-section{border-top:1px solid #e3e9e5}
+.act-case-section-title{display:flex;align-items:center;gap:10px;margin-bottom:15px}
+.act-case-section-title i{color:#247448;font-size:1rem}
+.act-case-section-title h2{color:#193a28;font-size:1.08rem;margin:0;font-weight:750}
+.act-case-rich-content,.act-case-paragraph{font-size:.98rem;line-height:1.75;color:#304638;overflow-wrap:anywhere}
+.act-case-paragraph{white-space:pre-line}
+.act-case-rich-content p{margin:0 0 .8em}
+.act-case-rich-content p:last-child{margin-bottom:0}
+.act-case-rich-content ul,.act-case-rich-content ol{padding-left:25px;margin:8px 0 12px}
+.act-case-rich-content h2,.act-case-rich-content h3{font-size:1.05rem;margin:18px 0 10px;color:#1e4d35}
+.act-case-rich-content blockquote{border-left:3px solid #ae8131;margin:10px 0;padding:5px 0 5px 15px;color:#586958}
+.act-case-rich-content a{color:#1b7045;text-decoration:underline}
+.act-case-empty{color:#859389;font-style:italic}
+.act-case-facts{padding:22px}
+.act-case-facts dl{margin:0}
+.act-case-facts dl>div{padding:11px 0;border-bottom:1px solid #e6ece7}
+.act-case-facts dl>div:last-child{border-bottom:0;padding-bottom:0}
+.act-case-facts dt{font-size:.78rem;color:#758478;margin-bottom:5px}
+.act-case-facts dd{font-size:.95rem;font-weight:660;margin:0;color:#2b4434;overflow-wrap:anywhere}
+@media(max-width:950px){.act-case-overview{grid-template-columns:repeat(2,minmax(0,1fr))}.act-case-overview-item:nth-child(2){border-right:0}.act-case-overview-item:nth-child(-n+2){border-bottom:1px solid #e1e8e2}.act-case-content-grid{grid-template-columns:1fr}}
+@media(max-width:550px){.act-case-header{padding:20px 16px}.act-case-overview-item{padding:15px}.act-case-section{padding:18px}.act-case-content-grid{gap:12px}.act-case-actions{width:100%}}
+@media print{.portal-sidebar,.portal-topbar,.portal-footer,.act-case-actions,.act-case-breadcrumb,.act-case-report~.card form,.act-case-report~.grid form{display:none!important}.portal-page,.portal-main{margin:0!important;padding:0!important}.act-case-header,.act-case-overview,.act-case-content-main,.act-case-facts{border-color:#bbb;break-inside:avoid}.act-case-content-grid{grid-template-columns:1.7fr 1fr}}

@@ -1,8 +1,83 @@
 @extends('layouts.app')
-@section('title','Report | Arewa Civic Tracker')
+@section('title','Report Details | Arewa Civic Tracker')
+@section('section_heading','Report details')
+@push('head')<link rel="stylesheet" href="{{ asset('css/act-case-detail.css') }}?v=20261031-case1">@endpush
 @section('content')
-<p><a href="{{ route('cases.index') }}"><i class="fa-solid fa-arrow-left" aria-hidden="true"></i> Reports</a></p><div class="card"><p class="muted">{{ $case->reference }} · {{ $case->lga->name }} · {{ $case->ward ? $case->ward.' · ' : '' }}{{ $case->community }}</p><h1>{{ $case->title }}</h1><div class="grid"><div><strong>Verification</strong><p>{{ \App\Models\WorkflowStatusLabel::label('verification',$case->verification_status) }}</p></div><div><strong>Progress</strong><p>{{ \App\Models\WorkflowStatusLabel::label('progress',$case->progress_status) }}</p></div><div><strong>Sector</strong><p>{{ $case->sector->name }}</p></div><div><strong>Observed</strong><p>{{ $case->observation_date->format('d M Y') }}</p></div></div>@if($case->category)<p><strong>Category:</strong> {{ $case->category->name }}</p>@endif
-<h3>Description</h3><p>{{ $case->description }}</p><h3>Observations</h3><p>{{ $case->observations ?: 'None recorded' }}</p><h3>Duty bearers</h3><p>{{ $case->duty_bearers ?: 'None recorded' }}</p></div>
+<div class="act-case-report" id="act-case-report">
+  <nav class="act-case-breadcrumb" aria-label="Breadcrumb">
+    <a href="{{ route('cases.index') }}"><i class="fa-solid fa-arrow-left" aria-hidden="true"></i> Monitoring reports</a>
+    <span aria-hidden="true">/</span><span>{{ $case->reference }}</span>
+  </nav>
+
+  <header class="act-case-header">
+    <div class="act-case-heading">
+      <p class="act-case-overline"><i class="fa-regular fa-file-lines" aria-hidden="true"></i> {{ $case->type==='public_project'?'Public Project Monitoring':'Governance Issue Report' }}</p>
+      <h1>{{ $case->title }}</h1>
+      <div class="act-case-metadata">
+        <span><i class="fa-solid fa-hashtag" aria-hidden="true"></i> {{ $case->reference }}</span>
+        <span><i class="fa-solid fa-location-dot" aria-hidden="true"></i> {{ $case->lga->name }}@if($case->ward), {{ $case->ward }}@endif · {{ $case->community }}</span>
+      </div>
+      <div class="act-case-statuses">
+        <span class="act-case-status act-case-status-{{ $case->verification_status }}">
+          <i class="fa-solid fa-circle-check" aria-hidden="true"></i>
+          {{ \App\Models\WorkflowStatusLabel::label('verification',$case->verification_status) }}
+        </span>
+        <span class="act-case-status act-case-progress">
+          <i class="fa-solid fa-chart-line" aria-hidden="true"></i>
+          {{ \App\Models\WorkflowStatusLabel::label('progress',$case->progress_status) }}
+        </span>
+        @if($case->closure_status==='closed')<span class="act-case-status act-case-closed">Closed</span>@endif
+      </div>
+    </div>
+    <div class="act-case-actions">
+      @can('update',$case)
+      <a class="btn" href="{{ route('cases.edit',$case) }}"><i class="fa-solid fa-pen-to-square" aria-hidden="true"></i> Edit report</a>
+      @endcan
+      <button type="button" class="btn-outline" onclick="window.print()"><i class="fa-solid fa-print" aria-hidden="true"></i> Print report</button>
+    </div>
+  </header>
+
+  <section class="act-case-overview" aria-label="Report summary">
+    <div class="act-case-overview-item"><span class="act-case-label"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Sector</span><strong>{{ $case->sector?->name ?? 'Not assigned' }}</strong></div>
+    <div class="act-case-overview-item"><span class="act-case-label"><i class="fa-solid fa-calendar-day" aria-hidden="true"></i> Date observed</span><strong>{{ $case->observation_date?->format('d M Y') ?? 'Not recorded' }}</strong></div>
+    <div class="act-case-overview-item"><span class="act-case-label"><i class="fa-regular fa-user" aria-hidden="true"></i> Submitted by</span><strong>{{ $case->reporter?->name ?? 'Field officer' }}</strong></div>
+    <div class="act-case-overview-item"><span class="act-case-label"><i class="fa-regular fa-clock" aria-hidden="true"></i> Last updated</span><strong>{{ $case->updated_at?->format('d M Y') ?? 'Not recorded' }}</strong></div>
+  </section>
+
+  <div class="act-case-content-grid">
+    <article class="act-case-content-main">
+      <section class="act-case-section">
+        <div class="act-case-section-title"><i class="fa-regular fa-file-lines" aria-hidden="true"></i><h2>Description</h2></div>
+        <div class="act-case-rich-content">{!! \App\Support\CaseRichText::render($case->description) !!}</div>
+      </section>
+      <section class="act-case-section">
+        <div class="act-case-section-title"><i class="fa-solid fa-clipboard-list" aria-hidden="true"></i><h2>Field observations</h2></div>
+        <div class="act-case-paragraph">@if($case->observations){{ $case->observations }}@else<span class="act-case-empty">No observations recorded.</span>@endif</div>
+      </section>
+      <section class="act-case-section">
+        <div class="act-case-section-title"><i class="fa-solid fa-people-group" aria-hidden="true"></i><h2>Stakeholders and duty bearers</h2></div>
+        <div class="act-case-paragraph">@if($case->duty_bearers){{ $case->duty_bearers }}@else<span class="act-case-empty">No duty bearers recorded.</span>@endif</div>
+      </section>
+    </article>
+
+    <aside class="act-case-content-side">
+      <section class="act-case-facts" aria-label="Report information">
+        <div class="act-case-section-title"><i class="fa-solid fa-circle-info" aria-hidden="true"></i><h2>Report information</h2></div>
+        <dl>
+          <div><dt>Local government</dt><dd>{{ $case->lga->name }}</dd></div>
+          <div><dt>Ward</dt><dd>{{ $case->ward ?: 'Not specified' }}</dd></div>
+          <div><dt>Community</dt><dd>{{ $case->community }}</dd></div>
+          <div><dt>Category</dt><dd>{{ $case->category?->name ?? 'Not specified' }}</dd></div>
+          <div><dt>Verification</dt><dd>{{ \App\Models\WorkflowStatusLabel::label('verification',$case->verification_status) }}</dd></div>
+          <div><dt>Report lifecycle</dt><dd>{{ $case->closure_status==='closed'?'Closed':'Open' }}</dd></div>
+          @if($case->latitude!==null&&$case->longitude!==null)
+          <div><dt>GPS coordinates</dt><dd>{{ $case->latitude }}, {{ $case->longitude }}</dd></div>
+          @endif
+        </dl>
+      </section>
+    </aside>
+  </div>
+</div>
 @if(auth()->user()->isAdmin())
 <section class="card">
  <h2>Public transparency</h2>
