@@ -7,6 +7,7 @@ use App\Models\Sector;
 use App\Models\WorkflowStatusLabel;
 use App\Services\ReportChartRenderer;
 use Dompdf\Dompdf;
+use App\Support\CaseRichText;
 use Dompdf\Options;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -103,7 +104,7 @@ class ReportsController extends Controller
                 $values=[
                     $case->reference,$case->type,$case->title,$case->lga?->name,$case->ward,$case->community,$case->sector?->name,
                     $case->observation_date?->format('Y-m-d'),$verificationLabels[$case->verification_status]??$case->verification_status,$progressLabels[$case->progress_status]??$case->progress_status,
-                    $case->description,$case->latitude,$case->longitude
+                    CaseRichText::plainText($case->description),$case->latitude,$case->longitude
                 ];
                 foreach($values as $col=>$value)$sheet->setCellValueExplicit([$col+1,$row],(string)($value??''),DataType::TYPE_STRING);
                 if(++$row>10001)break;

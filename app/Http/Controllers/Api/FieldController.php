@@ -1,5 +1,6 @@
 <?php
 namespace App\Http\Controllers\Api;
+use App\Support\CaseRichText;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreCaseRequest;
 use App\Models\CaseEvent;
@@ -113,9 +114,12 @@ class FieldController extends Controller {
    'evidence:id,case_id,original_name,mime_type,size_bytes']);
   $fields=$case->only(['type','title','description','lga_id','ward','community','sector_id','report_category_id',
     'observations','duty_bearers','progress_status','latitude','longitude']);
+  $fields['description']=CaseRichText::plainText($fields['description']);
   $fields['observation_date']=$case->observation_date->format('Y-m-d');
-  return response()->json(['report'=>$case->only(['id','reference','title','description','verification_status','progress_status',
-   'observation_date','ward','community','latitude','longitude','lga','sector','followups','evidence','closure_status']),
+  $report=$case->only(['id','reference','title','description','verification_status','progress_status',
+   'observation_date','ward','community','latitude','longitude','lga','sector','followups','evidence','closure_status']);
+  $report['description']=CaseRichText::plainText($report['description']);
+  return response()->json(['report'=>$report,
    'editable'=>$u->can('update',$case),
    'version'=>(int)\App\Models\CaseRevision::where('case_id',$case->id)->max('version'),
    'fields'=>$fields])

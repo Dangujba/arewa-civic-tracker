@@ -1,6 +1,7 @@
 <?php
 namespace App\Http\Requests;
 use App\Models\CivicCase;
+use App\Support\CaseRichText;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 class StoreCaseRequest extends FormRequest {
@@ -9,7 +10,10 @@ class StoreCaseRequest extends FormRequest {
         'client_submission_id'=>['required','uuid'],
         'type'=>['required',Rule::in(['public_project','governance_issue'])],
         'title'=>['required','string','min:5','max:200'],
-        'description'=>['required','string','min:15','max:10000'],
+        'description'=>['required','string','min:15','max:10000',function($attribute,$value,$fail){
+            if(mb_strlen(CaseRichText::plainText($value))<15)
+                $fail('Description must contain at least 15 characters of text.');
+        }],
         'lga_id'=>['required','integer','exists:lgas,id',function($attribute,$value,$fail){
             $user=$this->user();
             if(!$user || $user->role!=='focal')return;

@@ -1,6 +1,7 @@
 <?php
 namespace App\Http\Controllers;
 use App\Models\CivicCase;
+use App\Support\CaseRichText;
 use App\Models\Lga;
 use App\Models\Sector;
 use App\Models\CaseRevision;
@@ -44,7 +45,10 @@ class CaseRevisionController extends Controller {
    'reason'=>['required','string','min:5','max:2000'],
    'type'=>['required',Rule::in(['public_project','governance_issue'])],
    'title'=>['required','string','min:5','max:200'],
-   'description'=>['required','string','min:15','max:10000'],
+   'description'=>['required','string','min:15','max:10000',function($attribute,$value,$fail){
+        if(mb_strlen(CaseRichText::plainText($value))<15)
+            $fail('Description must contain at least 15 characters of text.');
+    }],
    'lga_id'=>['required','integer','exists:lgas,id',function($field,$value,$fail)use($r){
      if($r->user()->role!=='focal')return;
      if(!$r->user()->assignedLgas()->where('lgas.id',$value)->exists())$fail('This LGA is not assigned to your account.');
@@ -60,6 +64,7 @@ class CaseRevisionController extends Controller {
    'latitude'=>['nullable','required_with:longitude','numeric','between:-90,90'],
    'longitude'=>['nullable','required_with:latitude','numeric','between:-180,180']
   ]);
+  $data['description']=CaseRichText::clean($data['description']);
   DB::transaction(function()use($r,$case,$data){
    $locked=CivicCase::whereKey($case->id)->lockForUpdate()->firstOrFail();
    if(!$r->user()->can('update',$locked)||$locked->closure_status==='closed')abort(403,'Report is locked for editing.');

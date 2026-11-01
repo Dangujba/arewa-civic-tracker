@@ -3,12 +3,14 @@ namespace App\Services;
 use App\Models\CivicCase;
 use App\Models\CaseEvent;
 use App\Models\User;
+use App\Support\CaseRichText;
 use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Symfony\Component\HttpKernel\Exception\ConflictHttpException;
 class CaseSubmissionService {
     public function submit(User $user,array $data):CivicCase {
+        $data['description'] = CaseRichText::clean($data['description']);
         ksort($data);$hash=hash('sha256',json_encode($data,JSON_THROW_ON_ERROR));
         $existing=CivicCase::where('reporter_id',$user->id)->where('client_submission_id',$data['client_submission_id'])->first();
         if($existing){return $this->replay($existing,$hash);}
