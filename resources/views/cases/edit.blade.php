@@ -1,4 +1,8 @@
 @extends('layouts.app')
+@push('head')
+<link rel="stylesheet" href="{{ asset('vendor/quill/quill.snow.css') }}">
+<link rel="stylesheet" href="{{ asset('css/act-report-richtext.css') }}?v=20261031-quill1">
+@endpush
 @section('title','Edit Monitoring Report | Arewa Civic Tracker')
 @section('section_heading','Edit Monitoring Report')
 @section('content')
@@ -14,7 +18,7 @@
  <div class="field"><label>Report Category (Optional)</label><select name="report_category_id"><option value="">No category</option>@foreach($categories as $c)<option value="{{ $c->id }}" data-type="{{ $c->type }}" @selected(old('report_category_id',isset($case)?$case->report_category_id:null)==$c->id)>{{ $c->name }}</option>@endforeach</select></div><datalist id="community-suggestions">@foreach($communities as $place)<option value="{{ $place->name }}" data-lga="{{ $place->lga_id }}"></option>@endforeach</datalist><div class="field"><label>Sector</label><select name="sector_id" required>@foreach($sectors as $s)<option value="{{ $s->id }}" @selected(old('sector_id',$case->sector_id)==$s->id)>{{ $s->name }}</option>@endforeach</select></div>
  </div>
  <div class="field"><label>Report Title</label><input name="title" required maxlength="200" minlength="5" value="{{ old('title',$case->title) }}"></div>
- <div class="field"><label>Description</label><textarea name="description" required minlength="15" maxlength="10000">{{ old('description',$case->description) }}</textarea></div>
+ <div class="field"><label>Description</label><textarea name="description" data-act-richtext required minlength="15" maxlength="10000">{{ old('description',\App\Support\CaseRichText::clean($case->description)) }}</textarea></div>
  <div class="field"><label>Observations</label><textarea name="observations" maxlength="10000">{{ old('observations',$case->observations) }}</textarea></div>
  <div class="field"><label>Stakeholders / Duty Bearers</label><textarea name="duty_bearers" maxlength="5000">{{ old('duty_bearers',$case->duty_bearers) }}</textarea></div>
  <div class="grid"><div class="field"><label>Latitude</label><input type="number" step="any" min="-90" max="90" name="latitude" value="{{ old('latitude',$case->latitude) }}"></div><div class="field"><label>Longitude</label><input type="number" step="any" min="-180" max="180" name="longitude" value="{{ old('longitude',$case->longitude) }}"></div></div>
@@ -23,4 +27,8 @@
 </form>
 @endsection
 
+@push('scripts')
+<script defer src="{{ asset('vendor/quill/quill.js') }}"></script>
+<script defer src="{{ asset('js/act-report-richtext.js') }}?v=20261031-quill1"></script>
+@endpush
 @push('scripts')<script defer src="{{ asset('js/act-reference-forms.js') }}?v=20261029-master1"></script><script defer src="{{ asset('js/act-wards.js') }}?v=20261029-wards2"></script>@endpush

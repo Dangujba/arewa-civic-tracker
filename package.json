@@ -3,9 +3,10 @@
     "private": true,
     "type": "module",
     "scripts": {
-        "build": "npm run assets:icons && vite build",
+        "build": "npm run assets:icons && npm run assets:quill && vite build",
         "dev": "vite",
-        "assets:icons": "node scripts/prepare-icons.mjs"
+        "assets:icons": "node scripts/prepare-icons.mjs",
+        "assets:quill": "node scripts/prepare-quill.mjs"
     },
     "devDependencies": {
         "@tailwindcss/vite": "^4.0.0",

@@ -1,0 +1,8 @@
+.act-quill-host{font:inherit}
+.act-quill-host .ql-toolbar.ql-snow{border:1px solid #cddbd1;background:#f8faf8;border-radius:0}
+.act-quill-host .ql-container.ql-snow{min-height:170px;border:1px solid #cddbd1;border-top:0;border-radius:0;font-family:inherit;font-size:15px}
+.act-quill-host .ql-editor{min-height:170px;line-height:1.65;color:#233a2e}
+.act-quill-host .ql-editor.ql-blank::before{color:#7a8a81;font-style:normal}
+.act-quill-host .ql-toolbar button:focus-visible{outline:2px solid #17543b;outline-offset:2px}
+.act-richtext-hint{margin:5px 0;color:#ad3933;font-size:.9rem}
+@media print{.act-quill-host .ql-toolbar{display:none}}
