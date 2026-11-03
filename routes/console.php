@@ -8,3 +8,5 @@ Schedule::command('act:privacy-maintenance')->dailyAt('03:15')->timezone('Africa
 
 Schedule::command('act:copy-backup-offsite')->dailyAt('02:55')->timezone('Africa/Lagos')
     ->when(fn()=>filled(config('act.offsite_backup_dir')))->withoutOverlapping();
+
+Schedule::command('act:send-notification-emails --limit=40')->everyMinute()->withoutOverlapping();
