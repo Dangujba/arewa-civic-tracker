@@ -47,3 +47,31 @@
 @media(max-width:950px){.act-case-overview{grid-template-columns:repeat(2,minmax(0,1fr))}.act-case-overview-item:nth-child(2){border-right:0}.act-case-overview-item:nth-child(-n+2){border-bottom:1px solid #e1e8e2}.act-case-content-grid{grid-template-columns:1fr}}
 @media(max-width:550px){.act-case-header{padding:20px 16px}.act-case-overview-item{padding:15px}.act-case-section{padding:18px}.act-case-content-grid{gap:12px}.act-case-actions{width:100%}}
 @media print{.portal-sidebar,.portal-topbar,.portal-footer,.act-case-actions,.act-case-breadcrumb,.act-case-report~.card form,.act-case-report~.grid form{display:none!important}.portal-page,.portal-main{margin:0!important;padding:0!important}.act-case-header,.act-case-overview,.act-case-content-main,.act-case-facts{border-color:#bbb;break-inside:avoid}.act-case-content-grid{grid-template-columns:1.7fr 1fr}}
+
+/* High-priority evidence, consistent save controls and correct timestamp layout */
+.act-observed-time{display:block;font-size:.82rem;color:#6b7f72;font-weight:500;margin-top:4px}
+.act-case-evidence-panel{border:1px solid #dbe4dd;background:#fff;margin:18px 0;padding:22px 26px}
+.act-case-evidence-heading{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;flex-wrap:wrap}
+.act-case-evidence-heading h2{font-size:1.13rem;margin:5px 0 8px;color:#19462e}
+.act-case-evidence-heading h2 i{color:#278350;margin-right:7px}
+.act-case-evidence-heading p{font-size:.85rem;color:#687b6f;margin:0 0 14px}
+.act-evidence-total{font-size:.8rem;font-weight:700;background:#f1f6f2;padding:6px 10px;color:#20543a}
+.act-evidence-gallery{display:grid;grid-template-columns:repeat(auto-fill,minmax(185px,1fr));gap:13px;margin:10px 0}
+.act-evidence-item{border:1px solid #e0e8e2;min-width:0;background:#fff}
+.act-evidence-thumb{height:148px;background:#f4f7f4;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.act-evidence-thumb img{width:100%;height:100%;object-fit:contain}
+.act-evidence-file i{font-size:2rem;color:#c34841}
+.act-evidence-caption{padding:12px;font-size:.83rem;overflow-wrap:anywhere}
+.act-evidence-caption a{color:#205a3d;text-decoration:underline;font-weight:650}
+.act-evidence-caption small{display:block;color:#718173;margin-top:5px}
+.act-case-action-form{margin-top:15px;max-width:620px}
+.act-case-action-form .field{margin-bottom:10px}
+.portal-main .act-case-save-btn,.act-case-save-btn{display:inline-flex!important;justify-content:center!important;align-items:center!important;gap:9px!important;border:1px solid #16553c!important;background:#16553c!important;color:#fff!important;padding:11px 17px!important;font-size:.85rem!important;font-weight:750!important;line-height:1.25!important;min-width:148px!important;min-height:41px!important;width:auto!important;border-radius:0!important;box-shadow:none!important;text-align:center!important;cursor:pointer!important}
+.act-case-save-btn i{color:inherit!important;font-size:.87rem;flex:none}
+.act-case-save-btn span{display:inline!important;white-space:normal!important}
+.act-case-save-btn:hover{background:#103d2b!important;border-color:#103d2b!important}
+.act-case-save-btn:focus-visible{outline:3px solid #b7cfbe;outline-offset:2px}
+.act-case-save-btn:disabled{opacity:.55;cursor:not-allowed!important}
+.act-case-secondary-section h2 i{margin-right:8px;color:#25784d}
+@media(max-width:560px){.act-case-evidence-panel{padding:16px}.act-evidence-gallery{grid-template-columns:repeat(2,minmax(0,1fr))}.act-evidence-thumb{height:120px}}
+@media print{.act-case-evidence-upload,.act-case-secondary-section form{display:none!important}}

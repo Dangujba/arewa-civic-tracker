@@ -1,7 +1,7 @@
 @extends('layouts.app')
 @section('title','Report Details | Arewa Civic Tracker')
 @section('section_heading','Report details')
-@push('head')<link rel="stylesheet" href="{{ asset('css/act-case-detail.css') }}?v=20261031-case1">@endpush
+@push('head')<link rel="stylesheet" href="{{ asset('css/act-case-detail.css') }}?v=20261103-evidence1">@endpush
 @section('content')
 <div class="act-case-report" id="act-case-report">
   <nav class="act-case-breadcrumb" aria-label="Breadcrumb">
@@ -78,6 +78,40 @@
     </aside>
   </div>
 </div>
+
+<section class="act-case-evidence-panel" id="case-evidence">
+  <div class="act-case-evidence-heading">
+    <div><span class="act-case-label">Supporting materials</span><h2><i class="fa-solid fa-images" aria-hidden="true"></i> Evidence &amp; attachments</h2>
+    <p>Private to authorized staff. Preview images are optimized; download the original file to examine the unmodified evidence.</p></div>
+    <span class="act-evidence-total">{{ $case->evidence->count() }} file(s)</span>
+  </div>
+  <div class="act-evidence-gallery">
+    @forelse($case->evidence as $e)
+    <article class="act-evidence-item">
+      @if($e->preview_path)
+        <a class="act-evidence-thumb" href="{{ route('evidence.download',$e) }}" title="Download original evidence"><img loading="lazy" src="{{ route('evidence.preview',$e) }}" alt="Preview of {{ $e->original_name }}"></a>
+      @else
+        <a class="act-evidence-thumb act-evidence-file" href="{{ route('evidence.download',$e) }}"><i class="fa-regular fa-file-pdf" aria-hidden="true"></i></a>
+      @endif
+      <div class="act-evidence-caption">
+        <a href="{{ route('evidence.download',$e) }}" download><i class="fa-solid fa-download" aria-hidden="true"></i> {{ $e->original_name }}</a>
+        <small>{{ number_format($e->size_bytes/1024) }} KB · Original file</small>
+      </div>
+    </article>
+    @empty
+      <p class="act-case-empty">No evidence has been uploaded for this report.</p>
+    @endforelse
+  </div>
+  @if($case->closure_status!=='closed')
+    <form class="act-case-evidence-upload act-case-action-form" method="POST" enctype="multipart/form-data" action="{{ route('cases.evidence',$case) }}" data-no-ajax>
+      @csrf
+      <div class="field"><label for="additional-evidence">Add supporting evidence (JPG, PNG, WebP up to 10 MB; PDF up to 5 MB)</label>
+      <input id="additional-evidence" type="file" name="evidence" accept="image/png,image/jpeg,image/webp,application/pdf" required></div>
+      <button type="submit" class="act-case-save-btn"><i class="fa-solid fa-cloud-arrow-up" aria-hidden="true"></i><span>Upload Evidence</span></button>
+    </form>
+  @endif
+</section>
+
 @if(auth()->user()->isAdmin())
 <section class="card">
  <h2>Public transparency</h2>
@@ -87,12 +121,12 @@
  <p class="muted">Published {{ $case->published_at->format('d M Y H:i') }}</p>
  <form method="POST" action="{{ route('admin.cases.publication',$case) }}" data-no-ajax>@csrf
  <input type="hidden" name="action" value="unpublish">
- <button type="submit" class="btn-outline">Unpublish this report</button></form>
+ <button type="submit" class="act-case-save-btn"><i class="fa-solid fa-eye-slash" aria-hidden="true"></i><span>Unpublish Report</span></button></form>
  @elseif($case->verification_status==='approved')
  <form method="POST" action="{{ route('admin.cases.publication',$case) }}" data-no-ajax>@csrf
  <input type="hidden" name="action" value="publish">
  <p><label><input type="checkbox" name="confirm_public" value="1" required> I reviewed the public fields and approve their publication.</label></p>
- <button type="submit">Publish on public dashboard</button></form>
+ <button type="submit" class="act-case-save-btn"><i class="fa-solid fa-globe" aria-hidden="true"></i><span>Publish Report</span></button></form>
  @else
  <p class="muted">Only approved reports may be published.</p>
  @endif
@@ -104,7 +138,7 @@
  <form method="POST" action="{{ route('admin.governance.hold',$case) }}" data-no-ajax>@csrf
   <input type="hidden" name="hold" value="{{ $case->legal_hold?'0':'1' }}">
   <div class="field"><label for="hold-reason">{{ $case->legal_hold?'Reason for Releasing Hold':'Reason for Applying Hold' }}</label><textarea name="reason" id="hold-reason" required minlength="10" maxlength="3000" rows="2"></textarea></div>
-  <button class="btn-outline" type="submit">{{ $case->legal_hold?'Release Legal Hold':'Apply Legal Hold' }}</button>
+  <button class="act-case-save-btn" type="submit"><i class="fa-solid fa-shield-halved" aria-hidden="true"></i><span>{{ $case->legal_hold?'Release Legal Hold':'Apply Legal Hold' }}</span></button>
  </form>
 </section>
 @endif
@@ -122,8 +156,8 @@
  <input type="hidden" name="action" value="{{ $case->closure_status==='closed'?'reopen':'close' }}">
  <div class="field"><label for="case-closure-reason">{{ $case->closure_status==='closed'?'Reason for reopening':'Closure reason' }}</label>
  <textarea id="case-closure-reason" name="reason" minlength="10" maxlength="5000" required></textarea></div>
- <button type="submit" class="btn" @disabled($case->closure_status!=='closed'&&($case->verification_status!=='approved'||!in_array($case->progress_status,['completed','resolved'],true)))>
- {{ $case->closure_status==='closed'?'Reopen Case':'Close Case' }}</button>
+ <button type="submit" class="act-case-save-btn" @disabled($case->closure_status!=='closed'&&($case->verification_status!=='approved'||!in_array($case->progress_status,['completed','resolved'],true)))>
+ <i class="fa-solid fa-lock" aria-hidden="true"></i><span>{{ $case->closure_status==='closed'?'Reopen Case':'Close Case' }}</span></button>
  </form>
  @endif
 </section>
@@ -135,16 +169,28 @@
 <select id="reviewer-assigned" name="reviewer_id"><option value="">Unassigned</option>
 @foreach($reviewers as $reviewer)<option value="{{ $reviewer->id }}" @selected($case->reviewer_id==$reviewer->id)>{{ $reviewer->name }}</option>@endforeach
 </select></div><div class="field"><label for="reviewer-due">Review due date</label><input id="reviewer-due" type="date" name="review_due_at" value="{{ $case->review_due_at?->format('Y-m-d') }}"></div></div>
-<button type="submit">Save reviewer assignment</button></form></section>
+<button type="submit" class="act-case-save-btn"><i class="fa-solid fa-floppy-disk" aria-hidden="true"></i><span>Save Reviewer Assignment</span></button></form></section>
 @elseif($case->reviewer_id)
 <p class="muted">Assigned MEAL reviewer: {{ $case->reviewer?->name }} @if($case->review_due_at) | Due {{ $case->review_due_at->format('d M Y') }} @endif</p>
 @endif
-@if(count($allowedTransitions))<div class="card"><h2>Review decision</h2><form method="post" action="{{ route('cases.review',$case) }}">@csrf<div class="field"><label>New verification state</label><select name="status">@foreach($allowedTransitions as $s)<option value="{{ $s }}">{{ \App\Models\WorkflowStatusLabel::label('verification',$s) }}</option>@endforeach</select></div><div class="field"><label>Review comment / reason</label><textarea name="comment"></textarea></div><button type="submit"><i class="fa-solid fa-clipboard-check" aria-hidden="true"></i> Record decision</button></form></div>@endif
-<div class="grid"><div class="card"><h2>Evidence</h2><p class="muted">Previews are optimized for fast viewing. Download original to inspect unmodified photographic detail.</p>@forelse($case->evidence as $e)
-@if($e->preview_path)<div><a href="{{ route('evidence.download',$e) }}" title="Download original unmodified evidence"><img loading="lazy" src="{{ route('evidence.preview',$e) }}" alt="Optimized preview of {{ $e->original_name }}" style="display:block;max-width:100%;max-height:255px;object-fit:contain;margin-bottom:8px"></a></div>@endif
-<p><a href="{{ route('evidence.download',$e) }}">{{ $e->original_name }}</a> <small class="muted">Original · {{ number_format($e->size_bytes/1024) }} KB</small></p>@empty<p>No evidence uploaded.</p>@endforelse
-@if($case->closure_status!=='closed')<form method="post" enctype="multipart/form-data" action="{{ route('cases.evidence',$case) }}">@csrf<div class="field"><label>Add file (JPEG, PNG, WebP up to 10 MB; PDF up to 5 MB)</label><input type="file" name="evidence" accept="image/png,image/jpeg,image/webp,application/pdf" required></div><button>Upload evidence</button></form>@endif</div><div class="card"><h2>Follow-up</h2>@forelse($case->followups as $f)<p>{{ $f->note }} <small class="muted">{{ $f->created_at->format('d M Y') }}</small></p>@empty<p>No follow-up yet.</p>@endforelse
-@if($case->closure_status!=='closed')<form method="post" action="{{ route('cases.followups',$case) }}">@csrf<div class="field"><label>Follow-up note</label><textarea name="note" required></textarea></div><button>Save follow-up</button></form>@endif</div></div>
+@if(count($allowedTransitions))<div class="card"><h2>Review decision</h2><form method="post" action="{{ route('cases.review',$case) }}">@csrf<div class="field"><label>New verification state</label><select name="status">@foreach($allowedTransitions as $s)<option value="{{ $s }}">{{ \App\Models\WorkflowStatusLabel::label('verification',$s) }}</option>@endforeach</select></div><div class="field"><label>Review comment / reason</label><textarea name="comment"></textarea></div><button type="submit" class="act-case-save-btn"><i class="fa-solid fa-clipboard-check" aria-hidden="true"></i><span>Record Decision</span></button></form></div>@endif
+
+<section class="card act-case-secondary-section">
+  <h2><i class="fa-solid fa-comments" aria-hidden="true"></i> Follow-up</h2>
+  @forelse($case->followups as $f)
+    <p>{{ $f->note }} <small class="muted">{{ $f->created_at->format('d M Y, h:i A') }}</small></p>
+  @empty
+    <p class="muted">No follow-up yet.</p>
+  @endforelse
+  @if($case->closure_status!=='closed')
+    <form class="act-case-action-form" method="POST" action="{{ route('cases.followups',$case) }}" data-no-ajax>
+      @csrf
+      <div class="field"><label for="case-followup-note">Follow-up note</label><textarea id="case-followup-note" name="note" minlength="5" required></textarea></div>
+      <button type="submit" class="act-case-save-btn"><i class="fa-solid fa-floppy-disk" aria-hidden="true"></i><span>Save Follow-up</span></button>
+    </form>
+  @endif
+</section>
+
 @can('update',$case)<div class="card"><div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap"><div><h2 style="margin:0">Report Details</h2><p class="muted">Corrections are saved as a new version with a documented reason.</p></div><a class="btn" href="{{ route('cases.edit',$case) }}"><i class="fa-solid fa-pen-to-square" aria-hidden="true"></i> Edit Report</a></div></div>@endcan
 <div class="card"><h2>Revision History</h2><p class="muted">Each version preserves the previous and updated field values.</p>
 @forelse($case->revisions as $revision)<details style="padding:12px 0;border-bottom:1px solid #dce5dc"><summary style="cursor:pointer;font-weight:750">Version {{ $revision->version }} · {{ $revision->actor?->name??'Unknown' }} · {{ $revision->created_at?->format('d M Y H:i') }}</summary><p><strong>Reason:</strong> {{ $revision->reason }}</p><div class="dash-table-wrap"><table><thead><tr><th>Field</th><th>Before</th><th>After</th></tr></thead><tbody>@foreach($revision->changes as $field=>$change)<tr><td>{{ ucwords(str_replace('_',' ',$field)) }}</td><td>{{ $change['from']??'Not set' }}</td><td>{{ $change['to']??'Not set' }}</td></tr>@endforeach</tbody></table></div></details>
@@ -152,5 +198,5 @@
 <div class="card"><h2>Audit history</h2><ol>@foreach($case->events as $event)<li>{{ $event->event_type }} by {{ $event->actor?->name ?? 'Unknown user' }} @if($event->to_status) to {{ $event->to_status }} @endif · {{ $event->created_at->format('d M Y H:i') }} @if($event->comment) · {{ $event->comment }} @endif</li>@endforeach</ol></div>
 @if(auth()->id()===$case->reporter_id && $case->verification_status==='clarification_requested')
 <section class="card"><h2>Respond to clarification</h2><form action="{{ route('cases.clarification',$case) }}" method="post">@csrf<div class="field"><label>Response<textarea name="response" required minlength="5"></textarea></label></div><button>Submit response</button></form></section>@endif
-@if(auth()->user()->canReview() && $case->closure_status!=='closed')<section class="card"><h2>Update project / issue progress</h2><form action="{{ route('cases.progress',$case) }}" method="post">@csrf<div class="field"><label>Progress<select name="progress_status">@foreach(['observed','not_started','ongoing','stalled','completed','resolved','other'] as $status)<option value="{{ $status }}" @selected($case->progress_status===$status)>{{ \App\Models\WorkflowStatusLabel::label('progress',$status) }}</option>@endforeach</select></label></div><div class="field"><label>Reason or observation<textarea name="note" required minlength="5"></textarea></label></div><button>Save progress</button></form></section>@endif
+@if(auth()->user()->canReview() && $case->closure_status!=='closed')<section class="card"><h2>Update project / issue progress</h2><form action="{{ route('cases.progress',$case) }}" method="post">@csrf<div class="field"><label>Progress<select name="progress_status">@foreach(['observed','not_started','ongoing','stalled','completed','resolved','other'] as $status)<option value="{{ $status }}" @selected($case->progress_status===$status)>{{ \App\Models\WorkflowStatusLabel::label('progress',$status) }}</option>@endforeach</select></label></div><div class="field"><label>Reason or observation<textarea name="note" required minlength="5"></textarea></label></div><button type="submit" class="act-case-save-btn"><i class="fa-solid fa-floppy-disk" aria-hidden="true"></i><span>Save Progress</span></button></form></section>@endif
 @endsection
