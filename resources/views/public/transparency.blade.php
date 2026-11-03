@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="description" content="Explore published and approved public project monitoring reports in Yobe State without signing in.">
 <meta name="theme-color" content="#9E5D37">
-<link rel="icon" type="image/webp" href="{{ asset('icons/arewa-handdrawn-map.webp') }}">
+<link rel="icon" type="image/webp" href="{{ asset('icons/arewa-approved-mark.webp') }}?v=5">
 <link rel="stylesheet" href="{{ asset('vendor/fontawesome/all.min.css') }}">
 <link rel="stylesheet" href="{{ asset('vendor/maps/leaflet.css') }}">
 <link rel="stylesheet" href="{{ asset('css/act-public.css') }}?v=20261029-1">
@@ -16,7 +16,7 @@
 <a class="skip" href="#main">Skip to content</a>
 <header class="public-header">
  <div class="public-shell public-nav">
-  <a href="{{ route('home') }}" class="brand"><img src="{{ asset('icons/arewa-handdrawn-map.webp') }}" alt="" width="40" height="40"><span><strong>arewa.</strong><small>CIVIC TRACKER</small></span></a>
+  <a href="{{ route('home') }}" class="brand"><img class="act-brand-wordmark" src="{{ asset('icons/arewa-approved-wordmark.webp') }}" alt="Arewa Civic Tracker" width="180" height="58"></a>
   <nav aria-label="Page navigation"><a href="{{ route('home') }}">Home</a><a href="{{ route('public.transparency') }}" aria-current="page">Public transparency</a><a class="staff-link" href="{{ route('login') }}">Staff portal</a></nav>
  </div>
 </header>

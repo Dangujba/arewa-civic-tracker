@@ -3,8 +3,8 @@
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="csrf-token" content="{{ csrf_token() }}"><meta name="theme-color" content="#9E5D37">
 <link rel="manifest" href="{{ asset('manifest.webmanifest') }}">
-<link rel="icon" type="image/webp" href="{{ asset('icons/arewa-handdrawn-map.webp') }}?v=4">
-<link rel="icon" type="image/png" sizes="32x32" href="{{ asset('icons/favicon-32.png') }}?v=4">
+<link rel="icon" type="image/webp" href="{{ asset('icons/arewa-approved-mark.webp') }}?v=5">
+<link rel="icon" type="image/webp" sizes="32x32" href="{{ asset('icons/arewa-approved-mark.webp') }}?v=5">
 <link rel="shortcut icon" href="{{ asset('favicon.ico') }}?v=4">
 <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('icons/apple-touch-icon.png') }}?v=4">
 <link rel="stylesheet" href="{{ asset('vendor/fontawesome/all.min.css') }}">
@@ -30,8 +30,7 @@
 <div class="portal-shell" id="portal-shell">
   <aside class="portal-sidebar" id="portal-sidebar" aria-label="Application sidebar">
     <a class="portal-logo" href="{{ route('dashboard') }}">
-      <img class="portal-logo-image" src="{{ asset('icons/arewa-handdrawn-map.webp') }}" alt="" width="38" height="38">
-      <span class="portal-logo-text"><strong>arewa.</strong><small>Civic Tracker</small></span>
+      <img class="act-brand-wordmark" src="{{ asset('icons/arewa-approved-wordmark.webp') }}" alt="Arewa Civic Tracker" width="190" height="62">
     </a>
     <div class="sidebar-organization"><span class="portal-org-icon"><i class="fa-solid fa-building-columns" aria-hidden="true"></i></span><span class="sidebar-label"><strong>RAWYOD</strong><small>VOICES TO VOTES</small></span></div>
     <nav class="portal-nav" aria-label="Main application navigation">
@@ -101,7 +100,7 @@
 </div>
 @else
 <header class="app-header"><div class="container">
-<a class="brand" href="{{ route('home') }}"><img class="portal-logo-image" src="{{ asset('icons/arewa-handdrawn-map.webp') }}" alt="" width="34" height="34"><span class="act-portal-wordmark">arewa.<small>Civic Tracker</small></span></a>
+<a class="brand" href="{{ route('home') }}"><img class="act-brand-wordmark" src="{{ asset('icons/arewa-approved-wordmark.webp') }}" alt="Arewa Civic Tracker" width="175" height="57"></a>
 <nav class="app-nav"><a href="{{ route('home') }}"><i class="fa-solid fa-arrow-left" aria-hidden="true"></i> Back to website</a></nav>
 </div></header>
 <main id="main-content" tabindex="-1" class="app-main guest-main"><div class="container">

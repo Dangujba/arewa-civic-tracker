@@ -5,8 +5,8 @@
 <meta name="description" content="Arewa Civic Tracker supports RAWYOD's evidence-led monitoring of civic issues and public projects across the 17 LGAs of Yobe State.">
 <meta name="theme-color" content="#9E5D37"><meta name="csrf-token" content="{{ csrf_token() }}">
 <link rel="manifest" href="{{ asset('manifest.webmanifest') }}">
-<link rel="icon" type="image/webp" href="{{ asset('icons/arewa-handdrawn-map.webp') }}?v=4">
-<link rel="icon" type="image/png" sizes="32x32" href="{{ asset('icons/favicon-32.png') }}?v=4">
+<link rel="icon" type="image/webp" href="{{ asset('icons/arewa-approved-mark.webp') }}?v=5">
+<link rel="icon" type="image/webp" sizes="32x32" href="{{ asset('icons/arewa-approved-mark.webp') }}?v=5">
 <link rel="shortcut icon" href="{{ asset('favicon.ico') }}?v=4">
 <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('icons/apple-touch-icon.png') }}?v=4">
 <title>Arewa Civic Tracker | Evidence for Better Communities</title>
@@ -18,7 +18,7 @@
 <a class="skip" href="#main-content">Skip to content</a>
 <div class="topline"><div class="shell"><span><i class="fa-solid fa-location-dot" aria-hidden="true"></i> Yobe State, Nigeria</span><span>RAWYOD · VOICES TO VOTES</span></div></div>
 <header class="site-header"><div class="shell header-inner">
-<a class="wordmark" href="{{ route('home') }}" aria-label="Arewa Civic Tracker, home"><img src="{{ asset('icons/arewa-handdrawn-map.webp') }}" class="site-brand-icon" width="43" height="43" alt=""><span class="brand-copy"><strong>arewa.</strong><small>Civic Tracker</small></span></a>
+<a class="wordmark" href="{{ route('home') }}" aria-label="Arewa Civic Tracker, home"><img src="{{ asset('icons/arewa-approved-wordmark.webp') }}" class="act-brand-wordmark" width="175" height="57" alt="Arewa Civic Tracker"></a>
 <nav class="main-nav" id="site-navigation" aria-label="Primary navigation">
  <a href="#about">About</a><a href="{{ route('public.transparency') }}">Public transparency</a><a href="#capabilities">Features</a><a href="#how-it-works">How it works</a><a href="#yobe">Yobe in focus</a><a class="mobile-download-link" href="{{ route('downloads.android', ['v' => config('native.android_apk_name')]) }}" download>Download Android app</a>
 </nav>
@@ -97,7 +97,7 @@
 <section class="cta"><div class="shell cta-inner"><div><span class="eyebrow">Arewa Civic Tracker</span><h2>Turn field observations into clearer decisions.</h2><p>Sign in to your authorized workspace to document issues, review evidence and monitor activities across Yobe State.</p></div><a class="btn white" href="{{ route('login') }}">Open staff portal <i class="fa-solid fa-arrow-up-right-from-square" aria-hidden="true"></i></a></div></section>
 </main>
 <footer class="footer"><div class="shell">
- <div class="footer-top"><div><a class="wordmark" href="{{ route('home') }}"><img src="{{ asset('icons/arewa-handdrawn-map.webp') }}" class="site-brand-icon" width="43" height="43" alt=""><span class="brand-copy"><strong>arewa.</strong><small>Civic Tracker</small></span></a><p class="footer-about">A civic monitoring initiative for Roadmap for Women and Youth Development (RAWYOD), under VOICES TO VOTES. Implemented by InnoBytes Lab LTD.</p></div><nav class="footer-links" aria-label="Footer"><a href="#about">About</a><a href="#capabilities">Features</a><a href="#how-it-works">Reporting process</a><a href="#yobe">Yobe in focus</a><a href="{{ route('downloads.android', ['v' => config('native.android_apk_name')]) }}" download>Download Android app</a><a href="{{ route('login') }}">Staff portal</a></nav></div>
+ <div class="footer-top"><div><a class="wordmark" href="{{ route('home') }}"><img src="{{ asset('icons/arewa-approved-wordmark.webp') }}" class="act-brand-wordmark" width="175" height="57" alt="Arewa Civic Tracker"></a><p class="footer-about">A civic monitoring initiative for Roadmap for Women and Youth Development (RAWYOD), under VOICES TO VOTES. Implemented by InnoBytes Lab LTD.</p></div><nav class="footer-links" aria-label="Footer"><a href="#about">About</a><a href="#capabilities">Features</a><a href="#how-it-works">Reporting process</a><a href="#yobe">Yobe in focus</a><a href="{{ route('downloads.android', ['v' => config('native.android_apk_name')]) }}" download>Download Android app</a><a href="{{ route('login') }}">Staff portal</a></nav></div>
  <div class="footer-bottom"><span>© {{ date('Y') }} Arewa Civic Tracker. All rights reserved.</span><span>Infrastructure photography: Wikimedia Commons creators · Boundary data: geoBoundaries.</span></div>
 </div></footer>
 <div class="toast-stack" id="toast-stack" aria-live="polite"></div>
