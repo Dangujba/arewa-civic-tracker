@@ -121,3 +121,9 @@ These changes require physical-phone validation before claiming the hardware act
 - The immediate uploader claims the same Room draft used by WorkManager, preventing concurrent submissions for the same UUID. All subsequent retries remain server-side idempotent.
 - GPS, camera, evidence picker and bundled 178 Yobe wards retain their v0.3.9 implementations.
 - Physical-phone acceptance is required to confirm successful upload, visible reference, and offline fallback.
+
+## v0.4.1 official visual identity
+
+- The supplied Arewa Civic Tracker artwork now appears in the Android header as the official cropped wordmark and in the adaptive launcher as its phone/checklist symbol.
+- Native Material primary changes from green to copper #9E5D37; dark hover is #773F24, background #FAF8F5, text #171717; successful actions stay green #087640, errors red #DC2626. Flat corners and existing GPS/Camera/Evidence/offline reporting code remain unchanged.
+- Build and device acceptance are needed to confirm launch icon and appearance, with v0.4.0 sign-compatible debug APK.
