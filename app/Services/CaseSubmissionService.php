@@ -18,6 +18,15 @@ class CaseSubmissionService {
             return DB::transaction(function()use($user,$data,$hash){
                 $case=CivicCase::create([...$data,'uuid'=>(string)Str::uuid(),'reference'=>'ACT-YOB-'.now()->format('Y').'-'.strtoupper(Str::random(10)),'reporter_id'=>$user->id,'payload_hash'=>$hash,'verification_status'=>'submitted']);
                 CaseEvent::create(['case_id'=>$case->id,'actor_id'=>$user->id,'event_type'=>'submitted','to_status'=>'submitted']);
+                // Notify the review team for new cases only, never an idempotent replay.
+                $reviewers=User::query()->where('is_active',true)
+                    ->whereIn('role',['admin','meal'])->get();
+                foreach($reviewers as $reviewer){
+                    $reviewer->notify(new \App\Notifications\CaseActionNotification(
+                        $case->id,$case->reference,'New report submitted',
+                        'A new monitoring report is awaiting review in your workspace.'
+                    ));
+                }
                 return $case;
             });
         }catch(UniqueConstraintViolationException $e){
