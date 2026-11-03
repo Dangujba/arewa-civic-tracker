@@ -49,7 +49,7 @@ class ReportRichTextPageTest extends TestCase
             ->assertSee('<h2>Condition</h2>', false)
             ->assertSee('<strong>School roof</strong>', false)
             ->assertDontSee('<script>alert(1)</script>', false)
-            ->assertSee('Print report');
+            ->assertSee('Print View')->assertSee('Export PDF');
     }
 
     public function test_create_page_uses_official_quill_editor_assets(): void
