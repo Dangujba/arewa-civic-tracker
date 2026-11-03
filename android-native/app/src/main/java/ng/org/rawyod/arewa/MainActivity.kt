@@ -33,6 +33,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.text.font.FontWeight
@@ -162,11 +163,18 @@ private fun FieldApplication(
         modifier=Modifier.safeDrawingPadding(),
         snackbarHost={SnackbarHost(notifications)},
         topBar={
-            Surface(color=green,contentColor=Color.White){
-                Column(Modifier.fillMaxWidth().padding(horizontal=18.dp,vertical=15.dp)){
-                    Text("AREWA CIVIC TRACKER",style=MaterialTheme.typography.titleMedium,
-                        fontWeight=FontWeight.Bold,maxLines=1,overflow=TextOverflow.Ellipsis)
-                    Text("RAWYOD • VOICES TO VOTES",style=MaterialTheme.typography.labelSmall)
+            Surface(color=Color.White,contentColor=ink){
+                Column(Modifier.fillMaxWidth()) {
+                    Row(Modifier.fillMaxWidth().padding(horizontal=16.dp,vertical=5.dp),
+                        verticalAlignment=Alignment.CenterVertically,
+                        horizontalArrangement=Arrangement.SpaceBetween) {
+                        Image(painter=painterResource(id=R.drawable.arewa_approved_wordmark),
+                            contentDescription="Arewa Civic Tracker",
+                            modifier=Modifier.width(190.dp).height(62.dp))
+                        Text("RAWYOD",style=MaterialTheme.typography.labelSmall,
+                            color=green,fontWeight=FontWeight.Bold)
+                    }
+                    HorizontalDivider(thickness=3.dp,color=green)
                 }
             }
         },

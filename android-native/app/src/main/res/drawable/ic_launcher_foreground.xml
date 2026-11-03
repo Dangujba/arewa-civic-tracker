@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
     <!-- Reuse the approved map-and-pin website mark without text. -->
-    <item android:drawable="@drawable/arewa_handdrawn_map"
+    <item android:drawable="@drawable/arewa_approved_mark"
           android:gravity="center"
           android:width="76dp"
           android:height="76dp" />

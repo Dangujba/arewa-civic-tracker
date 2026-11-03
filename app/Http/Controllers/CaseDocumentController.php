@@ -15,7 +15,7 @@ class CaseDocumentController extends Controller
     {
         abort_unless($request->user()?->can('view', $case),403);
         $case->load(['lga','sector','category','reporter','reviewer','evidence','followups','events.actor']);
-        $logo=public_path('icons/act-192.png');
+        $logo=public_path('icons/arewa-approved-logo.png');
         $logoData=is_file($logo)
             ?'data:image/png;base64,'.base64_encode(file_get_contents($logo)):null;
         $evidence=[];

@@ -18,7 +18,7 @@ final class ZohoCaseEmailService {
         $reportUrl=route('cases.show',$message->case_id);
         $text=$message->subject."\n\n".$message->detail."\n\nOpen the report: ".$reportUrl;
         $html='<!doctype html><html><body style="font-family:Arial,sans-serif;background:#ffffff;color:#171717;max-width:620px;padding:22px;margin:auto">'
-            .'<table style="width:100%"><tr><td width="64"><img src="'.e(asset('icons/act-192.png')).'" width="56" height="56" alt="Arewa Civic Tracker"></td>'
+            .'<table style="width:100%"><tr><td width="64"><img src="'.e(asset('icons/arewa-approved-logo.png')).'" width="110" height="80" alt="Arewa Civic Tracker"></td>'
             .'<td><strong style="font-size:20px;color:#9E5D37">Arewa Civic Tracker</strong><br><small>RAWYOD | VOICES TO VOTES</small></td></tr></table>'
             .'<hr style="border:0;border-top:3px solid #9E5D37;margin:18px 0">'
             .'<h2 style="font-size:18px">'.e($message->subject).'</h2>'
