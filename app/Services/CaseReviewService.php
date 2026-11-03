@@ -32,10 +32,25 @@ class CaseReviewService {
             if(in_array($to,['rejected','clarification_requested'],true) && !$comment){throw ValidationException::withMessages(['comment'=>'A written reason is required.']);}
             $locked->verification_status=$to;$locked->save();
             CaseEvent::create(['case_id'=>$locked->id,'actor_id'=>$actor->id,'event_type'=>'review_status_changed','from_status'=>$from,'to_status'=>$to,'comment'=>$comment]);
-            if($to==='clarification_requested' && $locked->reporter?->is_active)
+            if($locked->reporter?->is_active && $locked->reporter_id!==$actor->id){
+                $headline=$to==='clarification_requested'?'Clarification requested':'Report verification updated';
+                $detail=$to==='clarification_requested'
+                    ?'Your report requires a response from the field.'
+                    :'Your report has moved to '.str_replace('_',' ',$to).'.';
                 $locked->reporter->notify(new \App\Notifications\CaseActionNotification(
-                  $locked->id,$locked->reference,'Clarification requested',
-                  'Your report requires a response from the field.'));
+                    $locked->id,$locked->reference,$headline,$detail
+                ));
+            }
+            // An administrator must make the final decision once MEAL verifies a report.
+            if($to==='verified'){
+                foreach(User::where('is_active',true)->where('role','admin')->get() as $admin){
+                    if($admin->id!==$actor->id)
+                        $admin->notify(new \App\Notifications\CaseActionNotification(
+                            $locked->id,$locked->reference,'Report ready for approval',
+                            'MEAL verification is complete. Administrator approval is required.'
+                        ));
+                }
+            }
             return $locked;
         });
     }
