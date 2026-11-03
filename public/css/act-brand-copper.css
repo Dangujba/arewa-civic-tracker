@@ -1,0 +1,113 @@
+/* Arewa Civic Tracker — approved copper/charcoal visual identity, 03 Nov 2026.
+   Shared by public portal, staff workspace, transparency and report details.
+   State semantics stay distinct: success green, danger red, neutral gray.
+   Flat, square controls with no decorative card shadows. */
+:root {
+ --act-primary:#9E5D37;--act-primary-hover:#773F24;
+ --act-primary-pressed:#62331D;--act-primary-soft:#F6EBE3;
+ --act-copper-border:#E0C8B7;--act-ink:#171717;
+ --act-muted:#615E5A;--act-surface:#FFFFFF;--act-paper:#FAF8F5;
+ --act-success:#087640;--act-danger:#DC2626;
+ --forest:var(--act-primary);--deep:var(--act-primary-hover);
+ --gold:#C58C66;--green:var(--act-primary);
+ --green-dark:var(--act-primary-hover);--green-bright:var(--act-primary);
+ --dark:#171717;--ink:var(--act-ink);--bg:var(--act-paper);
+ --soft:#F7F1EB;--line:#E7DED6
+}
+body{color:var(--act-ink);background:var(--act-paper)}
+a:focus-visible,button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-visible{
+ outline:2px solid var(--act-primary)!important;outline-offset:2px
+}
+::selection{background:#E8CEBB;color:#27170F}
+.portal-topbar,.site-header,.public-header{background:#fff}
+.topline,.portal-header-primary,.portal-main .btn:not(.outline):not(.secondary),
+.btn:not(.outline):not(.white):not(.secondary),
+.app-main button[type=submit],.gis-action:not(.gis-action-light),
+.portal-main .act-case-save-btn,.act-case-save-btn{
+ background:var(--act-primary)!important;border-color:var(--act-primary)!important;color:#fff!important;
+ border-radius:0!important;box-shadow:none!important
+}
+.portal-header-primary:hover,.portal-main .btn:not(.outline):not(.secondary):hover,
+.btn:not(.outline):not(.white):not(.secondary):hover,
+.app-main button[type=submit]:hover,.gis-action:not(.gis-action-light):hover,
+.portal-main .act-case-save-btn:hover,.act-case-save-btn:hover{
+ background:var(--act-primary-hover)!important;border-color:var(--act-primary-hover)!important
+}
+.portal-nav-link.active{
+ background:var(--act-primary-soft)!important;border-left-color:var(--act-primary)!important;
+ color:var(--act-primary-hover)!important
+}
+.portal-nav-link.active i,.portal-nav-link:hover i,.portal-logo-text strong,
+.portal-header-action,.portal-icon-button,.portal-header-primary i,.portal-breadcrumb strong{
+ color:var(--act-primary)!important
+}
+.portal-nav-link:hover{background:#FBF3EC!important;color:var(--act-primary-hover)!important}
+.portal-sidebar{border-right-color:var(--act-copper-border)!important}
+.portal-topbar,.portal-footer{border-color:var(--act-copper-border)!important}
+.portal-logo-mark{background:var(--act-primary)!important}
+.portal-sidebar .portal-logo,.portal-sidebar .sidebar-organization{border-color:#EFE2D7}
+.portal-main h1,.portal-main h2,.portal-main .section-title,
+.public-header .brand strong,.hero h1,.act-case-heading h1{color:var(--act-ink)}
+.portal-main .app-main input:focus,.portal-main .app-main select:focus,
+.portal-main .app-main textarea:focus,.auth-card input:focus,
+.ts-wrapper.focus .ts-control,.portal-main .report-form input:focus{
+ border-color:var(--act-primary)!important;box-shadow:0 0 0 2px #9E5D3724!important
+}
+.ts-dropdown .active,.ts-dropdown .option.active{background:var(--act-primary-soft)!important;color:var(--act-primary-hover)!important}
+.portal-main .ts-wrapper.single .ts-control{border-color:#D9C8BA!important}
+.portal-main .report-form input:not([type=file]),.portal-main .report-form select,
+.portal-main .report-form textarea,.portal-main .report-form button{
+ border-radius:0!important
+}
+.portal-main .act-ward-field .ts-dropdown .create{background:var(--act-primary-soft)!important;color:var(--act-primary-hover)!important}
+.portal-main .report-form label{color:#292321}
+a.link,.link,.btn-link,.btn.outline,.btn-outline,.public-nav a:hover,
+.act-case-breadcrumb a,.gis-popup-link{color:var(--act-primary)!important}
+.btn.outline,.btn-outline{border-color:var(--act-copper-border)!important;background:#fff!important;border-radius:0!important}
+.btn.outline:hover,.btn-outline:hover{background:var(--act-primary-soft)!important}
+.portal-main .dash-panel,.portal-main .dash-metric,
+.portal-main .card,.public-report-card,.act-case-header,.act-case-facts{
+ border-radius:0!important;box-shadow:none!important
+}
+.site-header .wordmark,.portal-logo,.public-header .brand{display:flex;align-items:center}
+.act-brand-full,.act-brand-wordmark{display:block;max-width:100%;height:auto;object-fit:contain}
+.site-header .act-brand-wordmark{width:175px;max-height:68px}
+.portal-sidebar .act-brand-wordmark{width:196px;max-height:72px}
+.portal-topbar .act-brand-wordmark{width:155px;max-height:62px}
+.public-header .act-brand-wordmark{width:180px;max-height:64px}
+.hero,.cta,.feature-band,.dark-section{background-color:var(--act-primary-soft)}
+.hero-copy h1 span,.eyebrow,.scope-stat .sicon,.download-note i{
+ color:var(--act-primary)!important
+}
+.site-header .header-actions .btn{border-radius:0!important}
+.feature-band,.dark-section,.cta{background:var(--act-primary-hover)!important;color:#fff}
+.feature-band .eyebrow,.dark-section .eyebrow,.cta .eyebrow{color:#F3D5BA!important}
+.carousel,.map-tile{background:var(--act-primary-hover)}
+.carousel-dot.active{background:#D7A37D}
+.site-header,.public-header{border-bottom:1px solid var(--act-copper-border)}
+.act-case-report .act-case-overline,.act-case-report .act-case-section-title i,
+.act-case-facts .act-case-section-title i,.act-case-report .act-case-metadata span i{
+ color:var(--act-primary)!important
+}
+.act-case-status-approved,.act-case-status-verified,.security-enabled,
+.badge-success,.status-success{color:var(--act-success)!important}
+.act-case-status-rejected,.alert-danger,.badge-danger,.status-error{color:var(--act-danger)!important}
+.act-case-status-submitted,.act-case-status-under_review{color:#805021!important}
+.gis-workspace input[type=checkbox],.gis-workspace input[type=radio]{accent-color:var(--act-primary)!important}
+.gis-panel-tabs button.active{border-bottom-color:var(--act-primary)!important;color:var(--act-primary)!important;background:var(--act-primary-soft)!important}
+.gis-text-button,.gis-action-light,.gis-panel-section-head i{color:var(--act-primary)!important}
+.gis-toolbar button:hover,.gis-toolbar button[aria-pressed=true]{background:var(--act-primary)!important;color:white!important}
+.gis-result:hover,.gis-result.active,.gis-lga-button:hover,.gis-lga-button.selected{
+ border-color:var(--act-copper-border)!important;background:#FCF4ED!important;color:var(--act-primary-hover)!important
+}
+.ql-toolbar.ql-snow .ql-active,.ql-toolbar.ql-snow button:hover{color:var(--act-primary)!important}
+.ql-toolbar.ql-snow .ql-stroke{stroke:currentColor}
+.swal2-confirm{background:var(--act-primary)!important}
+@media(max-width:580px){
+ .site-header .act-brand-wordmark{width:138px}
+ .portal-sidebar .act-brand-wordmark{width:175px}
+}
+@media print{
+ body{background:white!important}
+ .act-case-header,.act-case-facts,.act-case-overview,.act-case-content-main{border-color:#B8B1AB!important}
+}
