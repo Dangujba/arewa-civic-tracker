@@ -48,12 +48,12 @@ class CaseDocumentsAndEmailTest extends TestCase
   $this->get(route('cases.pdf',$c))->assertRedirect(route('login'));
   $this->get(route('cases.print',$c))->assertRedirect(route('login'));
   $this->actingAs($u)->get(route('cases.print',$c))->assertOk()
-   ->assertSee('Monitoring Report')
-   ->assertSee('14:15')
+   ->assertSee('MONITORING REPORT')
+   ->assertSee('02:15 PM')
    ->assertSee('Export PDF');
   $response=$this->actingAs($u)->get(route('cases.pdf',$c))->assertOk()
    ->assertHeader('Content-Type','application/pdf');
-  $this->assertStringStartsWith('%PDF-', $response->streamedContent() ?: $response->getContent());
+  $this->assertStringStartsWith('%PDF-', $response->baseResponse->getContent());
  }
 
  public function test_case_notifications_are_persisted_for_retries_and_send_with_zoho_api(): void {
