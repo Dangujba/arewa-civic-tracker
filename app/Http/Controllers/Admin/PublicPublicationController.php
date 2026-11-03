@@ -42,6 +42,15 @@ class PublicPublicationController extends Controller
             ]);
             AdminActivityLog::record($request->user(),'case.publication',$locked,
                 ['published'=>$data['action']==='publish']);
+            if($locked->reporter?->is_active && $locked->reporter_id!==$request->user()->id){
+                $locked->reporter->notify(new \App\Notifications\CaseActionNotification(
+                    $locked->id,$locked->reference,
+                    $data['action']==='publish'?'Report published':'Report unpublished',
+                    $data['action']==='publish'
+                        ?'Approved report metadata is now visible on the public dashboard.'
+                        :'The report is no longer visible on the public dashboard.'
+                ));
+            }
             return $message;
         });
         return redirect()->route('cases.show',$case)->with('message',$message);
