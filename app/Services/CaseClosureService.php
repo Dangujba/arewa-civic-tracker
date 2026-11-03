@@ -34,6 +34,12 @@ class CaseClosureService {
     'event_type'=>$action==='close'?'case_closed':'case_reopened',
     'from_status'=>$before,'to_status'=>$locked->closure_status,'comment'=>$reason]);
    AdminActivityLog::record($actor,$action==='close'?'case.closed':'case.reopened',$locked,['reason'=>$reason,'from'=>$before]);
+   if($locked->reporter?->is_active && $locked->reporter_id!==$actor->id){
+    $locked->reporter->notify(new \App\Notifications\CaseActionNotification(
+      $locked->id,$locked->reference,$action==='close'?'Report closed':'Report reopened',
+      $action==='close'?'Your report has been formally closed.':'Your report has been reopened for further work.'
+    ));
+   }
    return $locked;
   });
  }
