@@ -12,7 +12,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 class CaseRevisionController extends Controller {
- private const FIELDS=['type','title','description','lga_id','ward','community','sector_id','report_category_id','observation_date','observations','duty_bearers','latitude','longitude'];
+ private const FIELDS=['type','title','description','lga_id','ward','community','sector_id','report_category_id','observation_date','observation_time','observations','duty_bearers','latitude','longitude'];
  public function edit(Request $r,CivicCase $case){
   $r->user()->can('update',$case)||abort(403);
   $lgas=$r->user()->role==='focal'?$r->user()->assignedLgas()->orderBy('lgas.name')->get():Lga::orderBy('name')->get();
@@ -59,6 +59,7 @@ class CaseRevisionController extends Controller {
    'report_category_id'=>['nullable','integer',\Illuminate\Validation\Rule::exists('report_categories','id')
       ->where('is_active',true)->where('type',$r->input('type'))],
    'observation_date'=>['required','date','before_or_equal:today'],
+   'observation_time'=>['nullable','date_format:H:i'],
    'observations'=>['nullable','string','max:10000'],
    'duty_bearers'=>['nullable','string','max:5000'],
    'latitude'=>['nullable','required_with:longitude','numeric','between:-90,90'],
@@ -78,9 +79,11 @@ class CaseRevisionController extends Controller {
     if(in_array($field,['lga_id','sector_id'],true))$new=(int)$new;
     if($field==='report_category_id'&&$new!==null)$new=(int)$new;
     if($field==='observation_date')$new=date('Y-m-d',strtotime($new));
+    if($field==='observation_time' && $new!==null)$new=substr($new,0,5);
     if(in_array($field,['latitude','longitude'],true)&&$new!==null)$new=number_format((float)$new,7,'.','');
     if($old!==null&&in_array($field,['latitude','longitude'],true))$old=number_format((float)$old,7,'.','');
     if($old!==null&&$field==='observation_date')$old=substr((string)$old,0,10);
+    if($old!==null&&$field==='observation_time')$old=substr((string)$old,0,5);
     $before[$field]=$old;$after[$field]=$new;
     if((string)$old!==(string)$new)$changes[$field]=['from'=>$old,'to'=>$new];
    }

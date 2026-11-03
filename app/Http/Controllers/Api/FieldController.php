@@ -113,11 +113,11 @@ class FieldController extends Controller {
   $case->load(['lga:id,name','sector:id,name','followups:id,case_id,author_id,note,created_at',
    'evidence:id,case_id,original_name,mime_type,size_bytes']);
   $fields=$case->only(['type','title','description','lga_id','ward','community','sector_id','report_category_id',
-    'observations','duty_bearers','progress_status','latitude','longitude']);
+    'observations','duty_bearers','progress_status','observation_time','latitude','longitude']);
   $fields['description']=CaseRichText::plainText($fields['description']);
   $fields['observation_date']=$case->observation_date->format('Y-m-d');
   $report=$case->only(['id','reference','title','description','verification_status','progress_status',
-   'observation_date','ward','community','latitude','longitude','lga','sector','followups','evidence','closure_status']);
+   'observation_date','observation_time','ward','community','latitude','longitude','lga','sector','followups','evidence','closure_status']);
   $report['description']=CaseRichText::plainText($report['description']);
   return response()->json(['report'=>$report,
    'editable'=>$u->can('update',$case),

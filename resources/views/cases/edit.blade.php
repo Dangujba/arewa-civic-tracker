@@ -12,7 +12,7 @@
  <input type="hidden" name="version" value="{{ $case->revisions()->max('version')??0 }}">
  <div class="grid">
  <div class="field"><label>Report Type</label><select name="type" required><option value="public_project" @selected(old('type',$case->type)==='public_project')>Public Project</option><option value="governance_issue" @selected(old('type',$case->type)==='governance_issue')>Governance Issue</option></select></div>
- <div class="field"><label>Observation Date</label><input type="date" max="{{ now()->toDateString() }}" name="observation_date" value="{{ old('observation_date',$case->observation_date->format('Y-m-d')) }}" required></div>
+ <div class="field"><label>Observation Date</label><input type="date" max="{{ now()->toDateString() }}" name="observation_date" value="{{ old('observation_date',$case->observation_date->format('Y-m-d')) }}" required></div><div class="field"><label>Observation Time (if known)</label><input type="time" name="observation_time" value="{{ old('observation_time',$case->observation_time ? substr((string)$case->observation_time,0,5) : '') }}"></div>
  <div class="field"><label>LGA</label><select id="case-lga" name="lga_id" required>@foreach($lgas as $l)<option value="{{ $l->id }}" @selected(old('lga_id',$case->lga_id)==$l->id)>{{ $l->name }}</option>@endforeach</select></div>
  @include('components.ward-picker',['wardValue'=>old('ward',$case->ward)])
  <div class="field"><label>Community</label><input list="community-suggestions" name="community" maxlength="150" value="{{ old('community',$case->community) }}" required></div>

@@ -39,9 +39,9 @@
 
   <section class="act-case-overview" aria-label="Report summary">
     <div class="act-case-overview-item"><span class="act-case-label"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Sector</span><strong>{{ $case->sector?->name ?? 'Not assigned' }}</strong></div>
-    <div class="act-case-overview-item"><span class="act-case-label"><i class="fa-solid fa-calendar-day" aria-hidden="true"></i> Date observed</span><strong>{{ $case->observation_date?->format('d M Y') ?? 'Not recorded' }}</strong></div>
+    <div class="act-case-overview-item"><span class="act-case-label"><i class="fa-solid fa-calendar-day" aria-hidden="true"></i> Date observed</span><strong>{{ $case->observation_date?->format('d M Y') ?? 'Not recorded' }}<small class="act-observed-time">{{ $case->observation_time ? \Illuminate\Support\Carbon::parse($case->observation_time)->format('h:i A') : 'Time not recorded' }}</small></strong></div>
     <div class="act-case-overview-item"><span class="act-case-label"><i class="fa-regular fa-user" aria-hidden="true"></i> Submitted by</span><strong>{{ $case->reporter?->name ?? 'Field officer' }}</strong></div>
-    <div class="act-case-overview-item"><span class="act-case-label"><i class="fa-regular fa-clock" aria-hidden="true"></i> Last updated</span><strong>{{ $case->updated_at?->format('d M Y') ?? 'Not recorded' }}</strong></div>
+    <div class="act-case-overview-item"><span class="act-case-label"><i class="fa-regular fa-clock" aria-hidden="true"></i> Last updated</span><strong>{{ $case->updated_at?->format('d M Y, h:i A') ?? 'Not recorded' }}</strong></div>
   </section>
 
   <div class="act-case-content-grid">
