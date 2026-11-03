@@ -64,6 +64,14 @@ class CaseController extends Controller {
             abort_if($locked->closure_status==='closed',403);
             CaseFollowup::create(['case_id'=>$case->id,'author_id'=>$r->user()->id,'note'=>$data['note']]);
             CaseEvent::create(['case_id'=>$case->id,'actor_id'=>$r->user()->id,'event_type'=>'followup_added','comment'=>$data['note']]);
+            $target=$locked->reporter_id===$r->user()->id
+                ?$locked->reviewer:$locked->reporter;
+            if($target?->is_active && $target->id!==$r->user()->id){
+                $target->notify(new \App\Notifications\CaseActionNotification(
+                    $locked->id,$locked->reference,'New report follow-up',
+                    'A new follow-up has been recorded. Open the case to review.'
+                ));
+            }
         });
         return redirect()->route('cases.show',$case)->with('message','Follow-up added.');
     }
