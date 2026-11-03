@@ -15,6 +15,7 @@
 <link rel="stylesheet" href="{{ asset('css/act-form-polish.css') }}?v=20261029-ring1">
 <link rel="stylesheet" href="{{ asset('css/act-workspace-refinement.css') }}?v=20261029-master1">
 <link rel="stylesheet" href="{{ asset('css/act-accessibility.css') }}?v=20261029-final1">
+<link rel="stylesheet" href="{{ asset('css/act-notification-bell.css') }}?v=20261103-alert1">
 <title>@yield('title','Arewa Civic Tracker')</title>@stack('head')
 <script defer src="{{ asset('vendor/ui/tom-select.js') }}"></script>
 <script defer src="{{ asset('vendor/ui/sweetalert2.js') }}"></script>
@@ -79,6 +80,11 @@
         <div class="portal-breadcrumb"><small>AREWA CIVIC TRACKER</small><strong>@yield('section_heading','Monitoring workspace')</strong></div>
       </div>
       <div class="portal-topbar-actions">
+        @php($unreadCaseAlerts=auth()->user()->unreadNotifications()->count())
+        <a class="portal-header-action act-notification-bell" href="{{ route('notifications.index') }}" aria-label="Notifications, {{ $unreadCaseAlerts }} unread" title="Notifications">
+          <i class="fa-regular fa-bell" aria-hidden="true"></i><span>Alerts</span>
+          @if($unreadCaseAlerts>0)<strong class="act-notification-count">{{ min($unreadCaseAlerts,99) }}</strong>@endif
+        </a>
         <a class="portal-header-action" href="{{ route('map.index') }}" title="GIS map"><i class="fa-solid fa-map-location-dot" aria-hidden="true"></i><span>GIS</span></a>
         @can('create', App\Models\CivicCase::class)<a class="portal-header-primary" href="{{ route('cases.create') }}"><i class="fa-solid fa-plus" aria-hidden="true"></i><span>New report</span></a>@endcan
         <a href="{{ route('account.profile') }}" class="portal-topbar-user" title="My Profile" aria-label="My Profile">@if(auth()->user()->profile_photo_path)<img src="{{ route('account.profile.photo') }}?v={{ auth()->user()->updated_at?->timestamp??0 }}" alt="" width="35" height="35">@else{{ strtoupper(mb_substr(auth()->user()->name,0,1)) }}@endif</a>
