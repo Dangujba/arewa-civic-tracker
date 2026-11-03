@@ -14,7 +14,7 @@ class CaseDocumentController extends Controller
     private function document(Request $request, CivicCase $case, bool $print): array
     {
         abort_unless($request->user()?->can('view', $case),403);
-        $case->load(['lga','sector','category','reporter','reviewer','evidence','followups.author','events.actor']);
+        $case->load(['lga','sector','category','reporter','reviewer','evidence','followups','events.actor']);
         $logo=public_path('icons/act-192.png');
         $logoData=is_file($logo)
             ?'data:image/png;base64,'.base64_encode(file_get_contents($logo)):null;
