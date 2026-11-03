@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="description" content="Arewa Civic Tracker supports RAWYOD's evidence-led monitoring of civic issues and public projects across the 17 LGAs of Yobe State.">
-<meta name="theme-color" content="#164f3b"><meta name="csrf-token" content="{{ csrf_token() }}">
+<meta name="theme-color" content="#9E5D37"><meta name="csrf-token" content="{{ csrf_token() }}">
 <link rel="manifest" href="{{ asset('manifest.webmanifest') }}">
 <link rel="icon" type="image/webp" href="{{ asset('icons/arewa-handdrawn-map.webp') }}?v=4">
 <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('icons/favicon-32.png') }}?v=4">
@@ -12,6 +12,7 @@
 <title>Arewa Civic Tracker | Evidence for Better Communities</title>
 <link rel="stylesheet" href="{{ asset('vendor/fontawesome/all.min.css') }}">
 <link rel="stylesheet" href="{{ asset('css/act-structure.css') }}?v=20261029-publiclayout2">
+<link rel="stylesheet" href="{{ asset('css/act-brand-copper.css') }}?v=20261103-copper1">
 <script defer src="{{ asset('js/act-interactions.js') }}?v=20261029-ring1"></script>
 </head><body>
 <a class="skip" href="#main-content">Skip to content</a>

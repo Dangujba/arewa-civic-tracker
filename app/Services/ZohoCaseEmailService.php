@@ -17,13 +17,13 @@ final class ZohoCaseEmailService {
         if(!$this->configured())return false;
         $reportUrl=route('cases.show',$message->case_id);
         $text=$message->subject."\n\n".$message->detail."\n\nOpen the report: ".$reportUrl;
-        $html='<!doctype html><html><body style="font-family:Arial,sans-serif;background:#ffffff;color:#213e30;max-width:620px;padding:22px;margin:auto">'
+        $html='<!doctype html><html><body style="font-family:Arial,sans-serif;background:#ffffff;color:#171717;max-width:620px;padding:22px;margin:auto">'
             .'<table style="width:100%"><tr><td width="64"><img src="'.e(asset('icons/act-192.png')).'" width="56" height="56" alt="Arewa Civic Tracker"></td>'
-            .'<td><strong style="font-size:20px;color:#15583b">Arewa Civic Tracker</strong><br><small>RAWYOD | VOICES TO VOTES</small></td></tr></table>'
-            .'<hr style="border:0;border-top:3px solid #176747;margin:18px 0">'
+            .'<td><strong style="font-size:20px;color:#9E5D37">Arewa Civic Tracker</strong><br><small>RAWYOD | VOICES TO VOTES</small></td></tr></table>'
+            .'<hr style="border:0;border-top:3px solid #9E5D37;margin:18px 0">'
             .'<h2 style="font-size:18px">'.e($message->subject).'</h2>'
             .'<p>'.e($message->detail).'</p>'
-            .'<p style="padding:14px 0"><a href="'.e($reportUrl).'" style="display:inline-block;background:#175b3e;color:#fff;padding:13px 20px;text-decoration:none;font-weight:bold">Open Report Securely</a></p>'
+            .'<p style="padding:14px 0"><a href="'.e($reportUrl).'" style="display:inline-block;background:#9E5D37;color:#fff;padding:13px 20px;text-decoration:none;font-weight:bold">Open Report Securely</a></p>'
             .'<p style="font-size:12px;color:#687b6e">Sign in to Arewa Civic Tracker to view the case. Do not forward this notification to unauthorized recipients.</p>'
             .'</body></html>';
         try {

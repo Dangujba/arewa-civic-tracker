@@ -4,11 +4,12 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="description" content="Explore published and approved public project monitoring reports in Yobe State without signing in.">
-<meta name="theme-color" content="#164f3b">
+<meta name="theme-color" content="#9E5D37">
 <link rel="icon" type="image/webp" href="{{ asset('icons/arewa-handdrawn-map.webp') }}">
 <link rel="stylesheet" href="{{ asset('vendor/fontawesome/all.min.css') }}">
 <link rel="stylesheet" href="{{ asset('vendor/maps/leaflet.css') }}">
 <link rel="stylesheet" href="{{ asset('css/act-public.css') }}?v=20261029-1">
+<link rel="stylesheet" href="{{ asset('css/act-brand-copper.css') }}?v=20261103-copper1">
 <title>Public Transparency | Arewa Civic Tracker</title>
 </head>
 <body>

@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="en"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="csrf-token" content="{{ csrf_token() }}"><meta name="theme-color" content="#164f3b">
+<meta name="csrf-token" content="{{ csrf_token() }}"><meta name="theme-color" content="#9E5D37">
 <link rel="manifest" href="{{ asset('manifest.webmanifest') }}">
 <link rel="icon" type="image/webp" href="{{ asset('icons/arewa-handdrawn-map.webp') }}?v=4">
 <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('icons/favicon-32.png') }}?v=4">
@@ -16,6 +16,7 @@
 <link rel="stylesheet" href="{{ asset('css/act-workspace-refinement.css') }}?v=20261029-master1">
 <link rel="stylesheet" href="{{ asset('css/act-accessibility.css') }}?v=20261029-final1">
 <link rel="stylesheet" href="{{ asset('css/act-notification-bell.css') }}?v=20261103-alert1">
+<link rel="stylesheet" href="{{ asset('css/act-brand-copper.css') }}?v=20261103-copper1">
 <title>@yield('title','Arewa Civic Tracker')</title>@stack('head')
 <script defer src="{{ asset('vendor/ui/tom-select.js') }}"></script>
 <script defer src="{{ asset('vendor/ui/sweetalert2.js') }}"></script>

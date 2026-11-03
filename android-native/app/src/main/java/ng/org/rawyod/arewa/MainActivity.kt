@@ -48,10 +48,11 @@ import java.io.File
 import java.time.LocalDate
 import java.util.UUID
 
-private val green=Color(0xFF17543B)
-private val gold=Color(0xFFAE8131)
-private val ink=Color(0xFF1D2D25)
-private val paper=Color(0xFFF4F7F3)
+private val green=Color(0xFF9E5D37)
+private val success=Color(0xFF087640)
+private val gold=Color(0xFFC58C66)
+private val ink=Color(0xFF171717)
+private val paper=Color(0xFFFAF8F5)
 
 class MainActivity:FragmentActivity() {
     private val fieldVm:FieldViewModel by viewModels()
@@ -123,12 +124,13 @@ class MainActivity:FragmentActivity() {
         // These launchers must be registered before START, regardless of the
         // currently visible Compose tab or the biometric security screen.
         fieldCapture=FieldCaptureCoordinator(this,fieldVm,savedInstanceState)
-        window.statusBarColor=android.graphics.Color.rgb(23,84,59)
+        window.statusBarColor=android.graphics.Color.rgb(158,93,55)
         setContent {
             MaterialTheme(
                 colorScheme=lightColorScheme(
-                    primary=green,onPrimary=Color.White,primaryContainer=Color(0xFFDBEBDE),
-                    onPrimaryContainer=green,secondary=gold,secondaryContainer=Color(0xFFF1E7D1),
+                    primary=green,onPrimary=Color.White,primaryContainer=Color(0xFFF6EBE3),
+                    onPrimaryContainer=green,secondary=gold,secondaryContainer=Color(0xFFF5E9E0),
+                    error=Color(0xFFDC2626),
                     background=paper,surface=Color.White,onSurface=ink),
                 shapes=Shapes(small=RoundedCornerShape(0.dp),medium=RoundedCornerShape(0.dp),
                     large=RoundedCornerShape(0.dp))
@@ -593,7 +595,7 @@ private fun FormScreen(vm:FieldViewModel) {
             Text(vm.captureStatus,style=MaterialTheme.typography.bodySmall,
                 color=if(vm.captureStatus.contains("denied",ignoreCase=true) ||
                          vm.captureStatus.contains("unavailable",ignoreCase=true))
-                    MaterialTheme.colorScheme.error else green)
+                    MaterialTheme.colorScheme.error else success)
             if(vm.captureStatus.contains("permission denied",ignoreCase=true)){
                 TextButton(onClick=activity::openCapturePermissions) {
                     Icon(Icons.Filled.Settings,contentDescription=null,modifier=Modifier.size(15.dp))

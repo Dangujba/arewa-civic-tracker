@@ -6,23 +6,23 @@
 <style>
 @page{margin:15mm 17mm 17mm}
 *{box-sizing:border-box}
-body{font-family:DejaVu Sans,Arial,sans-serif;font-size:9.5px;color:#263d30;line-height:1.5;background:white;margin:0}
-.top-border{height:7px;background:#15563b}
-.letterhead{width:100%;border-bottom:2px solid #15563b;padding:10px 0 9px;table-layout:fixed}
+body{font-family:DejaVu Sans,Arial,sans-serif;font-size:9.5px;color:#171717;line-height:1.5;background:white;margin:0}
+.top-border{height:7px;background:#9E5D37}
+.letterhead{width:100%;border-bottom:2px solid #9E5D37;padding:10px 0 9px;table-layout:fixed}
 .letterhead td{vertical-align:middle}
 .logo{width:61px;height:61px}
-.org{font-weight:800;font-size:16px;color:#15563b;letter-spacing:.2px}
+.org{font-weight:800;font-size:16px;color:#9E5D37;letter-spacing:.2px}
 .tagline{font-size:8px;color:#7d855e;letter-spacing:1.5px}
 .doc-ref{font-size:9px;color:#647569;text-align:right}
-.report-title{font-size:19px;line-height:1.3;color:#193e2b;margin:12px 0 4px}
+.report-title{font-size:19px;line-height:1.3;color:#171717;margin:12px 0 4px}
 .subtitle{font-size:10px;color:#6f7c72;margin-bottom:9px}
-.badges span{display:inline-block;border:1px solid #c9dbce;padding:5px 9px;margin-right:8px;background:#edf5ee;color:#174c34;font-weight:bold;font-size:9px}
+.badges span{display:inline-block;border:1px solid #E0C8B7;padding:5px 9px;margin-right:8px;background:#F6EBE3;color:#773F24;font-weight:bold;font-size:9px}
 .summary{border-collapse:collapse;width:100%;margin:10px 0 11px}
 .summary td{padding:7px;border:1px solid #d7e2d9;vertical-align:top;width:50%}
 .summary label{display:block;font-size:8px;color:#708274;margin-bottom:3px;text-transform:uppercase}
 .summary strong{font-size:10px;font-weight:700}
 .block{margin:10px 0;page-break-inside:avoid}
-.block h2{font-size:12px;color:#16513a;margin:0 0 8px;padding:0 0 6px;border-bottom:1px solid #ccd9cf}
+.block h2{font-size:12px;color:#773F24;margin:0 0 8px;padding:0 0 6px;border-bottom:1px solid #ccd9cf}
 .rich p{margin:0 0 8px}.rich ul,.rich ol{padding-left:20px}
 .muted{color:#7b8e7e}
 .panel{padding:8px;border:1px solid #dce4dd;white-space:pre-line}
@@ -35,8 +35,8 @@ body{font-family:DejaVu Sans,Arial,sans-serif;font-size:9.5px;color:#263d30;line
 @media screen{
 body{max-width:850px;margin:22px auto;padding:0 25px;box-shadow:0 0 0 1px #dce4dc}
 .toolbar{display:flex;gap:10px;padding:15px 0;background:white}
-.toolbar button,.toolbar a{border:1px solid #18533a;background:#18533a;color:white;padding:10px 17px;cursor:pointer;text-decoration:none;font:700 12px Arial}
-.toolbar a.secondary{background:white;color:#18533a}
+.toolbar button,.toolbar a{border:1px solid #9E5D37;background:#9E5D37;color:white;padding:10px 17px;cursor:pointer;text-decoration:none;font:700 12px Arial}
+.toolbar a.secondary{background:white;color:#9E5D37}
 }
 @media print{.toolbar{display:none!important};body{margin:0;box-shadow:none;padding:0}}
 </style>
