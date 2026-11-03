@@ -19,15 +19,15 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.ui.unit.dp
 import ng.org.rawyod.arewa.ui.FieldViewModel
 
-private val brandGreen=Color(0xFF17543B)
-private val border=Color(0xFFD6E3DA)
+private val brandCopper=Color(0xFF9E5D37)
+private val border=Color(0xFFE0C8B7)
 
 @Composable
 private fun ScreenSection(title:String,icon:ImageVector,content:@Composable ColumnScope.()->Unit){
     Column(Modifier.fillMaxWidth().border(1.dp,border).background(Color.White).padding(16.dp),
         verticalArrangement=Arrangement.spacedBy(12.dp)){
         Row(horizontalArrangement=Arrangement.spacedBy(10.dp),verticalAlignment=Alignment.CenterVertically){
-            Icon(icon,contentDescription=null,tint=brandGreen,modifier=Modifier.size(20.dp))
+            Icon(icon,contentDescription=null,tint=brandCopper,modifier=Modifier.size(20.dp))
             Text(title,fontWeight=FontWeight.Bold,style=MaterialTheme.typography.titleMedium)
         }
         content()
@@ -59,7 +59,7 @@ internal fun ProfileScreen(vm:FieldViewModel){
     ScreenBody("My profile"){
         ScreenSection("Profile",Icons.Filled.AccountCircle){
             Row(horizontalArrangement=Arrangement.spacedBy(12.dp),verticalAlignment=Alignment.CenterVertically){
-                Icon(Icons.Filled.AccountCircle,contentDescription=null,tint=brandGreen,
+                Icon(Icons.Filled.AccountCircle,contentDescription=null,tint=brandCopper,
                     modifier=Modifier.size(52.dp))
                 Column {
                     Text(info.optString("name").ifBlank{vm.userName},
@@ -75,7 +75,7 @@ internal fun ProfileScreen(vm:FieldViewModel){
         ScreenSection("Device access",Icons.Filled.Smartphone){
             Row(verticalAlignment=Alignment.CenterVertically){
                 Icon(if(vm.offlinePinEnabled)Icons.Filled.CheckCircle else Icons.Filled.Info,
-                    contentDescription=null,tint=brandGreen)
+                    contentDescription=null,tint=brandCopper)
                 Spacer(Modifier.width(8.dp))
                 Text(if(vm.offlinePinEnabled)"Offline PIN available" else "Offline PIN not configured")
             }
@@ -170,7 +170,7 @@ internal fun SecuritySettingsScreen(
         }
         ScreenSection("Two-factor authentication",Icons.Filled.VerifiedUser){
             Text(if(vm.account.optBoolean("two_factor_enabled"))"Enabled" else "Disabled",
-                color=brandGreen)
+                color=brandCopper)
             TextButton(onClick={factorOpen=!factorOpen}){Text(if(factorOpen)"Close 2FA settings" else "Manage 2FA")}
             if(factorOpen){
                 if(vm.twoFactorSecret.isNotBlank()){

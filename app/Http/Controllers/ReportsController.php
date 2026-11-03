@@ -207,7 +207,7 @@ class ReportsController extends Controller
             'To' => $request->input('date_to'),
         ], fn ($value) => $value !== null && $value !== '');
 
-        $logoPath = public_path('icons/act-192.png');
+        $logoPath = public_path('icons/arewa-approved-logo.png');
         $logo = is_file($logoPath) ? 'data:image/png;base64,'.base64_encode(file_get_contents($logoPath)) : null;
         $html = view('reports.summary-pdf', [
             'rows'=>$rows, 'total'=>$total, 'summary'=>$summary, 'types'=>$types,
