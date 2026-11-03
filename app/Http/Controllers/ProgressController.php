@@ -16,6 +16,12 @@ class ProgressController extends Controller {
             $previous=$locked->progress_status;
             $locked->progress_status=$data['progress_status'];$locked->save();
             CaseEvent::create(['case_id'=>$locked->id,'actor_id'=>$r->user()->id,'event_type'=>'progress_status_updated','from_status'=>$previous,'to_status'=>$data['progress_status'],'comment'=>$data['note']]);
+            if($previous!==$locked->progress_status && $locked->reporter_id!==$r->user()->id && $locked->reporter?->is_active){
+                $locked->reporter->notify(new \App\Notifications\CaseActionNotification(
+                    $locked->id,$locked->reference,'Report progress updated',
+                    'Your report progress is now '.str_replace('_',' ',$locked->progress_status).'.'
+                ));
+            }
         });
         return redirect()->route('cases.show',$case)->with('message','Progress updated.');
     }
