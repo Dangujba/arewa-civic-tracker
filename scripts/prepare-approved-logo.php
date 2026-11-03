@@ -25,6 +25,12 @@ function export(string $source, string $target, int $width, int $height):void{
 }
 export($icons.'/arewa-approved-logo.webp',$icons.'/arewa-approved-logo.png',450,325);
 export($icons.'/arewa-approved-mark.webp',$icons.'/arewa-approved-mark-32.png',32,32);
+export($icons.'/arewa-approved-mark.webp',$icons.'/apple-touch-icon.png',180,180);
+// Modern ICO entries may contain PNG data. Use the approved 32-pixel mark.
+$png=file_get_contents($icons.'/arewa-approved-mark-32.png');
+$header=pack('vvv',0,1,1);
+$entry=pack('CCCCvvVV',32,32,0,0,1,32,strlen($png),22);
+file_put_contents($root.'/public/favicon.ico',$header.$entry.$png);
 export($icons.'/arewa-approved-mark.webp',$icons.'/arewa-approved-mark-192.png',192,192);
 export($icons.'/arewa-approved-mark.webp',$icons.'/arewa-approved-mark-512.png',512,512);
 export($icons.'/arewa-approved-wordmark.webp',$icons.'/arewa-approved-wordmark.png',540,176);
