@@ -28,6 +28,7 @@ class StoreCaseRequest extends FormRequest {
         'report_category_id'=>['nullable','integer',
           Rule::exists('report_categories','id')->where('is_active',true)->where('type',$this->input('type'))],
         'observation_date'=>['required','date','before_or_equal:today'],
+        'observation_time'=>['nullable','date_format:H:i'],
         'observations'=>['nullable','string','max:10000'],
         'duty_bearers'=>['nullable','string','max:5000'],
         'progress_status'=>['required',Rule::in(['observed','not_started','ongoing','stalled','completed','resolved','other'])],
