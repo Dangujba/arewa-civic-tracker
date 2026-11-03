@@ -6,9 +6,9 @@ use Illuminate\Support\Facades\Log;
 
 final class ZohoCaseEmailService {
     public function configured(): bool {
-        $url=(string)config('services.zoho_cpaas.endpoint');
-        return filled(config('services.zoho_cpaas.key'))
-            && filter_var(config('services.zoho_cpaas.from'),FILTER_VALIDATE_EMAIL)
+        $url=(string)config('arewa_notifications.endpoint');
+        return filled(config('arewa_notifications.key'))
+            && filter_var(config('arewa_notifications.from'),FILTER_VALIDATE_EMAIL)
             && parse_url($url,PHP_URL_SCHEME)==='https'
             && in_array(parse_url($url,PHP_URL_HOST),['cpaas.zoho.eu','cpaas.zoho.com'],true);
     }
@@ -29,11 +29,11 @@ final class ZohoCaseEmailService {
         try {
             $response=Http::timeout(20)->acceptJson()
                 ->withHeaders([
-                    'Authorization'=>'Zoho-enczapikey '.config('services.zoho_cpaas.key'),
+                    'Authorization'=>'Zoho-enczapikey '.config('arewa_notifications.key'),
                     'Content-Type'=>'application/json',
                 ])
-                ->post(config('services.zoho_cpaas.endpoint'),[
-                    'from'=>['address'=>config('services.zoho_cpaas.from'),'name'=>'Arewa Civic Tracker'],
+                ->post(config('arewa_notifications.endpoint'),[
+                    'from'=>['address'=>config('arewa_notifications.from'),'name'=>'Arewa Civic Tracker'],
                     'to'=>[['email_address'=>['address'=>$message->recipient_email]]],
                     'subject'=>$message->subject,
                     'htmlbody'=>$html,
