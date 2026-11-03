@@ -61,6 +61,8 @@ Route::middleware(['auth',EnsurePasswordIsChanged::class])->group(function(){
     Route::get('/cases/export.csv',[ExportController::class,'csv'])->name('cases.export');
     Route::get('/cases/{case}/edit',[\App\Http\Controllers\CaseRevisionController::class,'edit'])->name('cases.edit')->whereNumber('case');
     Route::put('/cases/{case}',[\App\Http\Controllers\CaseRevisionController::class,'update'])->name('cases.update')->whereNumber('case');
+    Route::get('/cases/{case}/pdf',[\App\Http\Controllers\CaseDocumentController::class,'pdf'])->name('cases.pdf')->whereNumber('case');
+    Route::get('/cases/{case}/print',[\App\Http\Controllers\CaseDocumentController::class,'print'])->name('cases.print')->whereNumber('case');
     Route::get('/cases/{case}',[CaseController::class,'show'])->name('cases.show')->whereNumber('case');
     Route::post('/cases/{case}/review',[CaseController::class,'review'])->name('cases.review')->whereNumber('case');
     Route::post('/cases/{case}/closure',[\App\Http\Controllers\CaseClosureController::class,'update'])

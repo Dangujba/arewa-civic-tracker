@@ -33,7 +33,8 @@
       @can('update',$case)
       <a class="btn" href="{{ route('cases.edit',$case) }}"><i class="fa-solid fa-pen-to-square" aria-hidden="true"></i> Edit report</a>
       @endcan
-      <button type="button" class="btn-outline" onclick="window.print()"><i class="fa-solid fa-print" aria-hidden="true"></i> Print report</button>
+      <a class="btn-outline act-case-document-link" href="{{ route('cases.print',$case) }}" target="_blank" rel="noopener"><i class="fa-solid fa-print" aria-hidden="true"></i> Print View</a>
+      <a class="btn act-case-document-link" href="{{ route('cases.pdf',$case) }}" data-report-export data-export-name="Arewa-Report-{{ $case->reference }}.pdf"><i class="fa-regular fa-file-pdf" aria-hidden="true"></i> Export PDF</a>
     </div>
   </header>
 
