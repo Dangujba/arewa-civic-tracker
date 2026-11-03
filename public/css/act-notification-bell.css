@@ -1,0 +1,5 @@
+.portal-topbar-actions .act-notification-bell{position:relative;display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+.portal-topbar-actions .act-notification-bell i{font-size:17px}
+.portal-topbar-actions .act-notification-count{display:inline-flex;justify-content:center;align-items:center;min-width:18px;height:18px;background:#a43131;color:#fff;font-size:10px;font-weight:800;padding:0 4px;border:1px solid #fff;border-radius:2px}
+.portal-topbar-actions .act-notification-bell:focus-visible{outline:2px solid #17623e;outline-offset:3px}
+@media(max-width:600px){.portal-topbar-actions .act-notification-bell>span{display:none}}
